@@ -1,0 +1,10 @@
+c:\users\alessio\documents\visual studio 2012\Projects\ProgettoMalnati\ProgettoMalnati\bin\Debug\ProgettoMalnati.exe.config
+c:\users\alessio\documents\visual studio 2012\Projects\ProgettoMalnati\ProgettoMalnati\bin\Debug\ProgettoMalnati.exe
+c:\users\alessio\documents\visual studio 2012\Projects\ProgettoMalnati\ProgettoMalnati\bin\Debug\ProgettoMalnati.pdb
+c:\users\alessio\documents\visual studio 2012\Projects\ProgettoMalnati\ProgettoMalnati\obj\Debug\ProgettoMalnati.csprojResolveAssemblyReference.cache
+c:\users\alessio\documents\visual studio 2012\Projects\ProgettoMalnati\ProgettoMalnati\obj\Debug\ProgettoMalnati.Form1.resources
+c:\users\alessio\documents\visual studio 2012\Projects\ProgettoMalnati\ProgettoMalnati\obj\Debug\ProgettoMalnati.Properties.Resources.resources
+c:\users\alessio\documents\visual studio 2012\Projects\ProgettoMalnati\ProgettoMalnati\obj\Debug\ProgettoMalnati.csproj.GenerateResource.Cache
+c:\users\alessio\documents\visual studio 2012\Projects\ProgettoMalnati\ProgettoMalnati\obj\Debug\ProgettoMalnati.exe
+c:\users\alessio\documents\visual studio 2012\Projects\ProgettoMalnati\ProgettoMalnati\obj\Debug\ProgettoMalnati.pdb
+C:\Users\Alessio\Documents\Visual Studio 2012\Projects\ProgettoMalnati\ProgettoMalnati\obj\Debug\ProgettoMalnati.MainForm.resources
