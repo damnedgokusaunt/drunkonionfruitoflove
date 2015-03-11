@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace ProgettoMalnati
+namespace ProgettoPdS
 {
 
     class KeyboardHandler
@@ -47,11 +47,11 @@ namespace ProgettoMalnati
                 {
                     case 'D':
                         keybd_event(data[1], 0, 0, 0);
-                        Console.WriteLine("Server esegue comando " + (char)data[0] + ":" + data[1]);   
+                        //Console.WriteLine("Server esegue comando " + (char)data[0] + ":" + data[1]);   
                         break;
                     case 'U':
                         keybd_event(data[1], 0, 2, 0);
-                        Console.WriteLine("Server esegue comando " + (char)data[0] + ":" + data[1]);  
+                        //Console.WriteLine("Server esegue comando " + (char)data[0] + ":" + data[1]);  
                         break;
                     default:
                         MessageBox.Show("Comando da tastiera non riconosciuto");

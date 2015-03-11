@@ -54,7 +54,7 @@ C:\Users\Alessio\Documents\Visual Studio 2012\Projects\drunkonionfruitoflove\Pro
 C:\Users\Alessio\Documents\Visual Studio 2012\Projects\drunkonionfruitoflove\ProgettoPdS\bin\Debug\ProgettoPdS.exe
 C:\Users\Alessio\Documents\Visual Studio 2012\Projects\drunkonionfruitoflove\ProgettoPdS\bin\Debug\ProgettoPdS.pdb
 C:\Users\Alessio\Documents\Visual Studio 2012\Projects\drunkonionfruitoflove\ProgettoPdS\obj\Debug\ProgettoPdS.csprojResolveAssemblyReference.cache
-C:\Users\Alessio\Documents\Visual Studio 2012\Projects\drunkonionfruitoflove\ProgettoPdS\obj\Debug\ProgettoMalnati.Form1.resources
-C:\Users\Alessio\Documents\Visual Studio 2012\Projects\drunkonionfruitoflove\ProgettoPdS\obj\Debug\ProgettoMalnati.MainForm.resources
 C:\Users\Alessio\Documents\Visual Studio 2012\Projects\drunkonionfruitoflove\ProgettoPdS\obj\Debug\ProgettoPdS.Properties.Resources.resources
 C:\Users\Alessio\Documents\Visual Studio 2012\Projects\drunkonionfruitoflove\ProgettoPdS\obj\Debug\ProgettoPdS.csproj.GenerateResource.Cache
+C:\Users\Alessio\Documents\Visual Studio 2012\Projects\drunkonionfruitoflove\ProgettoPdS\obj\Debug\ProgettoPdS.Form1.resources
+C:\Users\Alessio\Documents\Visual Studio 2012\Projects\drunkonionfruitoflove\ProgettoPdS\obj\Debug\ProgettoPdS.ControlForm.resources

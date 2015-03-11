@@ -14,7 +14,7 @@ using System.Windows.Forms;
 using System.Runtime.InteropServices;
 
 
-namespace ProgettoMalnati
+namespace ProgettoPdS
 {
 
     public partial class Form1 : Form
@@ -22,14 +22,15 @@ namespace ProgettoMalnati
 
         private delegate void InvokeDelegate(string text, int id);
 
-        private SynchronousSocketClient client;
-        private int CurrentSocketId;
+        private SynchronousSocketClient client { get; set; }
+        private int CurrentSocketId { get; set; }
+        private SynchronousSocketListener listener;
 
+        //getters
+        public int getCurrentSocketId() { return CurrentSocketId; }
 
-        public int getCurrentSocketId()
-        {
-            return CurrentSocketId;
-        }
+        //setters
+        public void setListener(SynchronousSocketListener listener) { this.listener = listener; }
 
         public void StatusUpdate(string text, int id)
         {
@@ -88,14 +89,13 @@ namespace ProgettoMalnati
         {
             try
             {
-                SynchronousSocketListener.ipAddress = IPAddress.Any;
-                SynchronousSocketListener.port = Convert.ToInt32(portBox.Text);
+                listener = new SynchronousSocketListener();
+               
+                listener.setIpAddress(IPAddress.Any);
+                listener.setPort(Convert.ToInt32(portBox.Text));
+                listener.setExpectedConnectionRequest("PASS" + PasswordEncrypterMD5.Encrypt(pwd2.Text) + "<EOF>");
 
-                string encPass = PasswordEncrypterMD5.Encrypt(pwd2.Text);
-
-                SynchronousSocketListener.ExpectedConnectionRequest = "PASS" + encPass + "<EOF>";
-
-                Thread t = new Thread(SynchronousSocketListener.StartListening);
+                Thread t = new Thread(listener.StartListening);
 
                 t.Start();
             }
@@ -137,12 +137,11 @@ namespace ProgettoMalnati
                 // Istanzia oggetto client
                 client = new SynchronousSocketClient();
 
-                client.form = this;
+                client.setForm(this);
 
-                client.ipAddress = IPAddress.Parse(serverAddrBox.Text);
-                client.port = Convert.ToInt32(serverPortBox.Text);
-                string encPass = PasswordEncrypterMD5.Encrypt(Convert.ToString(pwd1.Text));
-                client.pwd = "PASS" + encPass;
+                client.setIpAddress(IPAddress.Parse(serverAddrBox.Text));
+                client.setPort(Convert.ToInt32(serverPortBox.Text));              
+                client.setPwd("PASS" + PasswordEncrypterMD5.Encrypt(Convert.ToString(pwd1.Text)));
 
                 Thread t = new Thread(client.StartClient);
 
@@ -151,7 +150,7 @@ namespace ProgettoMalnati
                 t.Start();
 
                 // Create three items and three sets of subitems for each item.
-                ListViewItem item = new ListViewItem(serverAddrBox.Text, client.id);
+                ListViewItem item = new ListViewItem(serverAddrBox.Text, client.getId());
 
                 // Place a check mark next to the item.
                 item.Checked = true;

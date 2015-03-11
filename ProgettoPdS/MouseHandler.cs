@@ -12,7 +12,7 @@ using System.Windows.Input;
 using System.Windows.Forms;
 using System.Drawing;
 
-namespace ProgettoMalnati
+namespace ProgettoPdS
 {
     class MouseHandler
     {
@@ -26,7 +26,7 @@ namespace ProgettoMalnati
 
 
         private byte[] data;
-        private int speed = 1;
+
         SynchronousSocketListener server = null;
         
         // Flags for mouse_event api
@@ -80,13 +80,7 @@ namespace ProgettoMalnati
 
         private void Scroll(int delta)
         {
-            Console.WriteLine("Server esegue wheel");
-            
-            /*
-            //mouse_event((int)MouseEventFlagsAPI.MIDDLEDOWN, 0, 0, 0, 0);
-            mouse_event((int)MouseEventFlagsAPI.MIDDLEUP, 0, 0, 0, 0);
-             * 
-             * */
+            //Console.WriteLine("Server esegue wheel");
 
             mouse_event((int)MouseEventFlagsAPI.WHEEL, 0, 0, delta, 0);
         }
@@ -119,7 +113,7 @@ namespace ProgettoMalnati
 
                     delta = Convert.ToInt32(sub.Substring(0, i));
 
-                    Console.WriteLine("Ricevuto d=" + delta);
+                    //Console.WriteLine("Ricevuto d=" + delta);
 
                     Scroll(delta);
 

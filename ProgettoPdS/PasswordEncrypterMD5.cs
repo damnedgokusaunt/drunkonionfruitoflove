@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Security.Cryptography;
 
-namespace ProgettoMalnati
+namespace ProgettoPdS
 {
     public static class PasswordEncrypterMD5
     {

@@ -15,7 +15,7 @@ using System.Runtime.InteropServices;
 
 using System.Threading;
 
-namespace ProgettoMalnati
+namespace ProgettoPdS
 {
     public class SynchronousSocketListener
     {
@@ -23,18 +23,20 @@ namespace ProgettoMalnati
         public static extern void mouse_event(long dwFlags, long dx, long dy, long cButtons, long dwExtraInfo);
 
         // Incoming data from the client.
-        public static string data = null;
-        public static IPAddress ipAddress;
-        public static int port;
-        public static string ExpectedConnectionRequest, ExpectedControlRequest;
+        private string data = null;
+        private IPAddress ipAddress;
+        private int port;
+        private string expectedConnectionRequest;
 
-        public static Socket handler;
+        private Socket handler;
         
-        public static void StartListening() 
-        {
+        //setters
+        public void setIpAddress(IPAddress ipAddress) { this.ipAddress = ipAddress; }
+        public void setPort(int port) { this.port = port; }
+        public void setExpectedConnectionRequest(string expectedConnectionRequest) { this.expectedConnectionRequest = expectedConnectionRequest; }
 
-            ExpectedControlRequest = "CTRL<EOF>";
-
+        public void StartListening() 
+        {     
             byte[] bytes = new Byte[1024];
 
             // Establish the local endpoint for the socket.
@@ -87,7 +89,7 @@ namespace ProgettoMalnati
                             }
                         }
 
-                        if (data == ExpectedConnectionRequest)
+                        if (data == expectedConnectionRequest)
                         {
                             MessageBox.Show("Richiesta di connessione accettata.");
                             resp = "+OK<EOF>";
@@ -98,11 +100,11 @@ namespace ProgettoMalnati
                             handler.Send(msg);
                         }
 
-                        else if (data == ExpectedControlRequest)
+                        else if (data == MyProtocol.CONTROL_REQUEST)
                         {
                             MessageBox.Show("Richiesta di controllo accettata.");
 
-                            handler.Send(Encoding.ASCII.GetBytes("+OK<EOF>"));
+                            handler.Send(Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK));
 
                             byte[] point = new byte[sizeof(Int32) * 2];
                             byte[] buffer = new byte["QUIT<EOF>".Length];

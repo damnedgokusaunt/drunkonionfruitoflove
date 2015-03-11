@@ -8,27 +8,45 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace ProgettoMalnati
+namespace ProgettoPdS
 {
     public class SynchronousSocketClient
     {
 
-        public IPAddress ipAddress;
-        public int port, id;
-        public string pwd;
-        public LinkedList<Socket> SocketList;
+        private IPAddress ipAddress;
 
+        private int port, id;
+        private string pwd;
+        private LinkedList<Socket> SocketList;
+       
         private UdpClient udpChannel;
         private Socket tcpChannel;
         private Socket CurrentSocket;
 
         private Socket sender;
 
-        public Form1 form;
+        private Form1 form;
 
-        public void ShowMainForm()
+        //setters
+        public void setIpAddress(IPAddress ipAddress) { this.ipAddress = ipAddress; }
+        public void setPort(int port) { this.port = port; }
+        public void setPwd(string pwd) { this.pwd = pwd; }
+        public void setCurrentSocket(int id) { CurrentSocket = SocketList.ElementAt(id); }
+        public void setForm(Form1 form) { this.form = form; }
+        //getters
+        public int getId() { return id; }
+        public Socket getCurrentSocket() { return CurrentSocket; }
+
+        //costruttore
+        public SynchronousSocketClient()
         {
-            MainForm f = new MainForm();
+            SocketList = new LinkedList<Socket>();
+        }
+
+        //metodi vari
+        public void ShowControlForm()
+        {
+            ControlForm f = new ControlForm();
             udpChannel = new UdpClient();
 
             // Create a TCP/IP  socket.
@@ -47,37 +65,6 @@ namespace ProgettoMalnati
             f.setUdpRemoteEndPoint(new IPEndPoint(ipAddress, port+1));
 
             Application.Run(f);
-        }
-
-        /*
-        public string getConnectionState()
-        {
-            try
-            {
-                if (sender.Poll(-1, SelectMode.SelectWrite)) return "Socket w+";
-                else return "Socket w-";
-            }
-            catch (NullReferenceException e)
-            {
-                e.ToString();
-                MessageBox.Show("Nullreference");
-                return "Creazione socket...";
-            }
-        }*/
-
-        public SynchronousSocketClient()
-        {
-            SocketList = new LinkedList<Socket>();
-        }
-
-        public void setCurrentSocket(int id)
-        {
-            CurrentSocket = SocketList.ElementAt(id);
-        }
-
-        public Socket getCurrentSocket()
-        {
-            return CurrentSocket;
         }
 
         public void StartClient()
@@ -117,19 +104,19 @@ namespace ProgettoMalnati
 
                     switch (resp)
                     {
-                        case "+OK<EOF>":
+                        case MyProtocol.POSITIVE_ACK:
                             mess1 = "Connessione accettata.";
                             mess2 = "Disponibile.";
                             id = SocketList.Count();
                             SocketList.AddLast(sender);
                             break;
 
-                        case "-ERR<EOF>":
+                        case MyProtocol.NEGATIVE_ACK:
                             mess1 = "Connessione rifiutata.";
                             mess2 = "Non disponibile.";
                             break;
 
-                        default: 
+                        default:
                             MessageBox.Show("STRONZO!");
                             break;
                     }
@@ -138,23 +125,12 @@ namespace ProgettoMalnati
 
                     form.StatusUpdate(mess2, id);
 
-                    Console.WriteLine("Echoed test = {0}",
-                        Encoding.ASCII.GetString(bytes, 0, bytesRec));
-
-                }
-                catch (ArgumentNullException ane)
-                {
-                    Console.WriteLine("ArgumentNullException : {0}", ane.ToString());
-                }
-                catch (SocketException se)
-                {
-                    Console.WriteLine("SocketException : {0}", se.ToString());
+                    Console.WriteLine("Echoed test = {0}", Encoding.ASCII.GetString(bytes, 0, bytesRec));
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine("Unexpected exception : {0}", e.ToString());
+                    Console.WriteLine(e.ToString());
                 }
-
             }
             catch (Exception e)
             {
@@ -166,11 +142,9 @@ namespace ProgettoMalnati
         {
             byte[] bytes = new byte[1024];
 
-            string ControlRequest = "CTRL<EOF>";
+            int bytesSent = CurrentSocket.Send(Encoding.ASCII.GetBytes(MyProtocol.CONTROL_REQUEST));
 
-            int bytesSent = CurrentSocket.Send(Encoding.ASCII.GetBytes(ControlRequest));
-
-            Console.WriteLine("Client: inviato " + ControlRequest);
+            Console.WriteLine("Client: inviato " + MyProtocol.CONTROL_REQUEST);
 
             int bytesRec = CurrentSocket.Receive(bytes);
             
@@ -178,7 +152,7 @@ namespace ProgettoMalnati
 
             Console.WriteLine("Client: ricevuto " + resp);
 
-            if (resp == "+OK<EOF>")
+            if (resp == MyProtocol.POSITIVE_ACK)
             {
                 Int32 width = Screen.PrimaryScreen.Bounds.Width;
                 Int32 height = Screen.PrimaryScreen.Bounds.Height;
@@ -193,7 +167,7 @@ namespace ProgettoMalnati
 
                 form.StatusUpdate("Attivo", form.getCurrentSocketId());
 
-                Thread t = new Thread(ShowMainForm);
+                Thread t = new Thread(ShowControlForm);
                 t.Start();
             }
                       
