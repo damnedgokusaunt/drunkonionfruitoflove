@@ -108,25 +108,22 @@ namespace ProgettoMalnati
                 string data_s = Encoding.ASCII.GetString(data);
                 
                 int delta = 0;
-                
+
                 if (data_s.StartsWith("CS"))
                 {
-                    string sub = data_s.Substring(2, data.Length-2*sizeof(char));
+                    string sub = data_s.Substring(2, data.Length - 2 * sizeof(char));
 
                     // Trovo indice in cui finisce il numero
-                    int i = 0;
-                    for (; sub[i]!='<' && i<sub.Length; i++) ;
+                    int i;
+                    for (i = 0; sub[i] != '<' && i < sub.Length; i++) ;
 
                     delta = Convert.ToInt32(sub.Substring(0, i));
 
-                       
                     Console.WriteLine("Ricevuto d=" + delta);
 
+                    Scroll(delta);
+
                     continue;
-                    //delta = Convert.ToInt32());
-                    //Console.WriteLine("Ricevuto d=" + delta);
-                    
-                    //Scroll(delta);
                 }
                 
                 switch (data_s)
