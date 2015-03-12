@@ -42,15 +42,18 @@ namespace ProgettoPdS
             {
                 tcpChannel.Receive(data);
 
-                
+                //Console.WriteLine("Ricevuto keybd: " + data.ToString());
+
                 switch ((char)data[0])
                 {
                     case 'D':
                         keybd_event(data[1], 0, 0, 0);
+                        //System.Threading.Thread.Sleep(10);
                         //Console.WriteLine("Server esegue comando " + (char)data[0] + ":" + data[1]);   
                         break;
                     case 'U':
                         keybd_event(data[1], 0, 2, 0);
+                        //System.Threading.Thread.Sleep(10);
                         //Console.WriteLine("Server esegue comando " + (char)data[0] + ":" + data[1]);  
                         break;
                     default:

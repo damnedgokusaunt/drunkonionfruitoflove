@@ -8,66 +8,63 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+//TODO: sistemare id (per ora è messo a 0) nelle entrystatusupdate
+
 namespace ProgettoPdS
 {
     public class SynchronousSocketClient
     {
-
+        #region Attributes
         private IPAddress ipAddress;
 
         private int port, id;
         private string pwd;
         private LinkedList<Socket> SocketList;
        
-        private UdpClient udpChannel;
-        private Socket tcpChannel;
         private Socket CurrentSocket;
 
         private Socket sender;
 
-        private Form1 form;
+        private MainForm form;
 
+
+        private string connectionRequest;
+        private string controlRequest;
+        private string quitRequest;
+
+        #endregion
+        
+        #region Getters and setters
+        //getters
+        public int getId() { return id; }
+        public IPAddress getIpAddress() { return ipAddress; }
+        public int getPort() { return port; }
+        public Socket getCurrentSocket() { return CurrentSocket; }
         //setters
         public void setIpAddress(IPAddress ipAddress) { this.ipAddress = ipAddress; }
         public void setPort(int port) { this.port = port; }
         public void setPwd(string pwd) { this.pwd = pwd; }
         public void setCurrentSocket(int id) { CurrentSocket = SocketList.ElementAt(id); }
-        public void setForm(Form1 form) { this.form = form; }
-        //getters
-        public int getId() { return id; }
-        public Socket getCurrentSocket() { return CurrentSocket; }
+        public void setForm(MainForm form) { this.form = form; }
+        #endregion
 
-        //costruttore
-        public SynchronousSocketClient()
+        #region Constructor
+        public SynchronousSocketClient(IPAddress ipAddress, int port, string pwd)
         {
+            this.ipAddress = ipAddress;
+            this.port = port;
+
+            this.connectionRequest = MyProtocol.message(MyProtocol.CONNECTION, pwd);
+            this.controlRequest = MyProtocol.message(MyProtocol.CONTROL, pwd);
+            this.quitRequest = MyProtocol.message(MyProtocol.QUIT, pwd);
+
             SocketList = new LinkedList<Socket>();
         }
+        #endregion
 
-        //metodi vari
-        public void ShowControlForm()
-        {
-            ControlForm f = new ControlForm();
-            udpChannel = new UdpClient();
-
-            // Create a TCP/IP  socket.
-            IPEndPoint tcpRemoteEndPoint = new IPEndPoint(ipAddress, port + 2);
-
-            tcpChannel = new Socket(AddressFamily.InterNetwork,
-            SocketType.Stream, ProtocolType.Tcp);
-
-            tcpChannel.Connect(ipAddress, port + 2);
-
-            f.setUdpChannel(ref udpChannel);
-            f.setTcpChannel(ref tcpChannel);
-
-            f.CurrentSocket = CurrentSocket;
-
-            f.setUdpRemoteEndPoint(new IPEndPoint(ipAddress, port+1));
-
-            Application.Run(f);
-        }
-
-        public void StartClient()
+        #region Methods
+        // Questo metodo viene invocato per connettere l'oggetto SynchronousSocketClient con un server
+        public void initConnection()
         {
             // Data buffer for incoming data.
             byte[] bytes = new byte[1024];
@@ -75,57 +72,44 @@ namespace ProgettoPdS
             // Connect to a remote device.
             try
             {
-
                 // Create a TCP/IP  socket.
                 IPEndPoint remoteEP = new IPEndPoint(ipAddress, port);
 
-                sender = new Socket(AddressFamily.InterNetwork,
-                SocketType.Stream, ProtocolType.Tcp);
-
-                if (sender == null) MessageBox.Show("sender è null");
+                sender = new Socket(
+                    AddressFamily.InterNetwork,
+                    SocketType.Stream,
+                    ProtocolType.Tcp);
 
                 // Connect the socket to the remote endpoint. Catch any errors.
                 try
                 {
                     sender.Connect(remoteEP);
 
-                    // Encode the data string into a byte array.
-                    byte[] msg = Encoding.ASCII.GetBytes(pwd + "<EOF>");
-
                     // Send the data through the socket.
-                    int bytesSent = sender.Send(msg);
-                    Console.WriteLine("Client: inviato " + pwd + "<EOF>");
+                    int bytesSent = sender.Send(Encoding.ASCII.GetBytes(connectionRequest));
+                    Console.WriteLine("Client sent password.");
 
                     // Receive the response from the remote device.
                     int bytesRec = sender.Receive(bytes);
                     Console.WriteLine("Client: ricevuto " + Encoding.ASCII.GetString(bytes, 0, bytesRec));
 
-                    string mess1 = string.Empty, mess2 = string.Empty, resp = Encoding.ASCII.GetString(bytes, 0, bytesRec);
-
+                    string resp = Encoding.ASCII.GetString(bytes, 0, bytesRec);
                     switch (resp)
                     {
-                        case MyProtocol.POSITIVE_ACK:
-                            mess1 = "Connessione accettata.";
-                            mess2 = "Disponibile.";
-                            id = SocketList.Count();
+                        case MyProtocol.POSITIVE_ACK + MyProtocol.END_OF_MESSAGE:
+                            form.entryStatusUpdate("Disponibile.", 0);
+                            //id = SocketList.Count();
                             SocketList.AddLast(sender);
                             break;
 
-                        case MyProtocol.NEGATIVE_ACK:
-                            mess1 = "Connessione rifiutata.";
-                            mess2 = "Non disponibile.";
+                        case MyProtocol.NEGATIVE_ACK + MyProtocol.END_OF_MESSAGE:
+                            form.entryStatusUpdate("Non disponibile.", 0);
                             break;
 
                         default:
                             MessageBox.Show("STRONZO!");
                             break;
                     }
-
-                    MessageBox.Show(mess1);
-
-                    form.StatusUpdate(mess2, id);
-
-                    Console.WriteLine("Echoed test = {0}", Encoding.ASCII.GetString(bytes, 0, bytesRec));
                 }
                 catch (Exception e)
                 {
@@ -137,22 +121,19 @@ namespace ProgettoPdS
                 Console.WriteLine(e.ToString());
             }
         }
-
-        public void StartControl()
+       
+        public bool initControl()
         {
             byte[] bytes = new byte[1024];
 
-            int bytesSent = CurrentSocket.Send(Encoding.ASCII.GetBytes(MyProtocol.CONTROL_REQUEST));
+            int bytesSent = sender.Send(Encoding.ASCII.GetBytes(controlRequest));
+            Console.WriteLine("Client: inviato " + controlRequest);
 
-            Console.WriteLine("Client: inviato " + MyProtocol.CONTROL_REQUEST);
-
-            int bytesRec = CurrentSocket.Receive(bytes);
-            
+            int bytesRec = sender.Receive(bytes);
             string resp = Encoding.ASCII.GetString(bytes, 0, bytesRec);
-
             Console.WriteLine("Client: ricevuto " + resp);
 
-            if (resp == MyProtocol.POSITIVE_ACK)
+            if (resp == MyProtocol.message(MyProtocol.POSITIVE_ACK))
             {
                 Int32 width = Screen.PrimaryScreen.Bounds.Width;
                 Int32 height = Screen.PrimaryScreen.Bounds.Height;
@@ -163,15 +144,18 @@ namespace ProgettoPdS
                 System.Buffer.BlockCopy(BitConverter.GetBytes(width), 0, resolution, 0, sizeof(Int32));
                 System.Buffer.BlockCopy(BitConverter.GetBytes(height), 0, resolution, sizeof(Int32), sizeof(Int32));
 
-                bytesSent = CurrentSocket.Send(resolution);
+                bytesSent = sender.Send(resolution);
 
-                form.StatusUpdate("Attivo", form.getCurrentSocketId());
+                form.entryStatusUpdate("Attivo", 0);
 
-                Thread t = new Thread(ShowControlForm);
-                t.Start();
+                return true;     
             }
-                      
-        }
 
+            return false;
+
+        }
+        
+
+        #endregion
     }
 }

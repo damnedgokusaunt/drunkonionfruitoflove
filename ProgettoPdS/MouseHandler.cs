@@ -20,15 +20,14 @@ namespace ProgettoPdS
         [DllImport("user32.dll")]
         static extern void mouse_event(int dwFlags, int dx, int dy, int dwData, int dwExtraInfo);
 
+        #region Attributes
         private UdpClient s;
         private IPEndPoint remoteEP;
-        private Int32 ScreenWidth, ScreenHeight, clientWidth, clientHeight;
-
-
+        private Int32 ScreenWidth, ScreenHeight, clientWidth, clientHeight, widthRatio, heightRatio;
         private byte[] data;
-
         SynchronousSocketListener server = null;
-        
+        #endregion
+
         // Flags for mouse_event api
         [Flags]
         public enum MouseEventFlagsAPI
@@ -53,54 +52,57 @@ namespace ProgettoPdS
 
             ScreenWidth = Screen.PrimaryScreen.Bounds.Width;
             ScreenHeight = Screen.PrimaryScreen.Bounds.Height;
+
+            widthRatio = ScreenWidth / clientWidth;
+            heightRatio = ScreenHeight / clientHeight;
         }
 
-        private void Move()
+        #region Mouse methods
+        private void doMouseMove()
         {
-            Int32 x = BitConverter.ToInt32(data, 0) * ScreenWidth / clientWidth;
-            Int32 y = BitConverter.ToInt32(data, sizeof(Int32)) * ScreenHeight / clientHeight;
+            Int32 x = BitConverter.ToInt32(data, 0) * widthRatio;
+            Int32 y = BitConverter.ToInt32(data, sizeof(Int32)) * heightRatio;
 
             Cursor.Position = new Point(x, y);
+            //Console.WriteLine("Coordinate: " + x + "," + y);
         }
-
-        private void RightClick()
+        private void doMouseRightClick()
         {
             // Send click to system
             mouse_event((int)MouseEventFlagsAPI.RIGHTDOWN, 0, 0, 0, 0);
             mouse_event((int)MouseEventFlagsAPI.RIGHTUP, 0, 0, 0, 0);
         }
-
-        
-        private void LeftClick()
+        private void doMouseLeftClick()
         {
             // Send click to system
             // mouse_event((int)MouseEventFlagsAPI.LEFTDOWN, 0, 0, 0, 0);
             mouse_event((int)MouseEventFlagsAPI.LEFTUP, 0, 0, 0, 0);
         }
-
-        private void Scroll(int delta)
+        private void doMouseWheel(int delta)
         {
             //Console.WriteLine("Server esegue wheel");
 
             mouse_event((int)MouseEventFlagsAPI.WHEEL, 0, 0, delta, 0);
         }
-
-        
-
-        private void DragAndDrop()
+        private void doMouseDragAndDrop()
         {
             //mouse_event((int)MouseEventFlagsAPI.LEFTDOWN, 0, 0, 0, 0);
             mouse_event((int)MouseEventFlagsAPI.LEFTDOWN, 0, 0, 0, 0);
         }
+        #endregion
 
         public void Run()
         {
+            char firstCharOfEOM = MyProtocol.END_OF_MESSAGE[0];
+            
             while (true)
             {
                 data = s.Receive(ref remoteEP);
 
                 string data_s = Encoding.ASCII.GetString(data);
-                
+
+                //Console.WriteLine("Server riceve comando mouse: " + data);
+
                 int delta = 0;
 
                 if (data_s.StartsWith("CS"))
@@ -109,13 +111,14 @@ namespace ProgettoPdS
 
                     // Trovo indice in cui finisce il numero
                     int i;
-                    for (i = 0; sub[i] != '<' && i < sub.Length; i++) ;
+
+                    for (i = 0; sub[i] != firstCharOfEOM && i < sub.Length; i++) ;
 
                     delta = Convert.ToInt32(sub.Substring(0, i));
 
                     //Console.WriteLine("Ricevuto d=" + delta);
 
-                    Scroll(delta);
+                    doMouseWheel(delta);
 
                     continue;
                 }
@@ -123,15 +126,15 @@ namespace ProgettoPdS
                 switch (data_s)
                 {
                     case "CLD<EOF>":
-                        DragAndDrop();
+                        doMouseDragAndDrop();
                         break;
 
                     case "CLU<EOF>":
-                        LeftClick();
+                        doMouseLeftClick();
                         break;
 
                     case "CR<EOF>":
-                        RightClick();
+                        doMouseRightClick();
                         break;
 
                         /*
@@ -141,7 +144,7 @@ namespace ProgettoPdS
                          * */
 
                     default:
-                        Move();
+                        doMouseMove();
                         break;
                 }
             }

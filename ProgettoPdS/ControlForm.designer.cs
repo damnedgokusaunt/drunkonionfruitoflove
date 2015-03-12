@@ -41,9 +41,8 @@
             this.label1.Text = "Premi CTRL + Q per uscire da questa sessione";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.label1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.ControlForm_MouseDown);
-            this.label1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.MouseMoveIntercepter);
+            this.label1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.ControlForm_MouseMove);
             this.label1.MouseUp += new System.Windows.Forms.MouseEventHandler(this.ControlForm_MouseUp);
-            
             // 
             // ControlForm
             // 
@@ -57,15 +56,10 @@
             this.Text = "ControlForm";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.Load += new System.EventHandler(this.ControlForm_Load);
-            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.ControlForm_KeyDown);
-            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.ControlForm_KeyUp);
             this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.ControlForm_MouseDown);
-            this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.MouseMoveIntercepter);
+            this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.ControlForm_MouseMove);
             this.MouseUp += new System.Windows.Forms.MouseEventHandler(this.ControlForm_MouseUp);
-
-            // Associo metodo all'evento MouseWheel
-            this.MouseWheel += ControlForm_MouseWheel;
-
+            this.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.ControlForm_MouseWheel);
             this.ResumeLayout(false);
 
         }

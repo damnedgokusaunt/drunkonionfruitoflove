@@ -12,9 +12,23 @@ namespace ProgettoPdS
 {
     static class MyProtocol
     {
-        public const string POSITIVE_ACK = "+OK<EOF>";
-        public const string NEGATIVE_ACK = "-ERR<EOF>";
+        public const string POSITIVE_ACK = "+OK";
+        public const string NEGATIVE_ACK = "-ERR";
+
+        public const string CONNECTION = "PASS";
+        public const string CONTROL = "CTRL";
+        public const string QUIT = "QUIT";
+
+        public const string END_OF_MESSAGE = "<EOF>";
         
-        public const string CONTROL_REQUEST = "CTRL<EOF>";
+        public static string message(string code, string pwd)
+        {
+            return code + pwd + END_OF_MESSAGE;
+        }
+
+        public static string message(string code)
+        {
+            return code + END_OF_MESSAGE;
+        }
     }
 }

@@ -26,7 +26,10 @@ namespace ProgettoPdS
         private string data = null;
         private IPAddress ipAddress;
         private int port;
+
         private string expectedConnectionRequest;
+        private string expectedControlRequest;
+        private string expectedQuitRequest;
 
         private Socket handler;
         
@@ -35,115 +38,109 @@ namespace ProgettoPdS
         public void setPort(int port) { this.port = port; }
         public void setExpectedConnectionRequest(string expectedConnectionRequest) { this.expectedConnectionRequest = expectedConnectionRequest; }
 
-        public void StartListening() 
-        {     
-            byte[] bytes = new Byte[1024];
+        public SynchronousSocketListener(IPAddress ipAddress, int port, string pwd)
+        {
+            this.ipAddress = ipAddress;
+            this.port = port;
+            this.expectedConnectionRequest = MyProtocol.message(MyProtocol.CONNECTION, pwd);
+            this.expectedControlRequest = MyProtocol.message(MyProtocol.CONTROL, pwd);
+            this.expectedQuitRequest = MyProtocol.message(MyProtocol.QUIT, pwd);
+        }
 
-            // Establish the local endpoint for the socket.
-            // Dns.GetHostName returns the name of the 
-            // host running the application.
-            //IPHostEntry ipHostInfo = Dns.GetHostEntry(LocalAddressResolve());
-            //IPAddress ipAddress = ipHostInfo.AddressList[0];
+        private void recvTillTheEnd(ref string recvbuf, string end)
+        {
+            int bytesRec;
+            byte[] bytes = new byte[1024];
+
+            do
+            {
+                bytesRec = handler.Receive(bytes);
+                recvbuf += Encoding.ASCII.GetString(bytes, 0, bytesRec);
+            }
+            while (recvbuf.IndexOf(end) == -1);
+        }
+
+        public void startListening() 
+        {
+            //thread mouse handler e keyboard handler
+            Thread mh_t, kh_t;
+            int bytesRec = 0;
+            string resp = string.Empty;
+            byte[] bytes = new Byte[1024];
             
             IPEndPoint localEndPoint = new IPEndPoint(ipAddress, port);
 
             // Create a TCP/IP socket.
-            Socket listener = new Socket(AddressFamily.InterNetwork,
-                SocketType.Stream, ProtocolType.Tcp );
+            Socket listener = new Socket(
+                AddressFamily.InterNetwork,
+                SocketType.Stream, 
+                ProtocolType.Tcp);
 
-            // Bind the socket to the local endpoint and 
-            // listen for incoming connections.
-            /*
-            try
-            {*/
-            Console.WriteLine("IP: " + ipAddress + "\nPort: " + port);
-                listener.Bind(localEndPoint);
-                listener.Listen(10);
+            listener.Bind(localEndPoint);
+            listener.Listen(10);
 
-                MessageBox.Show("Server avviato con successo.");
+            MessageBox.Show("Server avviato con successo.");
+
+            while (true)
+            {
+                // Start listening for connections.
+                handler = listener.Accept();
 
                 while (true)
                 {
-                    // Start listening for connections.
-                    handler = listener.Accept();
+                    // An incoming connection needs to be processed
+                    data = null;
 
-                    int bytesRec = 0;
-                    string resp = string.Empty;
+                    recvTillTheEnd(ref data, MyProtocol.END_OF_MESSAGE);
 
-                    while (true)
+                    if (data == expectedConnectionRequest)
                     {
-                        //thread mouse handler e keyboard handler
-                        Thread mh_t, kh_t;
-
-                        // An incoming connection needs to be processe
-                        data = null;
-
-                        while (true)
-                        {
-                            bytes = new byte[1024];
-                            bytesRec = handler.Receive(bytes);
-                            data += Encoding.ASCII.GetString(bytes, 0, bytesRec);
-                            if (data.IndexOf("<EOF>") > -1)
-                            {
-                                break;
-                            }
-                        }
-
-                        if (data == expectedConnectionRequest)
-                        {
-                            MessageBox.Show("Richiesta di connessione accettata.");
-                            resp = "+OK<EOF>";
-
-                            // Echo the data back to the client.
-                            byte[] msg = Encoding.ASCII.GetBytes(resp);
-
-                            handler.Send(msg);
-                        }
-
-                        else if (data == MyProtocol.CONTROL_REQUEST)
-                        {
-                            MessageBox.Show("Richiesta di controllo accettata.");
-
-                            handler.Send(Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK));
-
-                            byte[] point = new byte[sizeof(Int32) * 2];
-                            byte[] buffer = new byte["QUIT<EOF>".Length];
-
-                            // Riceve risoluzione dello schermo
-                            handler.Receive(point);
-
-                            // Istanzia gestore mouse
-                            MouseHandler mh = new MouseHandler(
-                                new UdpClient(port + 1),
-                                handler.RemoteEndPoint as IPEndPoint,
-                                BitConverter.ToInt32(point, 0),
-                                BitConverter.ToInt32(point, sizeof(Int32)));
-
-                            // Istanzia gestore tastiera
-                            KeyboardHandler kh = new KeyboardHandler();
-
-                            kh.setLocalEndPoint(new IPEndPoint(ipAddress, port + 2));
-
-                            // Istanzia i relativi thread
-                            mh_t = new Thread(mh.Run);
-                            kh_t = new Thread(kh.Run);
-                            
-                            // Lancia i thread
-                            mh_t.Start();
-                            kh_t.Start();
-                        }
-
-                        else
-                        {
-                            MessageBox.Show("Richiesta non riconosciuta.");
-
-                            handler.Send(Encoding.ASCII.GetBytes("-ERR<EOF>"));
-                        }
-
-
+                        MessageBox.Show("Richiesta di connessione accettata.");
+                        handler.Send(Encoding.ASCII.GetBytes(MyProtocol.message(MyProtocol.POSITIVE_ACK)));
                     }
 
+                    else if (data == expectedControlRequest)
+                    {
+                        MessageBox.Show("Richiesta di controllo accettata.");
+                        handler.Send(Encoding.ASCII.GetBytes(MyProtocol.message(MyProtocol.POSITIVE_ACK)));
+
+                        byte[] point = new byte[sizeof(Int32) * 2];
+                        byte[] buffer = new byte[expectedQuitRequest.Length];
+
+                        // Riceve risoluzione dello schermo
+                        handler.Receive(point);
+
+                        // Istanzia gestore mouse
+                        MouseHandler mh = new MouseHandler(
+                            new UdpClient(port + 1),
+                            handler.RemoteEndPoint as IPEndPoint,
+                            BitConverter.ToInt32(point, 0),
+                            BitConverter.ToInt32(point, sizeof(Int32)));
+
+                        // Istanzia gestore tastiera
+                        KeyboardHandler kh = new KeyboardHandler();
+
+                        kh.setLocalEndPoint(new IPEndPoint(ipAddress, port + 2));
+
+                        // Istanzia i relativi thread
+                        mh_t = new Thread(mh.Run);
+                        kh_t = new Thread(kh.Run);
+                        
+                        // Lancia i thread
+                        mh_t.Start();
+                        kh_t.Start();
+                    }
+
+                    else
+                    {
+                        MessageBox.Show("Richiesta non riconosciuta.");
+                        handler.Send(Encoding.ASCII.GetBytes(MyProtocol.message(MyProtocol.NEGATIVE_ACK)));
+                    }
+
+
                 }
+
+            }
             }
         
         }
