@@ -64,6 +64,9 @@ namespace ProgettoPdS
         {
             //thread mouse handler e keyboard handler
             Thread mh_t, kh_t;
+            Thread ch_t;
+
+            
             int bytesRec = 0;
             string resp = string.Empty;
             byte[] bytes = new Byte[1024];
@@ -119,17 +122,24 @@ namespace ProgettoPdS
 
                         // Istanzia gestore tastiera
                         KeyboardHandler kh = new KeyboardHandler();
+                            kh.setLocalEndPoint(new IPEndPoint(ipAddress, port + 2));
 
-                        kh.setLocalEndPoint(new IPEndPoint(ipAddress, port + 2));
 
+                        // Istanzia gestore clipboard
+                        ClipboardHandler ch= new ClipboardHandler();
+                            ch.setLocalEndPoint(new IPEndPoint(ipAddress, port + 3));
+                            ch_t = new Thread(ch.Run);
+                            ch_t.SetApartmentState(ApartmentState.STA);
+                  
                         // Istanzia i relativi thread
                         mh_t = new Thread(mh.Run);
                         kh_t = new Thread(kh.Run);
                         
                         // Lancia i thread
+                        ch_t.Start();  
                         mh_t.Start();
                         kh_t.Start();
-                    }
+                        }
 
                     else
                     {
