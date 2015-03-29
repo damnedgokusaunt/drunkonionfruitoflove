@@ -80,7 +80,6 @@ C:\Users\Vincenzo\Desktop\drunkonionfruitoflove\ProgettoPdS\obj\Debug\ProgettoPd
 C:\Users\Vincenzo\Desktop\drunkonionfruitoflove\ProgettoPdS\obj\Debug\ProgettoPdS.ControlForm.resources
 C:\Users\Vincenzo\Desktop\drunkonionfruitoflove\ProgettoPdS\obj\Debug\ProgettoPdS.Properties.Resources.resources
 C:\Users\Vincenzo\Desktop\drunkonionfruitoflove\ProgettoPdS\obj\Debug\ProgettoPdS.csproj.GenerateResource.Cache
-C:\Users\Vincenzo\Desktop\drunkonionfruitoflove\ProgettoPdS\obj\Debug\ProgettoPdS.Start_Form.resources
 C:\Users\Vincenzo\Desktop\drunkonionfruitoflove\ProgettoPdS\bin\Debug\ProgettoPdS.exe
 C:\Users\Vincenzo\Desktop\drunkonionfruitoflove\ProgettoPdS\bin\Debug\ProgettoPdS.pdb
 C:\Users\Alessio\Desktop\Prog\ProgettoPdS\bin\Debug\ProgettoPdS.exe.config
@@ -95,3 +94,4 @@ C:\Users\Alessio\Desktop\Prog\ProgettoPdS\obj\Debug\ProgettoPdS.ControlForm.reso
 C:\Users\Alessio\Desktop\Prog\ProgettoPdS\obj\Debug\ProgettoPdS.Properties.Resources.resources
 C:\Users\Alessio\Desktop\Prog\ProgettoPdS\obj\Debug\ProgettoPdS.ServerForm.resources
 C:\Users\Alessio\Desktop\Prog\ProgettoPdS\obj\Debug\ProgettoPdS.csproj.GenerateResource.Cache
+C:\Users\Vincenzo\Desktop\drunkonionfruitoflove\ProgettoPdS\obj\Debug\ProgettoPdS.ServerForm.resources

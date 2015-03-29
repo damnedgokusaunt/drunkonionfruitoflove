@@ -11,6 +11,7 @@
         /// Clean up any resources being used.
         /// </summary>
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        /*
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -19,7 +20,7 @@
             }
             base.Dispose(disposing);
         }
-
+        */
         #region Windows Form Designer generated code
 
         /// <summary>
@@ -40,6 +41,7 @@
             this.label1.TabIndex = 0;
             this.label1.Text = "Premi CTRL + Q per uscire da questa sessione";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.label1.Click += new System.EventHandler(this.label1_Click);
             this.label1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.ControlForm_MouseDown);
             this.label1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.ControlForm_MouseMove);
             this.label1.MouseUp += new System.Windows.Forms.MouseEventHandler(this.ControlForm_MouseUp);

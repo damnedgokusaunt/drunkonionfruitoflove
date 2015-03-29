@@ -12,30 +12,57 @@ using System.Windows.Forms;
 using System.Threading;
 using System.Net.Sockets;
 
+using System.Runtime.InteropServices;
+
 namespace ProgettoPdS
 {
     public partial class ControlForm : Form
     {
+        #region Import methods for Clipboard
+
+        [DllImport("User32.dll")]
+        protected static extern int SetClipboardViewer(int hWndNewViewer);
+
+        [DllImport("User32.dll", CharSet = CharSet.Auto)]
+        public static extern bool ChangeClipboardChain(IntPtr hWndRemove, IntPtr hWndNewNext);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        public static extern int SendMessage(IntPtr hwnd, int wMsg, IntPtr wParam, IntPtr lParam);
+
+        private System.Windows.Forms.RichTextBox richTextBox1;
+
+        IntPtr nextClipboardViewer;
+
+        #endregion
+
         #region Attributes
-        private Point CurrentPosition;
+
+        // Remote end points
+        private IPEndPoint mouseRemoteEP, keybdRemoteEP, clipbdRemoteEP;
+
+        // Sockets
         private UdpClient mouseChannel;
-        private IPEndPoint mouseRemoteEP;
-        private Socket keybdChannel;
-        private IPEndPoint keybdRemoteEP;
+        private Socket keybdChannel, clipbdChannel;
+        
         public Socket CurrentSocket;
-        private IPEndPoint udpRemoteEndPoint, tcpRemoteEndPoint;
+        
 
         public Int32 x, y;
         public byte[] point;
         private byte[] keybd;
+        private byte[] clipbd;
 
         GlobalKeyboardHook gkh;
 
         #endregion
+   
         #region Constructor
         public ControlForm(IPAddress ipAddress, int port)
         {
+            
+
             InitializeComponent();
+
 
             mouseRemoteEP = new IPEndPoint(ipAddress, port + 1);
             mouseChannel = new UdpClient();
@@ -50,6 +77,16 @@ namespace ProgettoPdS
             gkh = new GlobalKeyboardHook();
             point = new byte[sizeof(Int32) * 2];
             keybd = new byte[2];
+
+
+            clipbdRemoteEP = new IPEndPoint(ipAddress, port + 3);
+            clipbdChannel = new Socket(
+                AddressFamily.InterNetwork,
+                SocketType.Stream,
+                ProtocolType.Tcp);
+            clipbdChannel.Connect(clipbdRemoteEP);
+
+            
         }
         #endregion
 
@@ -58,10 +95,17 @@ namespace ProgettoPdS
             this.FormBorderStyle = FormBorderStyle.None;
             this.WindowState = FormWindowState.Maximized;
 
+            Clipboard.Clear();
             gkh.HookedKeys.Add(Keys.A);
             gkh.HookedKeys.Add(Keys.B);
             gkh.KeyDown += new KeyEventHandler(ControlForm_KeyDown);
             gkh.KeyUp += new KeyEventHandler(ControlForm_KeyUp);
+
+            #region Some code for Clipboard
+            nextClipboardViewer = (IntPtr)SetClipboardViewer((int)this.Handle);
+            #endregion
+
+            Clipboard.Clear();
         }
 
         #region Mouse methods
@@ -153,6 +197,94 @@ namespace ProgettoPdS
                 e.Handled = true;
         }
         #endregion
-       
+
+        #region Clipboard methods
+
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        protected override void Dispose(bool disposing)
+        {
+            ChangeClipboardChain(this.Handle, nextClipboardViewer);
+            if (disposing)
+            {
+                if (components != null)
+                {
+                    components.Dispose();
+                }
+            }
+            base.Dispose(disposing);
+        }
+        
+        void handleClipboardData()
+        {
+
+            try
+            {
+                string clipbdMsg;
+
+                IDataObject iData = new DataObject();
+                iData = Clipboard.GetDataObject();
+
+                if (Clipboard.ContainsData(DataFormats.Text))
+                {
+                    clipbdMsg = MyProtocol.COPY + (string)iData.GetData(DataFormats.Text) + MyProtocol.END_OF_MESSAGE;
+                    clipbdChannel.Send(Encoding.ASCII.GetBytes(clipbdMsg));
+                }
+                                      
+                /*
+                if (iData.GetDataPresent(DataFormats.Rtf))
+                    MessageBox.Show((string)iData.GetData(DataFormats.Rtf));
+                //richTextBox1.Rtf = (string)iData.GetData(DataFormats.Rtf);
+                else if (iData.GetDataPresent(DataFormats.Text))
+                    MessageBox.Show((string)iData.GetData(DataFormats.Text));
+                //richTextBox1.Text = (string)iData.GetData(DataFormats.Text);
+                else
+                    MessageBox.Show("[Clipboard data is not RTF or ASCII Text]");
+                //richTextBox1.Text = "[Clipboard data is not RTF or ASCII Text]";
+                 * */
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.ToString());
+            }
+        }
+        protected override void WndProc(ref System.Windows.Forms.Message m)
+        {
+            if (clipbdChannel == null)
+                return;
+
+            // defined in winuser.h
+            const int WM_DRAWCLIPBOARD = 0x308;
+            const int WM_CHANGECBCHAIN = 0x030D;
+
+            switch (m.Msg)
+            {
+                case WM_DRAWCLIPBOARD:                    
+                    handleClipboardData();
+                    SendMessage(nextClipboardViewer, m.Msg, m.WParam, m.LParam);
+                    break;
+                /*
+                case WM_CHANGECBCHAIN:
+                    if (m.WParam == nextClipboardViewer)
+                        nextClipboardViewer = m.LParam;
+                    else
+                        SendMessage(nextClipboardViewer, m.Msg, m.WParam, m.LParam);
+                    break;
+                */
+                default:
+                    base.WndProc(ref m);
+                    break;
+            }
+        }
+
+        
+        #endregion
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+
+        }
+
     }
 }

@@ -12,15 +12,18 @@ namespace ProgettoPdS
 {
     static class MyProtocol
     {
-        public const string POSITIVE_ACK = "+OK";
-        public const string NEGATIVE_ACK = "-ERR";
-
+        #region Requests
         public const string CONNECTION = "PASS";
         public const string CONTROL = "CTRL";
         public const string QUIT = "QUIT";
-
+        public const string COPY = "COPY";
+        #endregion
+        #region Answers
+        public const string POSITIVE_ACK = "+OK";
+        public const string NEGATIVE_ACK = "-ERR";
+        #endregion
         public const string END_OF_MESSAGE = "<EOF>";
-        
+
         public static string message(string code, string pwd)
         {
             return code + pwd + END_OF_MESSAGE;
