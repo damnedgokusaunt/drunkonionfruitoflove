@@ -24,6 +24,8 @@ namespace ProgettoPdS
         #endregion
         public const string END_OF_MESSAGE = "<EOF>";
 
+        public const int DEFAULT_PORT = 5000;
+
         public static string message(string code, string pwd)
         {
             return code + pwd + END_OF_MESSAGE;

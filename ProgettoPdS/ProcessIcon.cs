@@ -34,9 +34,7 @@ namespace ProgettoPdS
 		public ProcessIcon()
 		{
 			// Instantiate the NotifyIcon object.
-			ni = new NotifyIcon();
-            
-            
+			ni = new NotifyIcon();       
 		}
 
         public void setFrm(ref ServerForm frm)
@@ -61,7 +59,6 @@ namespace ProgettoPdS
             ni.BalloonTipIcon = ToolTipIcon.Info;
             ni.BalloonTipText = "Fai click destro per selezionare l'opzione preferita!";
             ni.BalloonTipTitle = "Progetto PdS Viola-Costanzo";
-            ni.ShowBalloonTip(1000);
         }
         
 		/// <summary>

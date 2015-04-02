@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Net;
+using System.Net.Sockets;
 using System.Windows.Forms;
 
 namespace ProgettoPdS
@@ -47,6 +49,8 @@ namespace ProgettoPdS
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.contextMenuStrip2 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.button3 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // label5
@@ -69,9 +73,9 @@ namespace ProgettoPdS
             // 
             this.button2.Location = new System.Drawing.Point(76, 206);
             this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(100, 23);
+            this.button2.Size = new System.Drawing.Size(60, 23);
             this.button2.TabIndex = 19;
-            this.button2.Text = "Avvia server";
+            this.button2.Text = "Avvia";
             this.button2.UseVisualStyleBackColor = true;
             this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
@@ -118,11 +122,34 @@ namespace ProgettoPdS
             this.contextMenuStrip2.Name = "contextMenuStrip2";
             this.contextMenuStrip2.Size = new System.Drawing.Size(61, 4);
             // 
-            // Start_Form
+            // comboBox1
+            // 
+            this.comboBox1.FormattingEnabled = true;
+            this.comboBox1.Location = new System.Drawing.Point(76, 37);
+            this.comboBox1.Name = "comboBox1";
+            this.comboBox1.Size = new System.Drawing.Size(173, 21);
+            this.comboBox1.TabIndex = 22;
+            this.comboBox1.Text = "< Select an IP Address >";
+            this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
+            // 
+            // button3
+            // 
+            this.button3.Enabled = false;
+            this.button3.Location = new System.Drawing.Point(142, 206);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(60, 23);
+            this.button3.TabIndex = 23;
+            this.button3.Text = "Termina";
+            this.button3.UseVisualStyleBackColor = true;
+            this.button3.Click += new System.EventHandler(this.button3_Click);
+            // 
+            // ServerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(284, 261);
+            this.Controls.Add(this.button3);
+            this.Controls.Add(this.comboBox1);
             this.Controls.Add(this.label5);
             this.Controls.Add(this.pwd2);
             this.Controls.Add(this.button2);
@@ -130,7 +157,7 @@ namespace ProgettoPdS
             this.Controls.Add(this.portBox);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MainMenuStrip = this.menuStrip1;
-            this.Name = "Start_Form";
+            this.Name = "ServerForm";
             this.Text = "Progetto PDS";
             this.Load += new System.EventHandler(this.Start_Form_Load);
             this.Resize += new System.EventHandler(this.TrayMinimizerForm_Resize);
@@ -150,6 +177,8 @@ namespace ProgettoPdS
         private Button button1;
         private ContextMenuStrip contextMenuStrip1;
         private ContextMenuStrip contextMenuStrip2;
+        private ComboBox comboBox1;
+        private Button button3;
 
         
     }

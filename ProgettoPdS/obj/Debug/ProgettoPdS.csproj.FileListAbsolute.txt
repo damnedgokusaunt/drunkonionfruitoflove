@@ -100,3 +100,12 @@ C:\Users\Alessio\Desktop\drunkonionfruitoflove\ProgettoPdS\obj\Debug\ProgettoPdS
 C:\Users\Alessio\Documents\GitHub\drunkonionfruitoflove\ProgettoPdS\obj\Debug\ProgettoPdS.AboutBox.resources
 C:\Users\Alessio\Documents\GitHub\drunkonionfruitoflove\ProgettoPdS\obj\Debug\ProgettoPdS.MainForm.resources
 C:\Users\Alessio\Documents\GitHub\drunkonionfruitoflove\ProgettoPdS\obj\Debug\ProgettoPdS.ServerForm.resources
+C:\Users\Alessio\Desktop\drunkonionfruitoflove\ProgettoPdS\bin\Debug\ProgettoPdS.exe
+C:\Users\Alessio\Desktop\drunkonionfruitoflove\ProgettoPdS\bin\Debug\ProgettoPdS.pdb
+C:\Users\Alessio\Desktop\drunkonionfruitoflove\ProgettoPdS\obj\Debug\ProgettoPdS.csprojResolveAssemblyReference.cache
+C:\Users\Alessio\Desktop\drunkonionfruitoflove\ProgettoPdS\obj\Debug\ProgettoPdS.AboutBox.resources
+C:\Users\Alessio\Desktop\drunkonionfruitoflove\ProgettoPdS\obj\Debug\ProgettoPdS.MainForm.resources
+C:\Users\Alessio\Desktop\drunkonionfruitoflove\ProgettoPdS\obj\Debug\ProgettoPdS.ControlForm.resources
+C:\Users\Alessio\Desktop\drunkonionfruitoflove\ProgettoPdS\obj\Debug\ProgettoPdS.Properties.Resources.resources
+C:\Users\Alessio\Desktop\drunkonionfruitoflove\ProgettoPdS\obj\Debug\ProgettoPdS.ServerForm.resources
+C:\Users\Alessio\Desktop\drunkonionfruitoflove\ProgettoPdS\obj\Debug\ProgettoPdS.csproj.GenerateResource.Cache

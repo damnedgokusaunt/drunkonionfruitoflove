@@ -59,10 +59,7 @@ namespace ProgettoPdS
         #region Constructor
         public ControlForm(IPAddress ipAddress, int port)
         {
-            
-
             InitializeComponent();
-
 
             mouseRemoteEP = new IPEndPoint(ipAddress, port + 1);
             mouseChannel = new UdpClient();
@@ -78,15 +75,13 @@ namespace ProgettoPdS
             point = new byte[sizeof(Int32) * 2];
             keybd = new byte[2];
 
-
             clipbdRemoteEP = new IPEndPoint(ipAddress, port + 3);
             clipbdChannel = new Socket(
                 AddressFamily.InterNetwork,
                 SocketType.Stream,
                 ProtocolType.Tcp);
             clipbdChannel.Connect(clipbdRemoteEP);
-
-            
+          
         }
         #endregion
 
@@ -218,7 +213,6 @@ namespace ProgettoPdS
         
         void handleClipboardData()
         {
-
             try
             {
                 string clipbdMsg;
@@ -280,11 +274,6 @@ namespace ProgettoPdS
 
         
         #endregion
-
-        private void label1_Click(object sender, EventArgs e)
-        {
-
-        }
 
     }
 }

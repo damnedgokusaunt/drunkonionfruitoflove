@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using System.Runtime.InteropServices;
+using System.Collections;
 
 
 
@@ -26,6 +27,13 @@ namespace ProgettoPdS
         private int CurrentSocketId;
         private SynchronousSocketListener listener;
         private ControlForm ctrl;
+        private IPAddress addr;
+
+        private ProcessIcon pi;
+
+
+        
+
         //getters
         public int getCurrentSocketId() { return CurrentSocketId; }
 
@@ -35,18 +43,34 @@ namespace ProgettoPdS
         public ServerForm()
         {
             InitializeComponent();
-            
-            ProcessIcon pi = new ProcessIcon();
+
+            // IP address
+            addr = null;
+
+            IPAddress[] localIPs = Dns.GetHostAddresses(Dns.GetHostName()); //get all addresses of the host
+            foreach (IPAddress ip in localIPs)
+            {
+                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                    this.comboBox1.Items.Add(ip.ToString());
+            }
+            IEnumerator en = comboBox1.Items.GetEnumerator();
+            en.MoveNext();
+            this.comboBox1.Text = en.Current.ToString();
+
+            // TCP port
+            portBox.Text = MyProtocol.DEFAULT_PORT.ToString();
+
+            pi = new ProcessIcon();
 
             var me = this;
             pi.setFrm(ref me);
             pi.Display();
-            
-            
-        }
-        
 
-       
+
+        }
+
+
+
         // To minimaze inside the tray area
 
         private void TrayMinimizerForm_Resize(object sender, EventArgs e)
@@ -76,27 +100,36 @@ namespace ProgettoPdS
 
         private void button2_Click(object sender, EventArgs e)
         {
+            this.comboBox1.Enabled = false;
+            this.portBox.Enabled = false;
+            this.pwd2.Enabled = false;
+
+            this.button2.Enabled = false;
+            this.button3.Enabled = true;
+
             try
             {
                 listener = new SynchronousSocketListener(
-                    IPAddress.Any,
+                    this.addr,
                     Convert.ToInt32(portBox.Text),
                     PasswordEncrypterMD5.Encrypt(pwd2.Text));
 
                 Thread t = new Thread(listener.startListening);
 
                 t.Start();
+
+                this.Hide();
             }
-            catch (FormatException ex)
+            catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
             }
         }
 
-    
+
         public void Start_Form_Load(object sender, EventArgs e)
         {
-            
+
         }
 
         private void Start_Form_Load_1(object sender, EventArgs e)
@@ -106,6 +139,31 @@ namespace ProgettoPdS
         private void menuStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
         {
 
+        }
+
+        private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            addr = IPAddress.Parse(comboBox1.Text);
+
+            Console.WriteLine("IP Address: " + addr);
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("@ale: non ho ancora implementato questa funzione.");
+
+            /*
+            this.comboBox1.Enabled = true;
+            this.portBox.Enabled = true;
+            this.pwd2.Enabled = true;
+            this.button3.Enabled = false;
+            this.button2.Enabled = true;
+             * */
         }
     }
 }
