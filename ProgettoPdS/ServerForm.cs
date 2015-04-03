@@ -20,20 +20,14 @@ namespace ProgettoPdS
 {
     public partial class ServerForm : Form
     {
-
-        private delegate void InvokeDelegate(string text, int id);
-
+       //public delegate void Del();
+        bool isAboutLoaded = false;
         private SynchronousSocketClient client;
         private int CurrentSocketId;
         private SynchronousSocketListener listener;
         private ControlForm ctrl;
         private IPAddress addr;
-
-        private ProcessIcon pi;
-
-
         
-
         //getters
         public int getCurrentSocketId() { return CurrentSocketId; }
 
@@ -43,7 +37,7 @@ namespace ProgettoPdS
         public ServerForm()
         {
             InitializeComponent();
-
+            
             // IP address
             addr = null;
 
@@ -60,12 +54,11 @@ namespace ProgettoPdS
             // TCP port
             portBox.Text = MyProtocol.DEFAULT_PORT.ToString();
 
-            pi = new ProcessIcon();
+            //pi = new ProcessIcon();
 
-            var me = this;
-            pi.setFrm(ref me);
-            pi.Display();
-
+            //var me = this;
+            //pi.setFrm(ref me);
+           
 
         }
 
@@ -75,13 +68,13 @@ namespace ProgettoPdS
 
         private void TrayMinimizerForm_Resize(object sender, EventArgs e)
         {
-            notifyIcon1.BalloonTipTitle = "Minimize to Tray App";
-            notifyIcon1.BalloonTipText = "You have successfully minimized your form.";
+            //notifyIcon1.BalloonTipTitle = "Minimize to Tray App";
+            //notifyIcon1.BalloonTipText = "You have successfully minimized your form.";
 
             if (FormWindowState.Minimized == this.WindowState)
             {
-                notifyIcon1.Visible = true;
-                notifyIcon1.ShowBalloonTip(1000);
+                //notifyIcon1.Visible = true;
+                //notifyIcon1.ShowBalloonTip(1000);
                 this.Hide();
             }
             else if (FormWindowState.Normal == this.WindowState)
@@ -112,7 +105,7 @@ namespace ProgettoPdS
                 listener = new SynchronousSocketListener(
                     this.addr,
                     Convert.ToInt32(portBox.Text),
-                    PasswordEncrypterMD5.Encrypt(pwd2.Text));
+                    MyProtocol.Encrypt(pwd2.Text));
 
                 Thread t = new Thread(listener.startListening);
 
@@ -165,5 +158,51 @@ namespace ProgettoPdS
             this.button2.Enabled = true;
              * */
         }
+        /// <summary>
+        /// Handles the Click event of the Explorer control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+        void Explorer_Click(object sender, EventArgs e)
+        {
+            this.Show();
+            this.WindowState = FormWindowState.Normal;
+        }
+
+        /// <summary>
+        /// Handles the Click event of the About control.
+        /// </summary>
+        /// <param name="sender">The source of the event.</param>
+        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+        void About_Click(object sender, EventArgs e)
+        {
+            if (!isAboutLoaded)
+            {
+                isAboutLoaded = true;
+                new AboutBox().ShowDialog();
+                isAboutLoaded = false;
+            }
+        }
+
+        /// <summary>
+        /// Processes a menu item.
+        /// </summary>
+        /// <param name="sender">The sender.</param>
+        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+        void Exit_Click(object sender, EventArgs e)
+        {
+            // Quit without further ado.
+            Application.Exit();
+        }
+        private void notifyIcon1_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+
+        }
+
+        private void notifyIcon1_MouseDoubleClick_1(object sender, MouseEventArgs e)
+        {
+
+        }
+
     }
 }

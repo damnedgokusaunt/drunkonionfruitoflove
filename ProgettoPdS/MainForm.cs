@@ -90,7 +90,7 @@ namespace ProgettoPdS
                 listener = new SynchronousSocketListener(
                     IPAddress.Any,
                     Convert.ToInt32(portBox.Text),
-                    PasswordEncrypterMD5.Encrypt(pwd2.Text));
+                    MyProtocol.Encrypt(pwd2.Text));
 
                 Thread t = new Thread(listener.startListening);
 
@@ -135,7 +135,7 @@ namespace ProgettoPdS
                 client = new SynchronousSocketClient(
                     IPAddress.Parse(serverAddrBox.Text),
                     Convert.ToInt32(serverPortBox.Text),
-                    PasswordEncrypterMD5.Encrypt(Convert.ToString(pwd1.Text)));
+                    MyProtocol.Encrypt(Convert.ToString(pwd1.Text)));
 
                 client.setForm(this);
 

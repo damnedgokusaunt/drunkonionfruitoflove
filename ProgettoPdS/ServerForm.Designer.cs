@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ProgettoPdS.Properties;
+using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Windows.Forms;
@@ -26,7 +27,7 @@ namespace ProgettoPdS
         }
 
 
-        private System.Windows.Forms.NotifyIcon notifyIcon1;
+        
 
       // private System.ComponentModel.BackgroundWorker backgroundWorker1;
 
@@ -44,11 +45,12 @@ namespace ProgettoPdS
             this.button2 = new System.Windows.Forms.Button();
             this.portBox = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
-            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.button1 = new System.Windows.Forms.Button();
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
-            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.contextMenuStrip2 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.menu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.item = new System.Windows.Forms.ToolStripMenuItem();
+            this.sep = new System.Windows.Forms.ToolStripSeparator();
+
             this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.button3 = new System.Windows.Forms.Button();
             this.SuspendLayout();
@@ -96,15 +98,6 @@ namespace ProgettoPdS
             this.label3.TabIndex = 18;
             this.label3.Text = "Porta server";
             // 
-            // menuStrip1
-            // 
-            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
-            this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(616, 24);
-            this.menuStrip1.TabIndex = 17;
-            this.menuStrip1.Text = "menuStrip1";
-            this.menuStrip1.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.menuStrip1_ItemClicked);
-            // 
             // button1
             // 
             this.button1.Location = new System.Drawing.Point(0, 0);
@@ -112,15 +105,50 @@ namespace ProgettoPdS
             this.button1.Size = new System.Drawing.Size(75, 23);
             this.button1.TabIndex = 0;
             // 
-            // contextMenuStrip1
+            // notifyIcon1
             // 
-            this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(61, 4);
+            this.notifyIcon1.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Info;
+            this.notifyIcon1.Icon = global::ProgettoPdS.Properties.Resources.SystemTrayApp;
+            this.notifyIcon1.Text = "Viola-Costanzo PdS Project";
+            this.notifyIcon1.Visible = true;
+            this.notifyIcon1.ContextMenuStrip = this.menu;
+            
             // 
-            // contextMenuStrip2
+            // menu
             // 
-            this.contextMenuStrip2.Name = "contextMenuStrip2";
-            this.contextMenuStrip2.Size = new System.Drawing.Size(61, 4);
+            this.menu.Name = "menu";
+            this.menu.Size = new System.Drawing.Size(61, 4);
+            this.menu.Visible = true;
+            
+            //
+            // item1
+            // 
+            this.item.Image = global::ProgettoPdS.Properties.Resources.Explorer;
+            this.item.Name = "item1";
+            this.item.Size = new System.Drawing.Size(191, 22);
+            this.item.Text = "Vai alle info del server!";
+            this.item.Click += new System.EventHandler(this.Explorer_Click);
+            // 
+            // item2
+            // 
+            this.item.Image = global::ProgettoPdS.Properties.Resources.About;
+            this.item.Name = "item2";
+            this.item.Size = new System.Drawing.Size(191, 22);
+            this.item.Text = "About";
+            this.item.Click += new System.EventHandler(this.About_Click);
+            // 
+            // sep
+            // 
+            this.sep.Name = "sep";
+            this.sep.Size = new System.Drawing.Size(188, 6);
+            // 
+            // item3
+            // 
+            this.item.Image = global::ProgettoPdS.Properties.Resources.Exit;
+            this.item.Name = "item3";
+            this.item.Size = new System.Drawing.Size(191, 22);
+            this.item.Text = "Exit";
+            this.item.Click += new System.EventHandler(this.Exit_Click);
             // 
             // comboBox1
             // 
@@ -156,13 +184,37 @@ namespace ProgettoPdS
             this.Controls.Add(this.label3);
             this.Controls.Add(this.portBox);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
-            this.MainMenuStrip = this.menuStrip1;
             this.Name = "ServerForm";
             this.Text = "Progetto PDS";
             this.Load += new System.EventHandler(this.Start_Form_Load);
             this.Resize += new System.EventHandler(this.TrayMinimizerForm_Resize);
             this.ResumeLayout(false);
             this.PerformLayout();
+
+            // Windows Explorer.
+            item = new ToolStripMenuItem();
+            item.Text = "Vai alle info del server!";
+            item.Click += new EventHandler(Explorer_Click);
+            item.Image = Resources.Explorer;
+            menu.Items.Add(item);
+
+            // About.
+            item = new ToolStripMenuItem();
+            item.Text = "About";
+            item.Click += new EventHandler(About_Click);
+            item.Image = Resources.About;
+            menu.Items.Add(item);
+
+            // Separator.
+            sep = new ToolStripSeparator();
+            menu.Items.Add(sep);
+
+            // Exit.
+            item = new ToolStripMenuItem();
+            item.Text = "Exit";
+            item.Click += new System.EventHandler(Exit_Click);
+            item.Image = Resources.Exit;
+            menu.Items.Add(item);
 
         }
 
@@ -173,13 +225,13 @@ namespace ProgettoPdS
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox portBox;
-        private System.Windows.Forms.MenuStrip menuStrip1;
         private Button button1;
-        private ContextMenuStrip contextMenuStrip1;
-        private ContextMenuStrip contextMenuStrip2;
+        private ContextMenuStrip menu;
         private ComboBox comboBox1;
         private Button button3;
-
+        private NotifyIcon notifyIcon1;
+        private ToolStripMenuItem item;
+        private ToolStripSeparator sep;
         
     }
 }
