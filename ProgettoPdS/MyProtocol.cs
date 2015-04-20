@@ -18,8 +18,11 @@ namespace ProgettoPdS
         public const string CONTROL = "CTRL";
         public const string QUIT = "QUIT";
         public const string COPY = "COPY";
-        public const string RECEIVE_FILEDROP = "F";
+        //public const string RECEIVE_FILEDROP = "F";
+        public const string FILE_SEND = "FILE";
+        public const string RTF = "R";
         
+
         #endregion
         #region Answers
         public const string POSITIVE_ACK = "+OK";

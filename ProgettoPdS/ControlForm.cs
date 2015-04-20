@@ -13,9 +13,11 @@ using System.Threading;
 using System.Net.Sockets;
 
 using System.Runtime.InteropServices;
+using System.IO;
 
 namespace ProgettoPdS
 {
+     
     public partial class ControlForm : Form
     {
         #region Import methods for Clipboard
@@ -32,6 +34,7 @@ namespace ProgettoPdS
         private System.Windows.Forms.RichTextBox richTextBox1;
 
         IntPtr nextClipboardViewer;
+        private MainForm  window;
 
         #endregion
 
@@ -43,6 +46,7 @@ namespace ProgettoPdS
         // Sockets
         private UdpClient mouseChannel;
         private Socket keybdChannel, clipbdChannel;
+        
         
         public Socket CurrentSocket;
         
@@ -211,38 +215,239 @@ namespace ProgettoPdS
             base.Dispose(disposing);
         }
         
+
+        //ascia
+
+        public void SendData(ref Socket soc,byte[] buffer, int offset, int length)
+        {
+            NetworkStream clientStream;
+            clientStream = new NetworkStream(soc);
+           
+            if (clientStream == null)
+            {
+                return;
+            }
+
+          //  clientStream = clipbdChannel.GetStream();
+
+            try
+            {
+                clientStream.Write(buffer, offset, length);
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("write exception " + e.Message);
+                clientStream.Close();
+                throw;
+            }
+
+            clientStream.Flush();
+
+        }
+
+        public void SendFile(FileStream fs, Int64 fileSize)
+        {
+            Int32 chunks, chunkSize;
+            BinaryReader reader = new BinaryReader(fs);
+
+            chunks = Convert.ToInt32(fileSize / MyProtocol.CHUNK_SIZE);
+            chunkSize = 0;
+            byte[] bufferFile = new byte[MyProtocol.CHUNK_SIZE];
+
+            do
+            {
+                Console.WriteLine("Start!");
+                if (chunks > 0)
+                {
+                    chunkSize = MyProtocol.CHUNK_SIZE;
+                }
+                else
+                {
+                    chunkSize = Convert.ToInt32(fileSize % MyProtocol.CHUNK_SIZE);
+
+                    //if (chunkSize <= 0) break;
+                }
+
+                chunks--;
+
+                reader.Read(bufferFile, 0, chunkSize);
+                try
+                {
+                    SendData(ref clipbdChannel,bufferFile, 0, chunkSize);
+                }
+                catch
+                {
+                    fs.Close();
+                    throw;
+                }
+            } while (chunks >= 0);
+
+            Console.WriteLine("The end!");
+        }
+
+        private void ClipboardSendFile(string name)
+        {
+            FileInfo f;
+            FileStream fs;
+            byte[] buffer;
+            int bufferSize;
+            Int64 fileSize;
+
+            string fileName;
+            
+
+            if (!File.Exists(name)) throw new Exception("File doesn't exist!");
+
+            f = new FileInfo(name);
+            fileSize = f.Length;
+            fileName = f.Name;
+
+            fs = File.Open(name, FileMode.Open);
+
+            bufferSize = (13 + ASCIIEncoding.ASCII.GetBytes(fileName).Length);
+            buffer = new byte[bufferSize];
+
+
+            //string mess= MyProtocol.FILE_SEND;
+
+            //message to start file transfer, (Message[1]=SEND_FILE, filesize[8], fileNameLength[4], filename[fileNameLength])
+            Buffer.BlockCopy(BitConverter.GetBytes(fileSize), 0, buffer, 1, 8);
+            Buffer.BlockCopy(BitConverter.GetBytes(ASCIIEncoding.ASCII.GetBytes(fileName).Length), 0, buffer, 9, 4);
+            Buffer.BlockCopy(ASCIIEncoding.ASCII.GetBytes(fileName), 0, buffer, 13, ASCIIEncoding.ASCII.GetBytes(fileName).Length);
+
+            //sending protocol message
+
+            SendData(ref clipbdChannel, BitConverter.GetBytes(fileSize), 0, BitConverter.GetBytes(fileSize).Length);
+            SendData(ref clipbdChannel, ASCIIEncoding.ASCII.GetBytes(fileName + MyProtocol.END_OF_MESSAGE), 0, ASCIIEncoding.ASCII.GetBytes(fileName + MyProtocol.END_OF_MESSAGE).Length);
+            Console.WriteLine("Sto inviando il file: " + fileName);
+            
+
+            Console.WriteLine("start file trasfering: " + DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss"));
+            
+            SendFile(fs, fileSize);
+            Console.WriteLine("end file trasfering: " + DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss"));
+
+            fs.Close();
+
+            Console.WriteLine("done.");
+        }
+
+
+
         void handleClipboardData()
         {
             try
             {
                 string clipbdMsg;
+                
+                
+                //4_file
+                object clipContent;
+                string[] path;
+                int n;
+                byte[] buffer;
+                string mess = MyProtocol.FILE_SEND;
 
                 IDataObject iData = new DataObject();
                 iData = Clipboard.GetDataObject();
+
 
                 if (Clipboard.ContainsData(DataFormats.Text))
                 {
                     clipbdMsg = MyProtocol.COPY + (string)iData.GetData(DataFormats.Text) + MyProtocol.END_OF_MESSAGE;
                     clipbdChannel.Send(Encoding.ASCII.GetBytes(clipbdMsg));
                 }
-                                      
-                /*
-                if (iData.GetDataPresent(DataFormats.Rtf))
-                    MessageBox.Show((string)iData.GetData(DataFormats.Rtf));
-                //richTextBox1.Rtf = (string)iData.GetData(DataFormats.Rtf);
-                else if (iData.GetDataPresent(DataFormats.Text))
-                    MessageBox.Show((string)iData.GetData(DataFormats.Text));
-                //richTextBox1.Text = (string)iData.GetData(DataFormats.Text);
-                else
-                    MessageBox.Show("[Clipboard data is not RTF or ASCII Text]");
-                //richTextBox1.Text = "[Clipboard data is not RTF or ASCII Text]";
-                 * */
+
+                else if (Clipboard.ContainsData(DataFormats.Rtf))
+                {
+                    clipbdMsg = MyProtocol.RTF + (string)iData.GetData(DataFormats.Rtf) + MyProtocol.END_OF_MESSAGE;
+                    clipbdChannel.Send(Encoding.ASCII.GetBytes(clipbdMsg));
+                }
+                else if (Clipboard.ContainsData(DataFormats.FileDrop))
+                {
+                    
+                            //operazioni invio file
+                    buffer = new byte[1];
+                    try
+                    {
+                        Console.WriteLine("preparazione invio file...");
+                        SendData(ref clipbdChannel, Encoding.ASCII.GetBytes(mess + MyProtocol.END_OF_MESSAGE), 0, Encoding.ASCII.GetBytes(mess + MyProtocol.END_OF_MESSAGE).Length);
+                        Console.WriteLine("SENDATA eseguita!");
+                     
+                    }
+                    catch (Exception e)
+                    {
+                        MessageBox.Show(e.ToString());
+                    }
+                    byte[] bytes = new byte[MyProtocol.POSITIVE_ACK.Length];
+                    clipbdChannel.Receive(bytes);
+
+                    Console.WriteLine("Il client è pronto a ricevere il file.");
+
+                    IDataObject data = Clipboard.GetDataObject();    
+                    clipContent = data.GetData(DataFormats.FileDrop);
+                    path = (string[])clipContent;
+                    n = path.Length;
+
+                    for (int i = 0; i < n; i++)
+                    {
+                        if (File.Exists(path[i]))
+                        {
+                            try
+                            {
+                                ClipboardSendFile(path[i]);
+                            }
+                            catch (Exception e)
+                            {
+                                MessageBox.Show(e.ToString());
+                            }
+                        }
+                        else if (Directory.Exists(path[i]))
+                        {
+                            try
+                            {
+                                Console.WriteLine("start directory trasfering: " + DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss"));
+                              //  ClipboardRecursiveDirectorySend(path[i]);
+                                Console.WriteLine("end file trasfering: " + DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss"));
+                                Console.WriteLine("done.");
+                            }
+                            catch (Exception e)
+                            {
+                                MessageBox.Show(e.ToString());
+                            }
+                        }
+                        else
+                        {
+                            Console.WriteLine("Isn't a File or a Directory!!!");
+                        }
+                    }
+
+                    string mess1 = MyProtocol.END_OF_MESSAGE;
+  
+                    try
+                    {
+                        SendData(ref clipbdChannel, Encoding.ASCII.GetBytes(mess1), 0, Encoding.ASCII.GetBytes(mess1).Length);
+                    }
+                    catch (Exception e)
+                    {
+                        MessageBox.Show(e.ToString());
+                    }
+
+                    Console.WriteLine("done.");
+
+                    //Close();            
+                } 
+            
             }
             catch (Exception e)
             {
                 MessageBox.Show(e.ToString());
             }
         }
+
+
+
         protected override void WndProc(ref System.Windows.Forms.Message m)
         {
             if (clipbdChannel == null)
