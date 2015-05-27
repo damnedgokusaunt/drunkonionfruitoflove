@@ -41,7 +41,6 @@
             this.label1.TabIndex = 0;
             this.label1.Text = "Premi CTRL + Q per uscire da questa sessione";
             this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            
             this.label1.MouseDown += new System.Windows.Forms.MouseEventHandler(this.ControlForm_MouseDown);
             this.label1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.ControlForm_MouseMove);
             this.label1.MouseUp += new System.Windows.Forms.MouseEventHandler(this.ControlForm_MouseUp);

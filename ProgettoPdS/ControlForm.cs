@@ -216,8 +216,6 @@ namespace ProgettoPdS
         }
         
 
-        //ascia
-
         public void SendData(ref Socket soc,byte[] buffer, int offset, int length)
         {
             NetworkStream clientStream;
@@ -227,8 +225,6 @@ namespace ProgettoPdS
             {
                 return;
             }
-
-          //  clientStream = clipbdChannel.GetStream();
 
             try
             {
@@ -266,7 +262,6 @@ namespace ProgettoPdS
                 {
                     chunkSize = Convert.ToInt32(fileSize % MyProtocol.CHUNK_SIZE);
 
-                    //if (chunkSize <= 0) break;
                 }
 
                 chunks--;
@@ -290,11 +285,10 @@ namespace ProgettoPdS
         {
             FileInfo f;
             FileStream fs;
-            byte[] buffer;
-            int bufferSize;
             Int64 fileSize;
 
             string fileName;
+            string mess = MyProtocol.FILE_SEND;
             
 
             if (!File.Exists(name)) throw new Exception("File doesn't exist!");
@@ -305,35 +299,57 @@ namespace ProgettoPdS
 
             fs = File.Open(name, FileMode.Open);
 
-            bufferSize = (13 + ASCIIEncoding.ASCII.GetBytes(fileName).Length);
-            buffer = new byte[bufferSize];
+            SendData(ref clipbdChannel, Encoding.ASCII.GetBytes(mess + MyProtocol.END_OF_MESSAGE), 0, Encoding.ASCII.GetBytes(mess + MyProtocol.END_OF_MESSAGE).Length);
+            Console.WriteLine("Comando invio_file inviato!");
 
-
-            //string mess= MyProtocol.FILE_SEND;
-
-            //message to start file transfer, (Message[1]=SEND_FILE, filesize[8], fileNameLength[4], filename[fileNameLength])
-            Buffer.BlockCopy(BitConverter.GetBytes(fileSize), 0, buffer, 1, 8);
-            Buffer.BlockCopy(BitConverter.GetBytes(ASCIIEncoding.ASCII.GetBytes(fileName).Length), 0, buffer, 9, 4);
-            Buffer.BlockCopy(ASCIIEncoding.ASCII.GetBytes(fileName), 0, buffer, 13, ASCIIEncoding.ASCII.GetBytes(fileName).Length);
-
-            //sending protocol message
 
             SendData(ref clipbdChannel, BitConverter.GetBytes(fileSize), 0, BitConverter.GetBytes(fileSize).Length);
+            Console.WriteLine("FileSize inviata!");
+
             SendData(ref clipbdChannel, ASCIIEncoding.ASCII.GetBytes(fileName + MyProtocol.END_OF_MESSAGE), 0, ASCIIEncoding.ASCII.GetBytes(fileName + MyProtocol.END_OF_MESSAGE).Length);
             Console.WriteLine("Sto inviando il file: " + fileName);
-            
-
-            Console.WriteLine("start file trasfering: " + DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss"));
-            
+           
             SendFile(fs, fileSize);
-            Console.WriteLine("end file trasfering: " + DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss"));
-
             fs.Close();
 
-            Console.WriteLine("done.");
+            Console.WriteLine("Done.");
         }
 
+        
+        private void ClipboardRecursiveDirectorySend(string sDir)
+        {
+            DirectoryInfo dInfo;
+            string dirName;
+            byte[] buffer;
+            int bufferSize;
 
+            if (!Directory.Exists(sDir)) throw new Exception("Directory doesn't exists!");
+
+            dInfo = new DirectoryInfo(sDir);
+            dirName = dInfo.Name;
+
+            bufferSize = (1 + 4 + ASCIIEncoding.ASCII.GetBytes(dirName).Length);
+            buffer = new byte[bufferSize];
+
+            string com= MyProtocol.DIRE_SEND;
+
+
+            SendData(ref clipbdChannel, ASCIIEncoding.ASCII.GetBytes(com + MyProtocol.END_OF_MESSAGE), 0, ASCIIEncoding.ASCII.GetBytes(com + MyProtocol.END_OF_MESSAGE).Length);
+            SendData(ref clipbdChannel, ASCIIEncoding.ASCII.GetBytes(dirName + MyProtocol.END_OF_MESSAGE), 0, ASCIIEncoding.ASCII.GetBytes(dirName + MyProtocol.END_OF_MESSAGE).Length);
+            
+            foreach (string f in Directory.GetFiles(sDir))
+            {
+                ClipboardSendFile(f);
+            }
+
+            foreach (string d in Directory.GetDirectories(sDir))
+            {
+                ClipboardRecursiveDirectorySend(d);
+            }
+
+            SendData(ref clipbdChannel, ASCIIEncoding.ASCII.GetBytes(MyProtocol.END_OF_DIR+ MyProtocol.END_OF_MESSAGE), 0, ASCIIEncoding.ASCII.GetBytes(MyProtocol.END_OF_DIR + MyProtocol.END_OF_MESSAGE).Length);
+          
+        }
 
         void handleClipboardData()
         {
@@ -342,12 +358,12 @@ namespace ProgettoPdS
                 string clipbdMsg;
                 
                 
-                //4_file
+                //Dichiarazioni utili per i file
                 object clipContent;
                 string[] path;
                 int n;
                 byte[] buffer;
-                string mess = MyProtocol.FILE_SEND;
+                
 
                 IDataObject iData = new DataObject();
                 iData = Clipboard.GetDataObject();
@@ -366,23 +382,22 @@ namespace ProgettoPdS
                 }
                 else if (Clipboard.ContainsData(DataFormats.FileDrop))
                 {
-                    
-                            //operazioni invio file
+                    //Inizio operazioni di invio file
+
                     buffer = new byte[1];
                     try
                     {
+
+                        SendData(ref clipbdChannel, Encoding.ASCII.GetBytes(MyProtocol.CLEAN + MyProtocol.END_OF_MESSAGE), 0, Encoding.ASCII.GetBytes(MyProtocol.CLEAN + MyProtocol.END_OF_MESSAGE).Length);
+                        Console.WriteLine("Clean!");
                         Console.WriteLine("preparazione invio file...");
-                        SendData(ref clipbdChannel, Encoding.ASCII.GetBytes(mess + MyProtocol.END_OF_MESSAGE), 0, Encoding.ASCII.GetBytes(mess + MyProtocol.END_OF_MESSAGE).Length);
-                        Console.WriteLine("SENDATA eseguita!");
-                     
+                                             
                     }
                     catch (Exception e)
                     {
                         MessageBox.Show(e.ToString());
                     }
-                    byte[] bytes = new byte[MyProtocol.POSITIVE_ACK.Length];
-                    clipbdChannel.Receive(bytes);
-
+        
                     Console.WriteLine("Il client è pronto a ricevere il file.");
 
                     IDataObject data = Clipboard.GetDataObject();    
@@ -396,7 +411,7 @@ namespace ProgettoPdS
                         {
                             try
                             {
-                                ClipboardSendFile(path[i]);
+                               ClipboardSendFile(path[i]);
                             }
                             catch (Exception e)
                             {
@@ -407,10 +422,7 @@ namespace ProgettoPdS
                         {
                             try
                             {
-                                Console.WriteLine("start directory trasfering: " + DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss"));
-                              //  ClipboardRecursiveDirectorySend(path[i]);
-                                Console.WriteLine("end file trasfering: " + DateTime.Now.ToString("MM/dd/yyyy HH:mm:ss"));
-                                Console.WriteLine("done.");
+                               ClipboardRecursiveDirectorySend(path[i]);                        
                             }
                             catch (Exception e)
                             {
@@ -423,20 +435,8 @@ namespace ProgettoPdS
                         }
                     }
 
-                    string mess1 = MyProtocol.END_OF_MESSAGE;
-  
-                    try
-                    {
-                        SendData(ref clipbdChannel, Encoding.ASCII.GetBytes(mess1), 0, Encoding.ASCII.GetBytes(mess1).Length);
-                    }
-                    catch (Exception e)
-                    {
-                        MessageBox.Show(e.ToString());
-                    }
-
                     Console.WriteLine("done.");
-
-                    //Close();            
+                    
                 } 
             
             }
@@ -445,7 +445,6 @@ namespace ProgettoPdS
                 MessageBox.Show(e.ToString());
             }
         }
-
 
 
         protected override void WndProc(ref System.Windows.Forms.Message m)
@@ -463,14 +462,6 @@ namespace ProgettoPdS
                     handleClipboardData();
                     SendMessage(nextClipboardViewer, m.Msg, m.WParam, m.LParam);
                     break;
-                /*
-                case WM_CHANGECBCHAIN:
-                    if (m.WParam == nextClipboardViewer)
-                        nextClipboardViewer = m.LParam;
-                    else
-                        SendMessage(nextClipboardViewer, m.Msg, m.WParam, m.LParam);
-                    break;
-                */
                 default:
                     base.WndProc(ref m);
                     break;
@@ -480,5 +471,5 @@ namespace ProgettoPdS
         
         #endregion
 
-    }
+            }
 }
