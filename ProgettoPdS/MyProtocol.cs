@@ -29,10 +29,15 @@ namespace ProgettoPdS
         public const string NEGATIVE_ACK = "-ERR";
         #endregion
         public const string END_OF_MESSAGE = "<EOF>";
-        public const string CLIPBOARD_DIR = @".\";
+        public const string END_OF_DROPLIST = "<EOD>";
+        public const string END_OF_DIR = "<EDI>";
+
+        public const string CLIPBOARD_DIR = "clipboard";
+        public const string DIRE_SEND = "DIRE";
+        public const string CLEAN = "CLEA";
 
         public const int DEFAULT_PORT = 5000;
-        public const int CHUNK_SIZE = 1024; //1 KB
+        public const int CHUNK_SIZE = 1024; // 1 KB
 
         public static string message(string code, string pwd)
         {

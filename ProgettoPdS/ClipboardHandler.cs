@@ -14,7 +14,7 @@ using System.ComponentModel;
 using System.Data;
 using System.IO;
 using System.Collections.Specialized;
-
+using System.Threading;
 
 namespace ProgettoPdS
 {
@@ -37,13 +37,31 @@ namespace ProgettoPdS
         private TcpClient tcp;
 
 
-
+        private string ReceiveTillTerminator(ref Socket sock)
+        {
+            int bytesRec;
+            byte[] bytes = new byte[1];
+            string recvbuf = null, cmd = null;
+            do
+            {
+                bytesRec = sock.Receive(bytes);
+                recvbuf += Encoding.ASCII.GetString(bytes, 0, bytesRec);
+                //Console.WriteLine("recvbuf: " + recvbuf);
+            }
+            while (recvbuf.IndexOf(MyProtocol.END_OF_MESSAGE) == -1);
+            
+            cmd = recvbuf.Substring(0, recvbuf.IndexOf(MyProtocol.END_OF_MESSAGE));
+            
+            return cmd;
+        }
         public void setLocalEndPoint(IPEndPoint ep)
         {
             this.ep = ep;
         }
 
-        public static byte[] ReceiveData(ref Socket sock, int size)
+        #region Core methods
+        
+        public byte[] ReceiveData(ref Socket sock, int size)
         {
             int bytesRead = 0;
             int offset = 0;
@@ -77,8 +95,10 @@ namespace ProgettoPdS
             //clipFile cd;
             Int32 chunks, chunkSize, resto;
 
+            string path = fileName;
+
             //FILE TRANSFER           
-            FileStream output = File.Create(fileName);
+            FileStream output = File.Create(path);
 
             Console.WriteLine("creato file: " + fileName);
 
@@ -122,7 +142,7 @@ namespace ProgettoPdS
                 }
 
                 //Console.WriteLine(Encoding.ASCII.GetString(buffer, 0, chunkSize));
-                Console.WriteLine("start to write " + chunkSize); 
+                //Console.WriteLine("start to write " + chunkSize); 
                 try
                 {
                     binWriter.Write(buffer, 0, chunkSize);
@@ -141,14 +161,57 @@ namespace ProgettoPdS
             output.Close();
         }
 
-        private void handleFileDrop(ref Socket sock)
+        private void UpdateClipboard()
+        {
+            List<string> paths = new List<string>();
+            string dir = MyProtocol.CLIPBOARD_DIR;
+
+            foreach (string f in Directory.GetFiles(dir))
+            {
+                paths.Add(Path.GetFullPath(f));
+            }
+            foreach (string d in Directory.GetDirectories(dir))
+            {
+                paths.Add(Path.GetFullPath(d));
+            }
+
+            Clipboard.SetData(DataFormats.FileDrop, paths.ToArray());
+        }
+
+        private void StartClipoardUpdaterThread()
+        {
+            Thread t = new Thread(UpdateClipboard);
+            t.SetApartmentState(ApartmentState.STA);
+            t.Start();
+            t.Join();
+        }
+
+        private void CleanClipboardDir(string dir)
+        {
+            // Prima elimino tutti i file all'interno della directory
+            foreach (string f in Directory.GetFiles(dir))
+            {
+                File.Delete(f);
+            }
+            
+            foreach (string d in Directory.GetDirectories(dir))
+            {
+                // Chiamata ricorsiva: elimino tutti i file di tutte le sue sottocartelle
+                CleanClipboardDir(d);
+                // Elimino le directory in modo bottom-up
+                Directory.Delete(d);
+            }
+        }
+
+        private void handleFileDrop(ref Socket sock, string baseDir)
         {
             string fileName = null;
-
             StringCollection FileCollection = new StringCollection();
-
             byte[] buffer = null;
 
+
+            Console.WriteLine("Inizio ricezione di un file.");
+           
             // Ricezione della dimensione del file
             Console.WriteLine("Aspetto di ricevere dim del file...");
             try
@@ -163,7 +226,6 @@ namespace ProgettoPdS
             Int64 fileSize = BitConverter.ToInt64(buffer, 0);
 
             // Ricezione del nome del file
-            
             Console.WriteLine("Aspetto di ricevere nome del file...");
             try
             {
@@ -181,41 +243,109 @@ namespace ProgettoPdS
                 Console.WriteLine("(da nome file) ho ricevuto: " + recvbuf);
                 fileName = recvbuf.Substring(0, recvbuf.IndexOf(MyProtocol.END_OF_MESSAGE));
                 Console.WriteLine("Nome del file: " + fileName);
+
+                if (baseDir != null)
+                {
+                    fileName = baseDir + Path.DirectorySeparatorChar + fileName;
+                }
+                else
+                {
+                    fileName = MyProtocol.CLIPBOARD_DIR + Path.DirectorySeparatorChar + fileName;
+                }
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
                 return;
             }
-            
+
             Console.WriteLine("Inizio trasferimento file: " + fileName);
 
             receiveFile(ref sock, fileName, fileSize);
             Console.WriteLine("Fine trasferimento file: " + fileName);
-
-            #region prova clipboard
-            //prova clipboard
-            List<string> paths = new List<string>();
-
-            //Application.StartupPath + slash + fileName;
-            string path_completo = Path.GetFullPath(fileName);
-
-
-            if (File.Exists(path_completo))
-            {
-                MessageBox.Show("Esiste!");
-
-                paths.Add(path_completo);
-
-                Clipboard.Clear();
-                Clipboard.SetData(DataFormats.FileDrop, paths.ToArray());
-            }
-            else
-                MessageBox.Show("Non esiste!");
-            #endregion
-
-
         }
+
+        private void ReceiveSubDirectory(ref Socket sock, string basedir)
+        {
+            //byte[] msg;
+            string cmd = String.Empty;
+            //Int32 dirNameSize;
+            string dirName, newBaseDir, fileName;
+            
+            do
+            {
+                cmd = ReceiveTillTerminator(ref sock);
+
+                switch(cmd)
+                {
+                    case MyProtocol.FILE_SEND:
+                        try
+                        {
+                            sock.Send(Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK));
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e.Message);
+                            return;
+                        }
+                        handleFileDrop(ref sock, basedir);
+                        break;
+
+                    case MyProtocol.DIRE_SEND:
+                        // nome directory
+                        dirName = ReceiveTillTerminator(ref sock);
+                        dirName = System.IO.Path.GetInvalidFileNameChars().Aggregate(dirName, (current, c) => current.Replace(c.ToString(), string.Empty));
+                        newBaseDir = System.IO.Path.Combine(basedir, dirName);
+
+                        Directory.CreateDirectory(newBaseDir);
+
+                        Console.WriteLine("Nuova cartella: " + newBaseDir);
+
+                        ReceiveSubDirectory(ref sock, newBaseDir);
+                        break;
+
+                    case MyProtocol.END_OF_DIR:
+                        Console.WriteLine("End of directory. up of a level");
+                        break;
+
+                    default:
+                        Console.WriteLine("invalid message");
+                        throw new Exception("Invalid message received from server while trying to transfer directory content.");
+                }  
+            } while (cmd != MyProtocol.END_OF_DIR);        
+        }
+                  
+        public string ReceiveDirectory(ref Socket sock)
+        {
+            Int32 dirNameSize;
+            byte[] msg = null;
+            string basedir, myBaseDir;
+
+            // Ricevo il nome della directory
+            int bytesRec;
+            byte[] bytes = new byte[1];
+            string recvbuf = null;
+            do
+            {
+                bytesRec = sock.Receive(bytes);
+                recvbuf += Encoding.ASCII.GetString(bytes, 0, bytesRec);
+                //Console.WriteLine("recvbuf: " + recvbuf);
+            }
+            while (recvbuf.IndexOf(MyProtocol.END_OF_MESSAGE) == -1);
+            
+            basedir = recvbuf.Substring(0, recvbuf.IndexOf(MyProtocol.END_OF_MESSAGE));
+
+            Console.WriteLine("Ricevuto nome dir: " + basedir);
+
+            myBaseDir = Path.Combine(MyProtocol.CLIPBOARD_DIR, basedir);
+            DirectoryInfo di = Directory.CreateDirectory(myBaseDir);
+           
+
+            ReceiveSubDirectory(ref sock, myBaseDir);
+
+            return myBaseDir;
+        } 
+        #endregion
 
         public void Run()
         {
@@ -232,29 +362,24 @@ namespace ProgettoPdS
             //parte operativa
             while (true)
             {
+                Console.WriteLine(this.GetType().Name + " - in attesa di comandi dal client...");
 
-                int bytesRec;
-                byte[] bytes = new byte[1024];
-                string recvbuf = null;
-                do
-                {
-                    bytesRec = tcpChannel.Receive(bytes);
-                    recvbuf += Encoding.ASCII.GetString(bytes, 0, bytesRec);
-                    //Console.WriteLine("recvbuf: " + recvbuf);
-                }
-                while (recvbuf.IndexOf(MyProtocol.END_OF_MESSAGE) == -1);
-
-                Console.WriteLine("Ricevuto: " + recvbuf);
-
+                string recvbuf = ReceiveTillTerminator(ref tcpChannel);
                 string command = recvbuf.Substring(0, 4);
+                Console.WriteLine(this.GetType().Name + " - ricevuto comando: " + recvbuf);
 
                 switch (command)
                 {
+                    case MyProtocol.CLEAN:
+                        // Now, I'm starting to clean my clipboard folder as you told me.
+                        CleanClipboardDir(Path.GetFullPath(MyProtocol.CLIPBOARD_DIR));                    
+                        
+                        break;
                     case MyProtocol.COPY:
                         string content;
                         int len = recvbuf.Length - MyProtocol.END_OF_MESSAGE.Length - MyProtocol.COPY.Length; 
                         content = recvbuf.Substring(MyProtocol.COPY.Length,len);
-                        Console.WriteLine("Tentativo di scrittura su clipboard: " + content);
+                        //Console.WriteLine("Tentativo di scrittura su clipboard: " + content);
                         Clipboard.SetData(DataFormats.Text, content);
                         break;
                     case MyProtocol.RTF:
@@ -264,15 +389,31 @@ namespace ProgettoPdS
                         Clipboard.SetData(DataFormats.Rtf, content);
                         break;
                     case MyProtocol.FILE_SEND:
-                        Console.WriteLine("Ricevuta richiesta: " + MyProtocol.FILE_SEND);
-                        tcpChannel.Send(Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK));
+                        // Simulo un po' di ritardo di rete
+                        Thread.Sleep(1000);
+                        // Now send ack
+                        try
+                        {
+                            tcpChannel.Send(Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK));
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e.Message);
+                            return;
+                        }
 
-                        int lung = recvbuf.Length - MyProtocol.END_OF_MESSAGE.Length - MyProtocol.FILE_SEND.Length; 
-                        content = recvbuf.Substring(MyProtocol.FILE_SEND.Length, lung);
-                        handleFileDrop(ref tcpChannel);
-                        //Clipboard.SetData(DataFormats.FileDrop, content);
+                        handleFileDrop(ref tcpChannel, null);                       
+                        StartClipoardUpdaterThread(); 
                         break;
-           
+
+                    case MyProtocol.DIRE_SEND: 
+                        // Simulo un po' di ritardo di rete
+                        Thread.Sleep(1000);
+                        
+                        ReceiveDirectory(ref tcpChannel);
+                        StartClipoardUpdaterThread();                       
+                        break;
+
                     default:
                         MessageBox.Show("Comando da tastiera non riconosciuto");
                         break;
