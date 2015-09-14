@@ -351,6 +351,45 @@ namespace ProgettoPdS
           
         }
 
+
+        //Funzione per la conversione da bitmap obj a byte array
+        public static byte[] ConvertBitmapToByteArray(Image img)
+        {
+            ImageConverter converter = new ImageConverter();
+            return (byte[])converter.ConvertTo(img, typeof(byte[]));
+        }
+
+
+        public byte[] ReceiveData(ref Socket sock, int size)
+        {
+            int bytesRead = 0;
+            int offset = 0;
+            int count = size;
+            byte[] message = new byte[size];
+
+            do
+            {
+                try
+                {
+                    bytesRead = sock.Receive(message, offset, count, SocketFlags.None);
+                    //Console.WriteLine("I read: " + bytesRead + " byte");
+                }
+                catch (Exception e)
+                {
+                    throw e;
+                }
+
+                if (bytesRead == 0)
+                    throw new IOException();
+
+                count -= bytesRead;
+                offset += bytesRead;
+            } while (count != 0);
+
+            return message;
+        }
+
+
         void handleClipboardData()
         {
             try
@@ -375,11 +414,28 @@ namespace ProgettoPdS
                     clipbdChannel.Send(Encoding.ASCII.GetBytes(clipbdMsg));
                 }
 
-                else if (Clipboard.ContainsData(DataFormats.Rtf))
+
+                else if (Clipboard.ContainsData(DataFormats.Bitmap))
                 {
-                    clipbdMsg = MyProtocol.RTF + (string)iData.GetData(DataFormats.Rtf) + MyProtocol.END_OF_MESSAGE;
-                    clipbdChannel.Send(Encoding.ASCII.GetBytes(clipbdMsg));
+
+                    //invio comando bitmap + terminatore
+                    SendData(ref clipbdChannel, Encoding.ASCII.GetBytes(MyProtocol.IMG + MyProtocol.END_OF_MESSAGE), 0, Encoding.ASCII.GetBytes(MyProtocol.IMG + MyProtocol.END_OF_MESSAGE).Length);
+                    //attendo ack di ricezione
+                    ReceiveData(ref clipbdChannel, MyProtocol.POSITIVE_ACK.Length);
+                    //preparazione invio dati bitmap
+                    Image img = Clipboard.GetImage(); 
+                    //converto da bitmap obj a byte array
+                    byte[] res = ConvertBitmapToByteArray(img);
+                    //invio la dimensione dei dati
+                    Int32 dim = res.Length;
+                    SendData(ref clipbdChannel, BitConverter.GetBytes(dim), 0, sizeof(Int32));
+                    //attendo ack di ricezione
+                    ReceiveData(ref clipbdChannel, MyProtocol.POSITIVE_ACK.Length);
+                    //invio dati
+                    clipbdChannel.Send(res);
+ 
                 }
+
                 else if (Clipboard.ContainsData(DataFormats.FileDrop))
                 {
                     //Inizio operazioni di invio file
@@ -391,16 +447,16 @@ namespace ProgettoPdS
                         SendData(ref clipbdChannel, Encoding.ASCII.GetBytes(MyProtocol.CLEAN + MyProtocol.END_OF_MESSAGE), 0, Encoding.ASCII.GetBytes(MyProtocol.CLEAN + MyProtocol.END_OF_MESSAGE).Length);
                         Console.WriteLine("Clean!");
                         Console.WriteLine("preparazione invio file...");
-                                             
+
                     }
                     catch (Exception e)
                     {
                         MessageBox.Show(e.ToString());
                     }
-        
+
                     Console.WriteLine("Il client è pronto a ricevere il file.");
 
-                    IDataObject data = Clipboard.GetDataObject();    
+                    IDataObject data = Clipboard.GetDataObject();
                     clipContent = data.GetData(DataFormats.FileDrop);
                     path = (string[])clipContent;
                     n = path.Length;
@@ -411,7 +467,7 @@ namespace ProgettoPdS
                         {
                             try
                             {
-                               ClipboardSendFile(path[i]);
+                                ClipboardSendFile(path[i]);
                             }
                             catch (Exception e)
                             {
@@ -422,7 +478,7 @@ namespace ProgettoPdS
                         {
                             try
                             {
-                               ClipboardRecursiveDirectorySend(path[i]);                        
+                                ClipboardRecursiveDirectorySend(path[i]);
                             }
                             catch (Exception e)
                             {
@@ -436,7 +492,7 @@ namespace ProgettoPdS
                     }
 
                     Console.WriteLine("done.");
-                    
+
                 } 
             
             }
