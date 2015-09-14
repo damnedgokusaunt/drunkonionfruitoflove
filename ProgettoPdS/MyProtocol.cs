@@ -36,6 +36,8 @@ namespace ProgettoPdS
         public const string DIRE_SEND = "DIRE";
         public const string CLEAN = "CLEA";
 
+        public const string IMG = "IMAG";
+
         public const int DEFAULT_PORT = 5000;
         public const int CHUNK_SIZE = 1024; // 1 KB
 

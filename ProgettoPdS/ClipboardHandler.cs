@@ -60,7 +60,32 @@ namespace ProgettoPdS
         }
 
         #region Core methods
-        
+
+        public void SendData(ref Socket soc, byte[] buffer, int offset, int length)
+        {
+            NetworkStream clientStream;
+            clientStream = new NetworkStream(soc);
+
+            if (clientStream == null)
+            {
+                return;
+            }
+
+            try
+            {
+                clientStream.Write(buffer, offset, length);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("write exception " + e.Message);
+                clientStream.Close();
+                throw;
+            }
+
+            clientStream.Flush();
+
+        }
+
         public byte[] ReceiveData(ref Socket sock, int size)
         {
             int bytesRead = 0;
@@ -317,8 +342,8 @@ namespace ProgettoPdS
                   
         public string ReceiveDirectory(ref Socket sock)
         {
-            Int32 dirNameSize;
-            byte[] msg = null;
+            // Int32 dirNameSize;
+            // byte[] msg = null;
             string basedir, myBaseDir;
 
             // Ricevo il nome della directory
@@ -345,6 +370,19 @@ namespace ProgettoPdS
 
             return myBaseDir;
         } 
+        
+        #endregion
+
+        #region Bitmap methods
+
+        Bitmap ConvertByteArrayToBitmap(byte[] imageSource)
+        {
+            var imageConverter = new ImageConverter();
+            var image = (Image)imageConverter.ConvertFrom(imageSource);
+
+            return new Bitmap(image);
+        }
+
         #endregion
 
         public void Run()
@@ -412,6 +450,27 @@ namespace ProgettoPdS
                         
                         ReceiveDirectory(ref tcpChannel);
                         StartClipoardUpdaterThread();                       
+                        break;
+
+                    case MyProtocol.IMG:
+
+                        SendData(ref tcpChannel, Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), 0, MyProtocol.POSITIVE_ACK.Length);
+
+                        byte[] length = ReceiveData(ref tcpChannel, sizeof(Int32));
+
+                        /*
+                        if (BitConverter.IsLittleEndian)
+                            Array.Reverse(length);*/
+
+                        Int32 length_int32 = BitConverter.ToInt32(length, 0);
+
+                        SendData(ref tcpChannel, Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), 0, MyProtocol.POSITIVE_ACK.Length);
+
+                        byte[] imageSource = ReceiveData(ref tcpChannel, length_int32);
+
+                        Image image = ConvertByteArrayToBitmap(imageSource);
+                        Clipboard.SetImage(image);
+
                         break;
 
                     default:
