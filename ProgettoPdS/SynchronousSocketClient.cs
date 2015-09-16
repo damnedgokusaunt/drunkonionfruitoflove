@@ -10,7 +10,7 @@ using System.Windows.Forms;
 
 //TODO: sistemare id (per ora è messo a 0) nelle entrystatusupdate
 
-namespace ProgettoPdS
+namespace MyProject
 {
     public class SynchronousSocketClient
     {

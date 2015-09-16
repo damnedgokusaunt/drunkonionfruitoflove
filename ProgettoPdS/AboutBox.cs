@@ -10,7 +10,7 @@ using System.Text;
 using System.Reflection;
 
 
-namespace ProgettoPdS
+namespace MyProject
 {
 	partial class AboutBox : Form
 	{

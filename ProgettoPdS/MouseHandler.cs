@@ -12,7 +12,7 @@ using System.Windows.Input;
 using System.Windows.Forms;
 using System.Drawing;
 
-namespace ProgettoPdS
+namespace MyProject
 {
     class MouseHandler
     {

@@ -15,7 +15,7 @@ using System.Runtime.InteropServices;
 
 using System.Threading;
 
-namespace ProgettoPdS
+namespace MyProject
 {
     public class SynchronousSocketListener
     {

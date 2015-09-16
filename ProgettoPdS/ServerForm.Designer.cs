@@ -1,10 +1,10 @@
-﻿using ProgettoPdS.Properties;
+﻿using MyProject.Properties;
 using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Windows.Forms;
 
-namespace ProgettoPdS
+namespace MyProject
 {
     partial class ServerForm
     {
@@ -108,8 +108,8 @@ namespace ProgettoPdS
             // notifyIcon1
             // 
             this.notifyIcon1.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Info;
-            this.notifyIcon1.Icon = global::ProgettoPdS.Properties.Resources.SystemTrayApp;
-            this.notifyIcon1.Text = "Viola-Costanzo PdS Project";
+            this.notifyIcon1.Icon = global::MyProject.Properties.Resources.SystemTrayApp;
+            this.notifyIcon1.Text = "Project";
             this.notifyIcon1.Visible = true;
             this.notifyIcon1.ContextMenuStrip = this.menu;
             
@@ -123,7 +123,7 @@ namespace ProgettoPdS
             //
             // item1
             // 
-            this.item.Image = global::ProgettoPdS.Properties.Resources.Explorer;
+            this.item.Image = global::MyProject.Properties.Resources.Explorer;
             this.item.Name = "item1";
             this.item.Size = new System.Drawing.Size(191, 22);
             this.item.Text = "Vai alle info del server!";
@@ -131,7 +131,7 @@ namespace ProgettoPdS
             // 
             // item2
             // 
-            this.item.Image = global::ProgettoPdS.Properties.Resources.About;
+            this.item.Image = global::MyProject.Properties.Resources.About;
             this.item.Name = "item2";
             this.item.Size = new System.Drawing.Size(191, 22);
             this.item.Text = "About";
@@ -144,7 +144,7 @@ namespace ProgettoPdS
             // 
             // item3
             // 
-            this.item.Image = global::ProgettoPdS.Properties.Resources.Exit;
+            this.item.Image = global::MyProject.Properties.Resources.Exit;
             this.item.Name = "item3";
             this.item.Size = new System.Drawing.Size(191, 22);
             this.item.Text = "Exit";
@@ -185,7 +185,7 @@ namespace ProgettoPdS
             this.Controls.Add(this.portBox);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "ServerForm";
-            this.Text = "Progetto PDS";
+            this.Text = "Progetto";
             this.Load += new System.EventHandler(this.Start_Form_Load);
             this.Resize += new System.EventHandler(this.TrayMinimizerForm_Resize);
             this.ResumeLayout(false);

@@ -16,7 +16,7 @@ using System.Collections;
 
 
 
-namespace ProgettoPdS
+namespace MyProject
 {
     public partial class ServerForm : Form
     {

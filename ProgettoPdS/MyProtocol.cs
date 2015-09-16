@@ -9,7 +9,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ProgettoPdS
+namespace MyProject
 {
     static class MyProtocol
     {

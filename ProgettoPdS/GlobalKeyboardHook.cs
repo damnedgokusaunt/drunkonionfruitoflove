@@ -4,7 +4,7 @@ using System.Text;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
-namespace ProgettoPdS {
+namespace MyProject {
 	/// <summary>
 	/// A class that manages a global low level keyboard hook
 	/// </summary>

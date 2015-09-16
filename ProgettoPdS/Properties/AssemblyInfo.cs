@@ -16,11 +16,11 @@ using System.Threading.Tasks;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("ProgettoPdS")]
+[assembly: AssemblyTitle("MyProject")]
 [assembly: AssemblyDescription("Client-server")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("ProgettoPdS")]
+[assembly: AssemblyProduct("MyProjec")]
 [assembly: AssemblyCopyright("Copyright © 2011. All Rights reserved.")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]

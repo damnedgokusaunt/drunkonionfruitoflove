@@ -14,7 +14,7 @@ using System.Windows.Forms;
 using System.Runtime.InteropServices;
 
 
-namespace ProgettoPdS
+namespace MyProject
 {
 
     public partial class MainForm : Form

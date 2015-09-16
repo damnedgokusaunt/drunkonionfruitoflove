@@ -15,7 +15,7 @@ using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.IO;
 
-namespace ProgettoPdS
+namespace MyProject
 {
      
     public partial class ControlForm : Form

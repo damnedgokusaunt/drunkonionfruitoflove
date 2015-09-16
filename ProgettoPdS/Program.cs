@@ -7,11 +7,8 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Text;
-//usinProgettoMalnatidS.Properties;
-using ProgettoMalnati;
-using ProgettoMalnati.Properties;
 
-namespace ProgettoPdS
+namespace MyProject
 {
     static class Program
     {

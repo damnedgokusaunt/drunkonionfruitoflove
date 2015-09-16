@@ -16,7 +16,7 @@ using System.IO;
 using System.Collections.Specialized;
 using System.Threading;
 
-namespace ProgettoPdS
+namespace MyProject
 {
     class ClipboardHandler
     {

@@ -1,4 +1,4 @@
-﻿namespace ProgettoPdS
+﻿namespace MyProject
 {
     partial class ControlForm
     {
