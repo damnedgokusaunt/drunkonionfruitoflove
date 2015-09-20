@@ -16,7 +16,7 @@ using System.Collections;
 using System.Net.NetworkInformation;
 
 
-namespace ProgettoPdS
+namespace MyProject
 {
     public partial class ServerForm : Form
     {

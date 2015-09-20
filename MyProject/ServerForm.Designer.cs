@@ -1,10 +1,9 @@
-﻿using ProgettoPdS.Properties;
-using System;
+﻿using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Windows.Forms;
 
-namespace ProgettoPdS
+namespace MyProject
 {
     partial class ServerForm
     {
@@ -110,7 +109,7 @@ namespace ProgettoPdS
             // 
             this.notifyIcon1.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Info;
             this.notifyIcon1.ContextMenuStrip = this.menu;
-            this.notifyIcon1.Icon = global::ProgettoPdS.Properties.Resources.SystemTrayApp;
+            this.notifyIcon1.Icon = global::MyProject.Properties.Resources.SystemTrayApp;
             this.notifyIcon1.Text = "Viola-Costanzo PdS Project";
             this.notifyIcon1.Visible = true;
             // 
@@ -129,7 +128,7 @@ namespace ProgettoPdS
             // 
             // item
             // 
-            this.item.Image = global::ProgettoPdS.Properties.Resources.Exit;
+            this.item.Image = global::MyProject.Properties.Resources.Exit;
             this.item.Name = "item";
             this.item.Size = new System.Drawing.Size(92, 22);
             this.item.Text = "Exit";
