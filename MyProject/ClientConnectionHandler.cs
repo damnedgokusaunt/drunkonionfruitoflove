@@ -20,9 +20,10 @@ namespace MyProject
         private IPAddress ipAddress;
         private Int32 port;
         private string password;
-        private Socket handler, clipboard_channel;
+        private Socket handler;
 
         private UdpClient udp_channel;
+        public Socket clipbd_channel { get; set; }
 
         public ClientConnectionHandler(IPAddress ipAddress, Int32 port, string password)
         {
@@ -85,7 +86,7 @@ namespace MyProject
                     // Receive the UDP port of the server
                     bytes = Functions.ReceiveData(ref handler, sizeof(Int32));
                     Int32 udpRemotePort = BitConverter.ToInt32(bytes, 0);
-                    IPEndPoint udpLocalEP = new IPEndPoint(IPAddress.Any, port+1);
+                    IPEndPoint udpLocalEP = new IPEndPoint(IPAddress.Any, udpRemotePort);
                     Int32 udpLocalPort = udpLocalEP.Port;
                     udp_channel = new UdpClient(udpLocalEP);
                     udp_channel.Connect(new IPEndPoint(remoteEP.Address, udpRemotePort));
@@ -93,6 +94,14 @@ namespace MyProject
                     // Send the UDP port to the server
                     bytes = BitConverter.GetBytes(udpLocalPort);
                     Functions.SendData(ref handler, bytes, 0, sizeof(Int32));
+
+                    // Receive the TCP port of the server 
+                    bytes = Functions.ReceiveData(ref handler, sizeof(Int32));
+                    Int32 tcpRemotePort = BitConverter.ToInt32(bytes, 0);
+                    IPEndPoint tcpLocalEP = new IPEndPoint(IPAddress.Any, tcpRemotePort);
+                    Int32 tcpLocalPort = tcpLocalEP.Port;
+                    clipbd_channel = new Socket(AddressFamily.InterNetwork,SocketType.Stream,ProtocolType.Tcp);
+                    clipbd_channel.Connect(new IPEndPoint(remoteEP.Address, tcpRemotePort));
 
                     return true;
                 }          

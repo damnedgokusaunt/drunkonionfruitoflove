@@ -198,9 +198,6 @@ namespace MyProject
 
         }
 
-        
-
-
 
         private void chiudiToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -513,14 +510,17 @@ namespace MyProject
 
         private void button6_Click(object sender, EventArgs e)
         {
-            if (clipbdChannel == null)
+            if (target == null)
                 return;
-            Functions.handleClipboardData(ref clipbdChannel);
+            
+            Thread trd = new Thread(()=>Functions.handleClipboardData(target.clipbd_channel));
+            trd.SetApartmentState(ApartmentState.STA);
+            trd.Start();
+
+            //task per la handle
+            //Task.Factory.StartNew(() => Functions.handleClipboardData(target.clipbd_channel));
+       
         }
-
-
-
-
 
 
         private void label7_Click(object sender, EventArgs e)

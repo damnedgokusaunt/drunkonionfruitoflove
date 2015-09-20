@@ -146,8 +146,33 @@ namespace MyProject
         }
         #endregion
 
-        #region Clipboard methods
-        public static void SendFile(FileStream fs, Int64 fileSize)
+        public static void SendData(ref Socket soc, byte[] buffer, int offset, int length)
+        {
+            NetworkStream clientStream;
+            clientStream = new NetworkStream(soc);
+
+            if (clientStream == null)
+            {
+                return;
+            }
+
+            try
+            {
+                clientStream.Write(buffer, offset, length);
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("write exception " + e.Message);
+                clientStream.Close();
+                throw;
+            }
+
+            clientStream.Flush();
+
+        }
+
+        public static void SendFile(FileStream fs, Int64 fileSize, ref Socket clipbdChannel)
         {
             Int32 chunks, chunkSize;
             BinaryReader reader = new BinaryReader(fs);
@@ -186,7 +211,7 @@ namespace MyProject
             Console.WriteLine("The end!");
         }
 
-        public static void ClipboardSendFile(string name)
+        public static void ClipboardSendFile(string name, ref Socket clipbdChannel)
         {
             FileInfo f;
             FileStream fs;
@@ -214,13 +239,14 @@ namespace MyProject
             SendData(ref clipbdChannel, ASCIIEncoding.ASCII.GetBytes(fileName + MyProtocol.END_OF_MESSAGE), 0, ASCIIEncoding.ASCII.GetBytes(fileName + MyProtocol.END_OF_MESSAGE).Length);
             Console.WriteLine("Sto inviando il file: " + fileName);
 
-            SendFile(fs, fileSize);
+            SendFile(fs, fileSize, ref clipbdChannel);
             fs.Close();
 
             Console.WriteLine("Done.");
         }
 
-        public static void ClipboardRecursiveDirectorySend(string sDir)
+
+        public static void ClipboardRecursiveDirectorySend(string sDir, ref Socket clipbdChannel)
         {
             DirectoryInfo dInfo;
             string dirName;
@@ -243,17 +269,21 @@ namespace MyProject
 
             foreach (string f in Directory.GetFiles(sDir))
             {
-                ClipboardSendFile(f);
+                ClipboardSendFile(f, ref clipbdChannel);
             }
 
             foreach (string d in Directory.GetDirectories(sDir))
             {
-                ClipboardRecursiveDirectorySend(d);
+                ClipboardRecursiveDirectorySend(d, ref clipbdChannel);
             }
 
             SendData(ref clipbdChannel, ASCIIEncoding.ASCII.GetBytes(MyProtocol.END_OF_DIR + MyProtocol.END_OF_MESSAGE), 0, ASCIIEncoding.ASCII.GetBytes(MyProtocol.END_OF_DIR + MyProtocol.END_OF_MESSAGE).Length);
 
         }
+
+
+        //Funzioni per la gestione della clipboard per ControlForm e per ClipboardHandler
+
 
         public static void UpdateClipboard()
         {
@@ -297,6 +327,9 @@ namespace MyProject
             }
         }
 
+        //
+
+
         //Funzione per la conversione da bitmap obj a byte array
         public static byte[] ConvertBitmapToByteArray(Image img)
         {
@@ -304,7 +337,38 @@ namespace MyProject
             return (byte[])converter.ConvertTo(img, typeof(byte[]));
         }
 
-        public static void handleClipboardData(ref Socket clipbdChannel)
+
+        public static byte[] ReceiveData(ref Socket sock, int size)
+        {
+            int bytesRead = 0;
+            int offset = 0;
+            int count = size;
+            byte[] message = new byte[size];
+
+            do
+            {
+                try
+                {
+                    bytesRead = sock.Receive(message, offset, count, SocketFlags.None);
+                    //Console.WriteLine("I read: " + bytesRead + " byte");
+                }
+                catch (Exception e)
+                {
+                    throw e;
+                }
+
+                if (bytesRead == 0)
+                    throw new IOException();
+
+                count -= bytesRead;
+                offset += bytesRead;
+            } while (count != 0);
+
+            return message;
+        }
+
+
+        public static void handleClipboardData(Socket clipbdChannel)
         {
             try
             {
@@ -317,10 +381,10 @@ namespace MyProject
                 int n;
                 byte[] buffer;
 
-
+                
                 IDataObject iData = new DataObject();
                 iData = Clipboard.GetDataObject();
-
+                
 
                 if (Clipboard.ContainsData(DataFormats.Text))
                 {
@@ -331,7 +395,7 @@ namespace MyProject
 
                 else if (Clipboard.ContainsData(DataFormats.Bitmap))
                 {
-
+                    Console.WriteLine("Bitmap");
                     //invio comando bitmap + terminatore
                     SendData(ref clipbdChannel, Encoding.ASCII.GetBytes(MyProtocol.IMG + MyProtocol.END_OF_MESSAGE), 0, Encoding.ASCII.GetBytes(MyProtocol.IMG + MyProtocol.END_OF_MESSAGE).Length);
                     //attendo ack di ricezione
@@ -381,7 +445,7 @@ namespace MyProject
                         {
                             try
                             {
-                                ClipboardSendFile(path[i]);
+                                ClipboardSendFile(path[i], ref clipbdChannel);
                             }
                             catch (Exception e)
                             {
@@ -392,7 +456,7 @@ namespace MyProject
                         {
                             try
                             {
-                                ClipboardRecursiveDirectorySend(path[i]);
+                                ClipboardRecursiveDirectorySend(path[i], ref clipbdChannel);
                             }
                             catch (Exception e)
                             {
@@ -414,8 +478,29 @@ namespace MyProject
             {
                 MessageBox.Show(e.ToString());
                 SendData(ref clipbdChannel, Encoding.ASCII.GetBytes(MyProtocol.NEGATIVE_ACK + MyProtocol.END_OF_MESSAGE), 0, (MyProtocol.NEGATIVE_ACK + MyProtocol.END_OF_MESSAGE).Length);
-
+            
             }
+        }
+
+
+//PER CLIPBOARD HANDLER
+
+        public static string ReceiveTillTerminator(ref Socket sock)
+        {
+            int bytesRec;
+            byte[] bytes = new byte[1];
+            string recvbuf = null, cmd = null;
+            do
+            {
+                bytesRec = sock.Receive(bytes);
+                recvbuf += Encoding.ASCII.GetString(bytes, 0, bytesRec);
+                //Console.WriteLine("recvbuf: " + recvbuf);
+            }
+            while (recvbuf.IndexOf(MyProtocol.END_OF_MESSAGE) == -1);
+
+            cmd = recvbuf.Substring(0, recvbuf.IndexOf(MyProtocol.END_OF_MESSAGE));
+
+            return cmd;
         }
 
         public static void receiveFile(ref Socket sock, string fileName, Int64 fileSize)
@@ -632,6 +717,8 @@ namespace MyProject
             return myBaseDir;
         }
 
+
+
         public static Bitmap ConvertByteArrayToBitmap(byte[] imageSource)
         {
             var imageConverter = new ImageConverter();
@@ -640,81 +727,28 @@ namespace MyProject
             return new Bitmap(image);
         }
 
-        #endregion
 
-        public static void SendData(ref Socket soc, byte[] buffer, int offset, int length)
-        {
-            NetworkStream clientStream;
-            clientStream = new NetworkStream(soc);
 
-            if (clientStream == null)
-            {
-                return;
-            }
 
-            try
-            {
-                clientStream.Write(buffer, offset, length);
+        
 
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("write exception " + e.Message);
-                clientStream.Close();
-                throw;
-            }
 
-            clientStream.Flush();
 
-        }
 
-        public static byte[] ReceiveData(ref Socket sock, int size)
-        {
-            int bytesRead = 0;
-            int offset = 0;
-            int count = size;
-            byte[] message = new byte[size];
 
-            do
-            {
-                try
-                {
-                    bytesRead = sock.Receive(message, offset, count, SocketFlags.None);
-                    //Console.WriteLine("I read: " + bytesRead + " byte");
-                }
-                catch (Exception e)
-                {
-                    throw e;
-                }
 
-                if (bytesRead == 0)
-                    throw new IOException();
 
-                count -= bytesRead;
-                offset += bytesRead;
-            } while (count != 0);
 
-            return message;
-        }
 
-        //PER CLIPBOARD HANDLER
-        public static string ReceiveTillTerminator(ref Socket sock)
-        {
-            int bytesRec;
-            byte[] bytes = new byte[1];
-            string recvbuf = null, cmd = null;
-            do
-            {
-                bytesRec = sock.Receive(bytes);
-                recvbuf += Encoding.ASCII.GetString(bytes, 0, bytesRec);
-                //Console.WriteLine("recvbuf: " + recvbuf);
-            }
-            while (recvbuf.IndexOf(MyProtocol.END_OF_MESSAGE) == -1);
 
-            cmd = recvbuf.Substring(0, recvbuf.IndexOf(MyProtocol.END_OF_MESSAGE));
 
-            return cmd;
-        }
-     
+
+
+
+
+
+
+
+
     }
 }

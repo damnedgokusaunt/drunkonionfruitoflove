@@ -124,7 +124,7 @@ namespace MyProject
             this.serverAddrBox.Name = "serverAddrBox";
             this.serverAddrBox.Size = new System.Drawing.Size(100, 20);
             this.serverAddrBox.TabIndex = 24;
-            this.serverAddrBox.Text = "169.254.32.225";
+            this.serverAddrBox.Text = "169.254.18.100";
             // 
             // label1
             // 
@@ -293,7 +293,7 @@ namespace MyProject
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "MainForm";
-            this.Text = "Progetto MyProject";
+            this.Text = "MyProject";
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
