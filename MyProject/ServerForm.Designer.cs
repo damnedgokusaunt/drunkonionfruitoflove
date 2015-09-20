@@ -1,10 +1,10 @@
-﻿using MyProject.Properties;
+﻿using ProgettoPdS.Properties;
 using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Windows.Forms;
 
-namespace MyProject
+namespace ProgettoPdS
 {
     partial class ServerForm
     {
@@ -41,18 +41,18 @@ namespace MyProject
         {
             this.components = new System.ComponentModel.Container();
             this.label5 = new System.Windows.Forms.Label();
-            this.pwd2 = new System.Windows.Forms.TextBox();
-            this.button2 = new System.Windows.Forms.Button();
+            this.passwordBox = new System.Windows.Forms.TextBox();
+            this.startButton = new System.Windows.Forms.Button();
             this.portBox = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.button1 = new System.Windows.Forms.Button();
             this.notifyIcon1 = new System.Windows.Forms.NotifyIcon(this.components);
             this.menu = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.item = new System.Windows.Forms.ToolStripMenuItem();
             this.sep = new System.Windows.Forms.ToolStripSeparator();
-
-            this.comboBox1 = new System.Windows.Forms.ComboBox();
-            this.button3 = new System.Windows.Forms.Button();
+            this.item = new System.Windows.Forms.ToolStripMenuItem();
+            this.comboBox = new System.Windows.Forms.ComboBox();
+            this.quitButton = new System.Windows.Forms.Button();
+            this.menu.SuspendLayout();
             this.SuspendLayout();
             // 
             // label5
@@ -64,22 +64,23 @@ namespace MyProject
             this.label5.TabIndex = 21;
             this.label5.Text = "Password";
             // 
-            // pwd2
+            // passwordBox
             // 
-            this.pwd2.Location = new System.Drawing.Point(76, 163);
-            this.pwd2.Name = "pwd2";
-            this.pwd2.Size = new System.Drawing.Size(100, 20);
-            this.pwd2.TabIndex = 20;
+            this.passwordBox.Location = new System.Drawing.Point(76, 163);
+            this.passwordBox.Name = "passwordBox";
+            this.passwordBox.Size = new System.Drawing.Size(100, 20);
+            this.passwordBox.TabIndex = 20;
+            this.passwordBox.Text = "pass";
             // 
-            // button2
+            // startButton
             // 
-            this.button2.Location = new System.Drawing.Point(76, 206);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(60, 23);
-            this.button2.TabIndex = 19;
-            this.button2.Text = "Avvia";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
+            this.startButton.Location = new System.Drawing.Point(76, 206);
+            this.startButton.Name = "startButton";
+            this.startButton.Size = new System.Drawing.Size(60, 23);
+            this.startButton.TabIndex = 19;
+            this.startButton.Text = "Avvia";
+            this.startButton.UseVisualStyleBackColor = true;
+            this.startButton.Click += new System.EventHandler(this.startButton_Click);
             // 
             // portBox
             // 
@@ -87,7 +88,7 @@ namespace MyProject
             this.portBox.Name = "portBox";
             this.portBox.Size = new System.Drawing.Size(100, 20);
             this.portBox.TabIndex = 17;
-            this.portBox.TextChanged += new System.EventHandler(this.portBox_TextChanged);
+            this.portBox.Text = "3000";
             // 
             // label3
             // 
@@ -108,127 +109,87 @@ namespace MyProject
             // notifyIcon1
             // 
             this.notifyIcon1.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Info;
-            this.notifyIcon1.Icon = global::MyProject.Properties.Resources.SystemTrayApp;
-            this.notifyIcon1.Text = "Project";
-            this.notifyIcon1.Visible = true;
             this.notifyIcon1.ContextMenuStrip = this.menu;
-            
+            this.notifyIcon1.Icon = global::ProgettoPdS.Properties.Resources.SystemTrayApp;
+            this.notifyIcon1.Text = "Viola-Costanzo PdS Project";
+            this.notifyIcon1.Visible = true;
             // 
             // menu
             // 
+            this.menu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.sep,
+            this.item});
             this.menu.Name = "menu";
-            this.menu.Size = new System.Drawing.Size(61, 4);
-            this.menu.Visible = true;
-            
-            //
-            // item1
-            // 
-            this.item.Image = global::MyProject.Properties.Resources.Explorer;
-            this.item.Name = "item1";
-            this.item.Size = new System.Drawing.Size(191, 22);
-            this.item.Text = "Vai alle info del server!";
-            this.item.Click += new System.EventHandler(this.Explorer_Click);
-            // 
-            // item2
-            // 
-            this.item.Image = global::MyProject.Properties.Resources.About;
-            this.item.Name = "item2";
-            this.item.Size = new System.Drawing.Size(191, 22);
-            this.item.Text = "About";
-            this.item.Click += new System.EventHandler(this.About_Click);
+            this.menu.Size = new System.Drawing.Size(93, 32);
             // 
             // sep
             // 
             this.sep.Name = "sep";
-            this.sep.Size = new System.Drawing.Size(188, 6);
+            this.sep.Size = new System.Drawing.Size(89, 6);
             // 
-            // item3
+            // item
             // 
-            this.item.Image = global::MyProject.Properties.Resources.Exit;
-            this.item.Name = "item3";
-            this.item.Size = new System.Drawing.Size(191, 22);
+            this.item.Image = global::ProgettoPdS.Properties.Resources.Exit;
+            this.item.Name = "item";
+            this.item.Size = new System.Drawing.Size(92, 22);
             this.item.Text = "Exit";
             this.item.Click += new System.EventHandler(this.Exit_Click);
             // 
-            // comboBox1
+            // comboBox
             // 
-            this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Location = new System.Drawing.Point(76, 37);
-            this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(173, 21);
-            this.comboBox1.TabIndex = 22;
-            this.comboBox1.Text = "< Select an IP Address >";
-            this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
+            this.comboBox.FormattingEnabled = true;
+            this.comboBox.Location = new System.Drawing.Point(76, 37);
+            this.comboBox.Name = "comboBox";
+            this.comboBox.Size = new System.Drawing.Size(173, 21);
+            this.comboBox.TabIndex = 22;
+            this.comboBox.Text = "< Select an IP Address >";
+            this.comboBox.SelectedIndexChanged += new System.EventHandler(this.comboBox_SelectedIndexChanged);
             // 
-            // button3
+            // quitButton
             // 
-            this.button3.Enabled = false;
-            this.button3.Location = new System.Drawing.Point(142, 206);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(60, 23);
-            this.button3.TabIndex = 23;
-            this.button3.Text = "Termina";
-            this.button3.UseVisualStyleBackColor = true;
-            this.button3.Click += new System.EventHandler(this.button3_Click);
+            this.quitButton.Enabled = false;
+            this.quitButton.Location = new System.Drawing.Point(142, 206);
+            this.quitButton.Name = "quitButton";
+            this.quitButton.Size = new System.Drawing.Size(60, 23);
+            this.quitButton.TabIndex = 23;
+            this.quitButton.Text = "Termina";
+            this.quitButton.UseVisualStyleBackColor = true;
+            this.quitButton.Click += new System.EventHandler(this.quitButton_Click);
             // 
             // ServerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(284, 261);
-            this.Controls.Add(this.button3);
-            this.Controls.Add(this.comboBox1);
+            this.Controls.Add(this.quitButton);
+            this.Controls.Add(this.comboBox);
             this.Controls.Add(this.label5);
-            this.Controls.Add(this.pwd2);
-            this.Controls.Add(this.button2);
+            this.Controls.Add(this.passwordBox);
+            this.Controls.Add(this.startButton);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.portBox);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "ServerForm";
-            this.Text = "Progetto";
-            this.Load += new System.EventHandler(this.Start_Form_Load);
+            this.Text = "Progetto PDS";
+            this.Load += new System.EventHandler(this.ServerForm_Load);
             this.Resize += new System.EventHandler(this.TrayMinimizerForm_Resize);
+            this.menu.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
-
-            // Windows Explorer.
-            item = new ToolStripMenuItem();
-            item.Text = "Vai alle info del server!";
-            item.Click += new EventHandler(Explorer_Click);
-            item.Image = Resources.Explorer;
-            menu.Items.Add(item);
-
-            // About.
-            item = new ToolStripMenuItem();
-            item.Text = "About";
-            item.Click += new EventHandler(About_Click);
-            item.Image = Resources.About;
-            menu.Items.Add(item);
-
-            // Separator.
-            sep = new ToolStripSeparator();
-            menu.Items.Add(sep);
-
-            // Exit.
-            item = new ToolStripMenuItem();
-            item.Text = "Exit";
-            item.Click += new System.EventHandler(Exit_Click);
-            item.Image = Resources.Exit;
-            menu.Items.Add(item);
 
         }
 
         #endregion
 
         private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.TextBox pwd2;
-        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.TextBox passwordBox;
+        private System.Windows.Forms.Button startButton;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox portBox;
         private Button button1;
         private ContextMenuStrip menu;
-        private ComboBox comboBox1;
-        private Button button3;
+        private ComboBox comboBox;
+        private Button quitButton;
         private NotifyIcon notifyIcon1;
         private ToolStripMenuItem item;
         private ToolStripSeparator sep;

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 
-namespace MyProject
+namespace ProgettoPdS
 {
     partial class MainForm
     {
@@ -32,14 +32,7 @@ namespace MyProject
         private void InitializeComponent()
         {
             this.portBox = new System.Windows.Forms.TextBox();
-            this.label3 = new System.Windows.Forms.Label();
-            this.button2 = new System.Windows.Forms.Button();
-            this.label5 = new System.Windows.Forms.Label();
-            this.pwd2 = new System.Windows.Forms.TextBox();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
-            this.dsfdsdsdfToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.nuovoServerToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.chiudiToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.listView = new System.Windows.Forms.ListView();
             this.label4 = new System.Windows.Forms.Label();
             this.pwd1 = new System.Windows.Forms.TextBox();
@@ -48,87 +41,34 @@ namespace MyProject
             this.serverAddrBox = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.startClientButton = new System.Windows.Forms.Button();
-            this.StopButton = new System.Windows.Forms.Button();
-            this.button1 = new System.Windows.Forms.Button();
-            this.menuStrip1.SuspendLayout();
+            this.DisconnectButton = new System.Windows.Forms.Button();
+            this.label3 = new System.Windows.Forms.Label();
+            this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.label5 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
+            this.comboBox2 = new System.Windows.Forms.ComboBox();
+            this.label7 = new System.Windows.Forms.Label();
+            this.label8 = new System.Windows.Forms.Label();
+            this.button2 = new System.Windows.Forms.Button();
+            this.button4 = new System.Windows.Forms.Button();
+            this.button5 = new System.Windows.Forms.Button();
+            this.button6 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // portBox
             // 
-            this.portBox.Location = new System.Drawing.Point(365, 202);
+            this.portBox.Location = new System.Drawing.Point(452, 188);
             this.portBox.Name = "portBox";
-            this.portBox.Size = new System.Drawing.Size(100, 20);
+            this.portBox.Size = new System.Drawing.Size(110, 20);
             this.portBox.TabIndex = 10;
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(474, 205);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(64, 13);
-            this.label3.TabIndex = 11;
-            this.label3.Text = "Porta server";
-            this.label3.Click += new System.EventHandler(this.label3_Click);
-            // 
-            // button2
-            // 
-            this.button2.Location = new System.Drawing.Point(365, 254);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(100, 23);
-            this.button2.TabIndex = 12;
-            this.button2.Text = "Avvia server";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(474, 231);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(53, 13);
-            this.label5.TabIndex = 16;
-            this.label5.Text = "Password";
-            // 
-            // pwd2
-            // 
-            this.pwd2.Location = new System.Drawing.Point(365, 228);
-            this.pwd2.Name = "pwd2";
-            this.pwd2.Size = new System.Drawing.Size(100, 20);
-            this.pwd2.TabIndex = 15;
             // 
             // menuStrip1
             // 
-            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.dsfdsdsdfToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(573, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(644, 24);
             this.menuStrip1.TabIndex = 17;
             this.menuStrip1.Text = "menuStrip1";
-            // 
-            // dsfdsdsdfToolStripMenuItem
-            // 
-            this.dsfdsdsdfToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.nuovoServerToolStripMenuItem,
-            this.chiudiToolStripMenuItem});
-            this.dsfdsdsdfToolStripMenuItem.Name = "dsfdsdsdfToolStripMenuItem";
-            this.dsfdsdsdfToolStripMenuItem.Size = new System.Drawing.Size(87, 20);
-            this.dsfdsdsdfToolStripMenuItem.Text = "Impostazioni";
-            this.dsfdsdsdfToolStripMenuItem.Click += new System.EventHandler(this.dsfdsdsdfToolStripMenuItem_Click);
-            // 
-            // nuovoServerToolStripMenuItem
-            // 
-            this.nuovoServerToolStripMenuItem.Name = "nuovoServerToolStripMenuItem";
-            this.nuovoServerToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
-            this.nuovoServerToolStripMenuItem.Text = "Nuovo server";
-            this.nuovoServerToolStripMenuItem.Click += new System.EventHandler(this.nuovoServerToolStripMenuItem_Click);
-            // 
-            // chiudiToolStripMenuItem
-            // 
-            this.chiudiToolStripMenuItem.Name = "chiudiToolStripMenuItem";
-            this.chiudiToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
-            this.chiudiToolStripMenuItem.Text = "Chiudi";
-            this.chiudiToolStripMenuItem.Click += new System.EventHandler(this.chiudiToolStripMenuItem_Click);
             // 
             // listView
             // 
@@ -143,8 +83,6 @@ namespace MyProject
             this.listView.TabIndex = 18;
             this.listView.UseCompatibleStateImageBehavior = false;
             this.listView.View = System.Windows.Forms.View.Details;
-            this.listView.SelectedIndexChanged += new System.EventHandler(this.listView1_SelectedIndexChanged);
-            this.listView.DoubleClick += new System.EventHandler(this.item_DoubleClick);
             // 
             // label4
             // 
@@ -161,6 +99,7 @@ namespace MyProject
             this.pwd1.Name = "pwd1";
             this.pwd1.Size = new System.Drawing.Size(100, 20);
             this.pwd1.TabIndex = 27;
+            this.pwd1.Text = "pass";
             // 
             // label2
             // 
@@ -177,6 +116,7 @@ namespace MyProject
             this.serverPortBox.Name = "serverPortBox";
             this.serverPortBox.Size = new System.Drawing.Size(100, 20);
             this.serverPortBox.TabIndex = 25;
+            this.serverPortBox.Text = "3000";
             // 
             // serverAddrBox
             // 
@@ -184,6 +124,7 @@ namespace MyProject
             this.serverAddrBox.Name = "serverAddrBox";
             this.serverAddrBox.Size = new System.Drawing.Size(100, 20);
             this.serverAddrBox.TabIndex = 24;
+            this.serverAddrBox.Text = "169.254.32.225";
             // 
             // label1
             // 
@@ -196,41 +137,150 @@ namespace MyProject
             // 
             // startClientButton
             // 
-            this.startClientButton.Location = new System.Drawing.Point(333, 143);
+            this.startClientButton.Location = new System.Drawing.Point(462, 143);
             this.startClientButton.Name = "startClientButton";
-            this.startClientButton.Size = new System.Drawing.Size(98, 23);
+            this.startClientButton.Size = new System.Drawing.Size(100, 23);
             this.startClientButton.TabIndex = 22;
             this.startClientButton.Text = "Connetti";
             this.startClientButton.UseVisualStyleBackColor = true;
             this.startClientButton.Click += new System.EventHandler(this.startClientButton_Click);
             // 
-            // StopButton
+            // DisconnectButton
             // 
-            this.StopButton.Location = new System.Drawing.Point(462, 143);
-            this.StopButton.Name = "StopButton";
-            this.StopButton.Size = new System.Drawing.Size(100, 23);
-            this.StopButton.TabIndex = 29;
-            this.StopButton.Text = "Stop";
-            this.StopButton.UseVisualStyleBackColor = true;
-            this.StopButton.Click += new System.EventHandler(this.button1_Click);
+            this.DisconnectButton.Location = new System.Drawing.Point(13, 185);
+            this.DisconnectButton.Name = "DisconnectButton";
+            this.DisconnectButton.Size = new System.Drawing.Size(123, 23);
+            this.DisconnectButton.TabIndex = 31;
+            this.DisconnectButton.Text = "Chiudi server";
+            this.DisconnectButton.UseVisualStyleBackColor = true;
+            this.DisconnectButton.Click += new System.EventHandler(this.DisconnectButton_Click);
             // 
-            // button1
+            // label3
             // 
-            this.button1.Location = new System.Drawing.Point(106, 182);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(123, 23);
-            this.button1.TabIndex = 30;
-            this.button1.Text = "Seleziona server";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click_1);
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(12, 259);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(86, 13);
+            this.label3.TabIndex = 35;
+            this.label3.Text = "Choose CTRL + ";
+            this.label3.Click += new System.EventHandler(this.label3_Click);
             // 
-            // Form1
+            // comboBox1
+            // 
+            this.comboBox1.AllowDrop = true;
+            this.comboBox1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox1.FormattingEnabled = true;
+            this.comboBox1.Location = new System.Drawing.Point(102, 256);
+            this.comboBox1.Name = "comboBox1";
+            this.comboBox1.Size = new System.Drawing.Size(121, 21);
+            this.comboBox1.TabIndex = 36;
+            this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(229, 259);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(88, 13);
+            this.label5.TabIndex = 37;
+            this.label5.Text = "to select a server";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(12, 301);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(86, 13);
+            this.label6.TabIndex = 38;
+            this.label6.Text = "Choose CTRL + ";
+            // 
+            // comboBox2
+            // 
+            this.comboBox2.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox2.FormattingEnabled = true;
+            this.comboBox2.Location = new System.Drawing.Point(102, 298);
+            this.comboBox2.Name = "comboBox2";
+            this.comboBox2.Size = new System.Drawing.Size(121, 21);
+            this.comboBox2.TabIndex = 39;
+            this.comboBox2.SelectedIndexChanged += new System.EventHandler(this.comboBox2_SelectedIndexChanged);
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(231, 301);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(124, 13);
+            this.label7.TabIndex = 40;
+            this.label7.Text = "to suspend a connection";
+            this.label7.Click += new System.EventHandler(this.label7_Click);
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(134, 240);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(51, 13);
+            this.label8.TabIndex = 41;
+            this.label8.Text = "HOTKEY";
+            this.label8.Click += new System.EventHandler(this.label8_Click);
+            // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(333, 254);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(35, 23);
+            this.button2.TabIndex = 42;
+            this.button2.Text = "Ok";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
+            // 
+            // button4
+            // 
+            this.button4.Location = new System.Drawing.Point(361, 296);
+            this.button4.Name = "button4";
+            this.button4.Size = new System.Drawing.Size(35, 23);
+            this.button4.TabIndex = 43;
+            this.button4.Text = "Ok";
+            this.button4.UseVisualStyleBackColor = true;
+            this.button4.Click += new System.EventHandler(this.button4_Click);
+            // 
+            // button5
+            // 
+            this.button5.Location = new System.Drawing.Point(420, 263);
+            this.button5.Name = "button5";
+            this.button5.Size = new System.Drawing.Size(105, 68);
+            this.button5.TabIndex = 44;
+            this.button5.Text = "Importa appunti (server->client)";
+            this.button5.UseVisualStyleBackColor = true;
+            this.button5.Click += new System.EventHandler(this.button5_Click);
+            // 
+            // button6
+            // 
+            this.button6.Location = new System.Drawing.Point(531, 262);
+            this.button6.Name = "button6";
+            this.button6.Size = new System.Drawing.Size(102, 71);
+            this.button6.TabIndex = 45;
+            this.button6.Text = "Esporta appunti (client->server)";
+            this.button6.UseVisualStyleBackColor = true;
+            this.button6.Click += new System.EventHandler(this.button6_Click);
+            // 
+            // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(573, 309);
-            this.Controls.Add(this.button1);
-            this.Controls.Add(this.StopButton);
+            this.ClientSize = new System.Drawing.Size(644, 342);
+            this.Controls.Add(this.button6);
+            this.Controls.Add(this.button5);
+            this.Controls.Add(this.button4);
+            this.Controls.Add(this.button2);
+            this.Controls.Add(this.label8);
+            this.Controls.Add(this.label7);
+            this.Controls.Add(this.comboBox2);
+            this.Controls.Add(this.label6);
+            this.Controls.Add(this.label5);
+            this.Controls.Add(this.comboBox1);
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.DisconnectButton);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.pwd1);
             this.Controls.Add(this.label2);
@@ -239,18 +289,12 @@ namespace MyProject
             this.Controls.Add(this.label1);
             this.Controls.Add(this.startClientButton);
             this.Controls.Add(this.listView);
-            this.Controls.Add(this.label5);
-            this.Controls.Add(this.pwd2);
-            this.Controls.Add(this.button2);
-            this.Controls.Add(this.label3);
             this.Controls.Add(this.portBox);
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
-            this.Name = "Form1";
-            this.Text = "Progetto";
-            this.Load += new System.EventHandler(this.Form1_Load);
-            this.menuStrip1.ResumeLayout(false);
-            this.menuStrip1.PerformLayout();
+            this.Name = "MainForm";
+            this.Text = "Progetto PDS";
+            this.Load += new System.EventHandler(this.MainForm_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -259,14 +303,7 @@ namespace MyProject
         #endregion
 
         private System.Windows.Forms.TextBox portBox;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Button button2;
-        private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.TextBox pwd2;
         private System.Windows.Forms.MenuStrip menuStrip1;
-        private System.Windows.Forms.ToolStripMenuItem dsfdsdsdfToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem nuovoServerToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem chiudiToolStripMenuItem;
         private System.Windows.Forms.ListView listView;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.TextBox pwd1;
@@ -275,8 +312,18 @@ namespace MyProject
         private System.Windows.Forms.TextBox serverAddrBox;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button startClientButton;
-        private Button StopButton;
-        private Button button1;
+        private Button DisconnectButton;
+        private Label label3;
+        private ComboBox comboBox1;
+        private Label label5;
+        private Label label6;
+        private ComboBox comboBox2;
+        private Label label7;
+        private Label label8;
+        private Button button2;
+        private Button button4;
+        private Button button5;
+        private Button button6;
     }
 }
 

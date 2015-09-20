@@ -7,8 +7,11 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Text;
+//usinProgettoMalnatidS.Properties;
+using ProgettoMalnati;
+using ProgettoMalnati.Properties;
 
-namespace MyProject
+namespace ProgettoPdS
 {
     static class Program
     {
@@ -16,12 +19,13 @@ namespace MyProject
         /// Punto di ingresso principale dell'applicazione.
         /// </summary>
         /// 
+
         [STAThread]
         static void Main()
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new ServerForm());            
+            Application.Run(new ServerForm());
         }
         
 
