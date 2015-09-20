@@ -14,9 +14,10 @@ using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using System.Collections;
 using System.Net.NetworkInformation;
+using MyProject;
 
 
-namespace ProgettoPdS
+namespace MyProject
 {
     public partial class ServerForm : Form
     {

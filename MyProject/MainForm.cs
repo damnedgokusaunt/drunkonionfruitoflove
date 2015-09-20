@@ -16,7 +16,7 @@ using System.Diagnostics;
 using System.ComponentModel;
 
 
-namespace ProgettoPdS
+namespace MyProject
 {
     public partial class MainForm : Form
     {

@@ -19,7 +19,7 @@ using System.Security.Cryptography;
 using System.Diagnostics;
 
 
-namespace ProgettoPdS
+namespace MyProject
 {
     static class Functions
     {

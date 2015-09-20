@@ -1,10 +1,10 @@
-﻿using ProgettoPdS.Properties;
+﻿using MyProject.Properties;
 using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Windows.Forms;
 
-namespace ProgettoPdS
+namespace MyProject
 {
     partial class ServerForm
     {
@@ -110,8 +110,8 @@ namespace ProgettoPdS
             // 
             this.notifyIcon1.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Info;
             this.notifyIcon1.ContextMenuStrip = this.menu;
-            this.notifyIcon1.Icon = global::ProgettoPdS.Properties.Resources.SystemTrayApp;
-            this.notifyIcon1.Text = "Viola-Costanzo PdS Project";
+            this.notifyIcon1.Icon = global::MyProject.Properties.Resources.SystemTrayApp;
+            this.notifyIcon1.Text = "Project";
             this.notifyIcon1.Visible = true;
             // 
             // menu
@@ -129,7 +129,7 @@ namespace ProgettoPdS
             // 
             // item
             // 
-            this.item.Image = global::ProgettoPdS.Properties.Resources.Exit;
+            this.item.Image = global::MyProject.Properties.Resources.Exit;
             this.item.Name = "item";
             this.item.Size = new System.Drawing.Size(92, 22);
             this.item.Text = "Exit";
@@ -170,7 +170,7 @@ namespace ProgettoPdS
             this.Controls.Add(this.portBox);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "ServerForm";
-            this.Text = "Progetto PDS";
+            this.Text = "Progetto MyProject";
             this.Load += new System.EventHandler(this.ServerForm_Load);
             this.Resize += new System.EventHandler(this.TrayMinimizerForm_Resize);
             this.menu.ResumeLayout(false);

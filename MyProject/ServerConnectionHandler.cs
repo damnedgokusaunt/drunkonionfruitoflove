@@ -16,7 +16,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.IO;
 
-namespace ProgettoPdS
+namespace MyProject
 {
     public class ServerConnectionHandler
     {

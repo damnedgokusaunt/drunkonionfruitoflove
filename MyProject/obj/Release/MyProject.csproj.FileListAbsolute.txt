@@ -3,9 +3,9 @@ C:\Users\Alessio\Documents\GitHub\drunkonionfruitoflove\MyProject\bin\Release\My
 C:\Users\Alessio\Documents\GitHub\drunkonionfruitoflove\MyProject\bin\Release\MyProject.pdb
 C:\Users\Alessio\Documents\GitHub\drunkonionfruitoflove\MyProject\obj\Release\MyProject.AboutBox.resources
 C:\Users\Alessio\Documents\GitHub\drunkonionfruitoflove\MyProject\obj\Release\MyProject.MainForm.resources
-C:\Users\Alessio\Documents\GitHub\drunkonionfruitoflove\MyProject\obj\Release\MyProject.ControlForm.resources
 C:\Users\Alessio\Documents\GitHub\drunkonionfruitoflove\MyProject\obj\Release\MyProject.Properties.Resources.resources
 C:\Users\Alessio\Documents\GitHub\drunkonionfruitoflove\MyProject\obj\Release\MyProject.ServerForm.resources
 C:\Users\Alessio\Documents\GitHub\drunkonionfruitoflove\MyProject\obj\Release\MyProject.csproj.GenerateResource.Cache
 C:\Users\Alessio\Documents\GitHub\drunkonionfruitoflove\MyProject\obj\Release\MyProject.exe
 C:\Users\Alessio\Documents\GitHub\drunkonionfruitoflove\MyProject\obj\Release\MyProject.pdb
+C:\Users\Alessio\Documents\GitHub\drunkonionfruitoflove\MyProject\obj\Release\MyProject.csprojResolveAssemblyReference.cache

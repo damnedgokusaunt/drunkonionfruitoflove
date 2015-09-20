@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 
-namespace ProgettoPdS
+namespace MyProject
 {
     partial class MainForm
     {
@@ -293,7 +293,7 @@ namespace ProgettoPdS
             this.Controls.Add(this.menuStrip1);
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "MainForm";
-            this.Text = "Progetto PDS";
+            this.Text = "Progetto MyProject";
             this.Load += new System.EventHandler(this.MainForm_Load);
             this.ResumeLayout(false);
             this.PerformLayout();
