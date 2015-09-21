@@ -20,12 +20,9 @@ namespace MyProject
 {
     public partial class ServerForm : Form
     {
-       //public delegate void Del();
         bool isAboutLoaded = false;
         private ServerConnectionHandler listener;
-     //   private ControlForm ctrl;
         private IPAddress addr;
-
         private Thread consumer_tcp, consumer_udp, clipboard_worker;
 
         /// <summary>
@@ -46,15 +43,23 @@ namespace MyProject
             this.comboBox.Text = en.Current.ToString();
         }
 
+        private void comboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            addr = IPAddress.Parse(comboBox.Text);
+
+            Console.WriteLine("IP Address: " + addr);
+        }
+
         public ServerForm()
         {
             InitializeComponent();
 
-            
-            // Populate comboBox
             PopulateIPAddressList();
+
+            portBox.Text = Convert.ToString(Functions.FindFreePort());
         }
 
+        
         // To minimaze inside the tray area
         private void TrayMinimizerForm_Resize(object sender, EventArgs e)
         {
@@ -75,12 +80,7 @@ namespace MyProject
 
         }
 
-        private void comboBox_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            addr = IPAddress.Parse(comboBox.Text);
-
-            Console.WriteLine("IP Address: " + addr);
-        }
+    
 
         private void startButton_Click(object sender, EventArgs e)
         {
@@ -142,15 +142,7 @@ namespace MyProject
 
         private void quitButton_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("@ale: non ho ancora implementato questa funzione.");
-
-            /*
-            this.comboBox1.Enabled = true;
-            this.portBox.Enabled = true;
-            this.pwd2.Enabled = true;
-            this.button3.Enabled = false;
-            this.startButton.Enabled = true;
-             * */
+            throw new NotImplementedException();
         }
        
         /// <summary>
@@ -195,6 +187,11 @@ namespace MyProject
             if (!NetworkInterface.GetIsNetworkAvailable())
                 MessageBox.Show("Affinchè l'applicazione funzioni correttamente è necessario che il PC sia connesso ad una rete LAN.");
 
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            portBox.Text = Convert.ToString(Functions.FindFreePort());
         }
 
     }

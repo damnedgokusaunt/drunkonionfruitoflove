@@ -51,13 +51,15 @@ namespace MyProject
             this.item = new System.Windows.Forms.ToolStripMenuItem();
             this.comboBox = new System.Windows.Forms.ComboBox();
             this.quitButton = new System.Windows.Forms.Button();
+            this.button2 = new System.Windows.Forms.Button();
+            this.label1 = new System.Windows.Forms.Label();
             this.menu.SuspendLayout();
             this.SuspendLayout();
             // 
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(103, 147);
+            this.label5.Location = new System.Drawing.Point(29, 140);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(53, 13);
             this.label5.TabIndex = 21;
@@ -65,7 +67,7 @@ namespace MyProject
             // 
             // passwordBox
             // 
-            this.passwordBox.Location = new System.Drawing.Point(76, 163);
+            this.passwordBox.Location = new System.Drawing.Point(168, 137);
             this.passwordBox.Name = "passwordBox";
             this.passwordBox.Size = new System.Drawing.Size(100, 20);
             this.passwordBox.TabIndex = 20;
@@ -73,7 +75,7 @@ namespace MyProject
             // 
             // startButton
             // 
-            this.startButton.Location = new System.Drawing.Point(76, 206);
+            this.startButton.Location = new System.Drawing.Point(32, 206);
             this.startButton.Name = "startButton";
             this.startButton.Size = new System.Drawing.Size(60, 23);
             this.startButton.TabIndex = 19;
@@ -83,8 +85,10 @@ namespace MyProject
             // 
             // portBox
             // 
-            this.portBox.Location = new System.Drawing.Point(76, 112);
+            this.portBox.BackColor = System.Drawing.SystemColors.Window;
+            this.portBox.Location = new System.Drawing.Point(168, 93);
             this.portBox.Name = "portBox";
+            this.portBox.ReadOnly = true;
             this.portBox.Size = new System.Drawing.Size(100, 20);
             this.portBox.TabIndex = 17;
             this.portBox.Text = "3000";
@@ -92,11 +96,11 @@ namespace MyProject
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(103, 96);
+            this.label3.Location = new System.Drawing.Point(29, 96);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(64, 13);
+            this.label3.Size = new System.Drawing.Size(32, 13);
             this.label3.TabIndex = 18;
-            this.label3.Text = "Porta server";
+            this.label3.Text = "Porta";
             // 
             // button1
             // 
@@ -110,7 +114,7 @@ namespace MyProject
             this.notifyIcon1.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Info;
             this.notifyIcon1.ContextMenuStrip = this.menu;
             this.notifyIcon1.Icon = global::MyProject.Properties.Resources.SystemTrayApp;
-            this.notifyIcon1.Text = "Viola-Costanzo PdS Project";
+            this.notifyIcon1.Text = "Project";
             this.notifyIcon1.Visible = true;
             // 
             // menu
@@ -136,18 +140,19 @@ namespace MyProject
             // 
             // comboBox
             // 
+            this.comboBox.AccessibleDescription = "";
+            this.comboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBox.FormattingEnabled = true;
-            this.comboBox.Location = new System.Drawing.Point(76, 37);
+            this.comboBox.Location = new System.Drawing.Point(168, 51);
             this.comboBox.Name = "comboBox";
-            this.comboBox.Size = new System.Drawing.Size(173, 21);
+            this.comboBox.Size = new System.Drawing.Size(100, 21);
             this.comboBox.TabIndex = 22;
-            this.comboBox.Text = "< Select an IP Address >";
             this.comboBox.SelectedIndexChanged += new System.EventHandler(this.comboBox_SelectedIndexChanged);
             // 
             // quitButton
             // 
             this.quitButton.Enabled = false;
-            this.quitButton.Location = new System.Drawing.Point(142, 206);
+            this.quitButton.Location = new System.Drawing.Point(208, 206);
             this.quitButton.Name = "quitButton";
             this.quitButton.Size = new System.Drawing.Size(60, 23);
             this.quitButton.TabIndex = 23;
@@ -155,11 +160,32 @@ namespace MyProject
             this.quitButton.UseVisualStyleBackColor = true;
             this.quitButton.Click += new System.EventHandler(this.quitButton_Click);
             // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(168, 163);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(100, 23);
+            this.button2.TabIndex = 24;
+            this.button2.Text = "Cambia porta";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(29, 54);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(77, 13);
+            this.label1.TabIndex = 25;
+            this.label1.Text = "Indirizzo di rete";
+            // 
             // ServerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(284, 261);
+            this.ClientSize = new System.Drawing.Size(315, 261);
+            this.Controls.Add(this.label1);
+            this.Controls.Add(this.button2);
             this.Controls.Add(this.quitButton);
             this.Controls.Add(this.comboBox);
             this.Controls.Add(this.label5);
@@ -169,7 +195,7 @@ namespace MyProject
             this.Controls.Add(this.portBox);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "ServerForm";
-            this.Text = "Progetto PDS";
+            this.Text = "Remote Control Server";
             this.Load += new System.EventHandler(this.ServerForm_Load);
             this.Resize += new System.EventHandler(this.TrayMinimizerForm_Resize);
             this.menu.ResumeLayout(false);
@@ -192,6 +218,8 @@ namespace MyProject
         private NotifyIcon notifyIcon1;
         private ToolStripMenuItem item;
         private ToolStripSeparator sep;
+        private Button button2;
+        private Label label1;
         
     }
 }

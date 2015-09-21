@@ -78,12 +78,12 @@ namespace MyProject
                 MessageBox.Show("Connesso.");
 
                 // Create UDP channel
-                IPEndPoint udpLocalEndPoint = new IPEndPoint(ipAddress, port+1); // Specifing 0 as the port, a free port will be assigned
-                Int32 udpPort = udpLocalEndPoint.Port; // Retrieve port number
+                Int32 udpPort = Functions.FindFreePort();
+                IPEndPoint udpLocalEndPoint = new IPEndPoint(ipAddress, udpPort);
                 udp_channel = new UdpClient(udpLocalEndPoint);
 
                 // Create TCP channel for clipboard operations (import/export)
-                Int32 clipboardPort = port + 2;
+                Int32 clipboardPort = Functions.FindFreePort();
                 IPEndPoint clipboardLocalEndPoint = new IPEndPoint(ipAddress, clipboardPort);
                 Socket clipboard_listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 clipboard_listener.Bind(clipboardLocalEndPoint);

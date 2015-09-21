@@ -13,14 +13,18 @@ using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using System.IO;
 using System.Diagnostics;
-using System.ComponentModel;
 
 
 namespace MyProject
 {
     public partial class MainForm : Form
     {
-        //Hotkey
+        private Dictionary<Int32, ClientConnectionHandler> connections;
+        private ClientConnectionHandler current, target;
+        private HotkeysHandler hotkeys_handler;
+        private GlobalHook hook;
+
+        #region Hotkey
         enum KeyModifier
         {
             None = 0,
@@ -29,24 +33,6 @@ namespace MyProject
             Shift = 4,
             WinKey = 8
         }
-
-        private Dictionary<Int32, ClientConnectionHandler> connections;
-        private ClientConnectionHandler current, target;
-        private IPEndPoint mouseRemoteEP, keybdRemoteEP, clipbdRemoteEP;
-
-        // Sockets
-        private UdpClient mouseChannel;
-        private Socket keybdChannel, clipbdChannel;
-        public Socket CurrentSocket;
-        public Int32 x, y;
-        public byte[] point;
-        private byte[] keybd;
-        private byte[] clipbd;
-        //GlobalKeyboardHook gkh;
-        Thread cc_t;
-
-        private HotkeysHandler hotkeys_handler;
-        private GlobalHook hook;
 
         protected override void WndProc(ref Message m)
         {
@@ -72,9 +58,9 @@ namespace MyProject
 
             }
         }
+        #endregion
 
-
-        #region Keyboard methods     
+        #region Keyboard methods
         private void OnKeyDown(object sender, KeyEventArgs e)
         {
             if (target != null)
@@ -500,26 +486,17 @@ namespace MyProject
 
         private void button5_Click(object sender, EventArgs e)
         {
-            if (clipbdChannel == null)
-                return;
-
-            //cc_t.Start();
-            //cc_t.Join();
-            Run_Client(ref clipbdChannel);
+            throw new NotImplementedException();
         }
 
         private void button6_Click(object sender, EventArgs e)
         {
-            if (target == null)
-                return;
-            
-            Thread trd = new Thread(()=>Functions.handleClipboardData(target.clipbd_channel));
-            trd.SetApartmentState(ApartmentState.STA);
-            trd.Start();
-
-            //task per la handle
-            //Task.Factory.StartNew(() => Functions.handleClipboardData(target.clipbd_channel));
-       
+            if (target != null)
+            {
+                Thread trd = new Thread(() => Functions.handleClipboardData(target.clipbd_channel));
+                trd.SetApartmentState(ApartmentState.STA);
+                trd.Start();
+            }
         }
 
 

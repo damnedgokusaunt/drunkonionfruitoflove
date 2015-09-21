@@ -33,6 +33,17 @@ namespace MyProject
 
 
         #region Connection
+
+        public static int FindFreePort()
+        {
+            TcpListener l = new TcpListener(IPAddress.Loopback, 0);
+            l.Start();
+            int port = ((IPEndPoint)l.LocalEndpoint).Port;
+            l.Stop();
+
+            return port;
+        }
+        
         public static string Encrypt(string source)
         {
             using (MD5 md5Hash = MD5.Create())
@@ -481,9 +492,6 @@ namespace MyProject
             
             }
         }
-
-
-//PER CLIPBOARD HANDLER
 
         public static string ReceiveTillTerminator(ref Socket sock)
         {

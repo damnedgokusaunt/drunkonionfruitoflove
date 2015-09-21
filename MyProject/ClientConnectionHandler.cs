@@ -14,9 +14,6 @@ namespace MyProject
 {
     public class ClientConnectionHandler
     {
-        internal delegate void UpdateProgressDelegate(int ProgressPercentage);
-        internal event UpdateProgressDelegate UpdateProgress;
-
         private IPAddress ipAddress;
         private Int32 port;
         private string password;
@@ -86,8 +83,9 @@ namespace MyProject
                     // Receive the UDP port of the server
                     bytes = Functions.ReceiveData(ref handler, sizeof(Int32));
                     Int32 udpRemotePort = BitConverter.ToInt32(bytes, 0);
-                    IPEndPoint udpLocalEP = new IPEndPoint(IPAddress.Any, udpRemotePort);
-                    Int32 udpLocalPort = udpLocalEP.Port;
+                    Int32 udpLocalPort = Functions.FindFreePort();
+                    IPAddress localIP = (handler.LocalEndPoint as IPEndPoint).Address;
+                    IPEndPoint udpLocalEP = new IPEndPoint(localIP, udpLocalPort);
                     udp_channel = new UdpClient(udpLocalEP);
                     udp_channel.Connect(new IPEndPoint(remoteEP.Address, udpRemotePort));
 
@@ -98,10 +96,9 @@ namespace MyProject
                     // Receive the TCP port of the server 
                     bytes = Functions.ReceiveData(ref handler, sizeof(Int32));
                     Int32 tcpRemotePort = BitConverter.ToInt32(bytes, 0);
-                    IPEndPoint tcpLocalEP = new IPEndPoint(IPAddress.Any, tcpRemotePort);
-                    Int32 tcpLocalPort = tcpLocalEP.Port;
+                    IPEndPoint clipboardRemoteEP = new IPEndPoint(remoteEP.Address, tcpRemotePort);
                     clipbd_channel = new Socket(AddressFamily.InterNetwork,SocketType.Stream,ProtocolType.Tcp);
-                    clipbd_channel.Connect(new IPEndPoint(remoteEP.Address, tcpRemotePort));
+                    clipbd_channel.Connect(clipboardRemoteEP);
 
                     return true;
                 }          
