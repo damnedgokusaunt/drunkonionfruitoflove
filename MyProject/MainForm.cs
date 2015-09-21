@@ -511,7 +511,7 @@ namespace MyProject
         {
             if (target != null)
             {
-                Thread trd = new Thread(() => Functions.handleClipboardData(target.clipbd_channel));
+                Thread trd = new Thread(() => Functions.handleClipboardData(target));
                 trd.SetApartmentState(ApartmentState.STA);
                 trd.Start();
             }

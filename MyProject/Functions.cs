@@ -154,31 +154,28 @@ namespace MyProject
         #endregion
 
         #region Clipboard methods
-        public static void handleClipboardData(Socket clipbdChannel)
+        public static void handleClipboardData(ConnectionHandler conn)
         {
+            Socket clipbdChannel = conn.clipbd_channel;
+            
+
             try
             {
                 string clipbdMsg;
-
-
-                //Dichiarazioni utili per i file
                 object clipContent;
                 string[] path;
                 int n;
                 byte[] buffer;
 
-
                 IDataObject iData = new DataObject();
                 iData = Clipboard.GetDataObject();
-
 
                 if (Clipboard.ContainsData(DataFormats.Text))
                 {
                     clipbdMsg = MyProtocol.COPY + (string)iData.GetData(DataFormats.Text) + MyProtocol.END_OF_MESSAGE;
-                    clipbdChannel.Send(Encoding.ASCII.GetBytes(clipbdMsg));
+                    buffer = Encoding.ASCII.GetBytes(clipbdMsg);
+                    Functions.SendData(clipbdChannel, buffer, 0, buffer.Length);
                 }
-
-
                 else if (Clipboard.ContainsData(DataFormats.Bitmap))
                 {
                     Console.WriteLine("Bitmap");
@@ -197,14 +194,9 @@ namespace MyProject
                     ReceiveData(clipbdChannel, MyProtocol.POSITIVE_ACK.Length);
                     //invio dati
                     clipbdChannel.Send(res);
-
                 }
-
                 else if (Clipboard.ContainsData(DataFormats.FileDrop))
                 {
-                    //Inizio operazioni di invio file
-
-                    buffer = new byte[1];
                     try
                     {
 
@@ -679,7 +671,6 @@ namespace MyProject
             }
 
             clientStream.Flush();
-
         }
         public static byte[] ReceiveData(Socket sock, int size)
         {
