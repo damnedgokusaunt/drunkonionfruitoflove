@@ -70,6 +70,7 @@
       <DependentUpon>AboutBox.cs</DependentUpon>
     </Compile>
     <Compile Include="ClientConnectionHandler.cs" />
+    <Compile Include="ConnectionHandler.cs" />
     <Compile Include="Functions.cs" />
     <Compile Include="GlobalHook.cs" />
     <Compile Include="HotkeysHandler.cs" />

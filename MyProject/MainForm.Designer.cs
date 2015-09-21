@@ -53,6 +53,8 @@ namespace MyProject
             this.button4 = new System.Windows.Forms.Button();
             this.button5 = new System.Windows.Forms.Button();
             this.button6 = new System.Windows.Forms.Button();
+            this.progressBar = new System.Windows.Forms.ProgressBar();
+            this.debugBox = new System.Windows.Forms.RichTextBox();
             this.SuspendLayout();
             // 
             // portBox
@@ -264,11 +266,28 @@ namespace MyProject
             this.button6.UseVisualStyleBackColor = true;
             this.button6.Click += new System.EventHandler(this.button6_Click);
             // 
+            // progressBar
+            // 
+            this.progressBar.Location = new System.Drawing.Point(12, 453);
+            this.progressBar.Name = "progressBar";
+            this.progressBar.Size = new System.Drawing.Size(620, 23);
+            this.progressBar.TabIndex = 46;
+            // 
+            // debugBox
+            // 
+            this.debugBox.Location = new System.Drawing.Point(12, 351);
+            this.debugBox.Name = "debugBox";
+            this.debugBox.Size = new System.Drawing.Size(620, 96);
+            this.debugBox.TabIndex = 47;
+            this.debugBox.Text = "";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(644, 342);
+            this.ClientSize = new System.Drawing.Size(644, 488);
+            this.Controls.Add(this.debugBox);
+            this.Controls.Add(this.progressBar);
             this.Controls.Add(this.button6);
             this.Controls.Add(this.button5);
             this.Controls.Add(this.button4);
@@ -324,6 +343,9 @@ namespace MyProject
         private Button button4;
         private Button button5;
         private Button button6;
+        
+        public ProgressBar progressBar;
+        public RichTextBox debugBox;
     }
 }
 

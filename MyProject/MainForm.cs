@@ -19,6 +19,9 @@ namespace MyProject
 {
     public partial class MainForm : Form
     {
+        public delegate void ProgressHandler(double v, string message);
+        public ProgressHandler UpdateProgress;
+
         private Dictionary<Int32, ClientConnectionHandler> connections;
         private ClientConnectionHandler current, target;
         private HotkeysHandler hotkeys_handler;
@@ -151,10 +154,24 @@ namespace MyProject
         }
         #endregion
 
-
+        public void Update(double v, string message)
+        {
+            if (this.InvokeRequired)
+            {
+                this.BeginInvoke(new Action(() =>
+                    {
+                        // v from 0 to 1
+                        this.progressBar.Value = (int) v * 100;
+                        Console.WriteLine("Thread id: " + Thread.CurrentThread.ManagedThreadId);
+                        this.debugBox.AppendText(message + "\n");
+                    }));
+            }
+        }
         public MainForm()
         {
             InitializeComponent();
+
+            this.UpdateProgress += Update;
 
             // Codice che non posso mettere nella InitializeComponent perché è generata automaticamente
             this.listView.Columns.Add("ID");
@@ -193,11 +210,12 @@ namespace MyProject
  
         private void startClientButton_Click(object sender, EventArgs e)
         {
-
+            Console.WriteLine("Thread principale: " + Thread.CurrentThread.ManagedThreadId);
+            
             try
             {
                 // Istanzia oggetto client
-                ClientConnectionHandler new_connection = new ClientConnectionHandler(IPAddress.Parse(serverAddrBox.Text), Convert.ToInt32(serverPortBox.Text), Functions.Encrypt(pwd1.Text));
+                ClientConnectionHandler new_connection = new ClientConnectionHandler(this, IPAddress.Parse(serverAddrBox.Text), Convert.ToInt32(serverPortBox.Text), Functions.Encrypt(pwd1.Text));
 
                 //connection.setForm(this);
                 Task<bool> t = Task.Factory.StartNew(() => new_connection.Open());        
@@ -366,15 +384,15 @@ namespace MyProject
 }
 
 
-        public void Run_Client(ref Socket tcpChannel)
+        public void Run_Client(Socket tcpChannel)
         {
 
             //Il client chiede al server se hai dati nella clipboard
-            Functions.SendData(ref tcpChannel, Encoding.ASCII.GetBytes(MyProtocol.CLIENT + MyProtocol.END_OF_MESSAGE), 0, (MyProtocol.CLIENT + MyProtocol.END_OF_MESSAGE).Length);
+            Functions.SendData(tcpChannel, Encoding.ASCII.GetBytes(MyProtocol.CLIENT + MyProtocol.END_OF_MESSAGE), 0, (MyProtocol.CLIENT + MyProtocol.END_OF_MESSAGE).Length);
             //In caso di risposta negativa, invia un negative ack al client: in questo caso la procedura termina.
             //Diversamente...
             //Ricevo il comando inviatomi dal server
-            string recvbuf = Functions.ReceiveTillTerminator(ref tcpChannel);
+            string recvbuf = Functions.ReceiveTillTerminator(tcpChannel);
             string command = recvbuf.Substring(0, 4);
 
             switch (command)
@@ -409,7 +427,7 @@ namespace MyProject
                         return;
                     }
 
-                    Functions.handleFileDrop(ref tcpChannel, null);
+                    Functions.handleFileDrop(tcpChannel, null);
                     Functions.StartClipoardUpdaterThread();
                     break;
 
@@ -417,21 +435,21 @@ namespace MyProject
                     // Simulo un po' di ritardo di rete
                     Thread.Sleep(1000);
 
-                    Functions.ReceiveDirectory(ref tcpChannel);
+                    Functions.ReceiveDirectory(tcpChannel);
                     Functions.StartClipoardUpdaterThread();
                     break;
 
                 case MyProtocol.IMG:
 
-                    Functions.SendData(ref tcpChannel, Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), 0, MyProtocol.POSITIVE_ACK.Length);
+                    Functions.SendData(tcpChannel, Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), 0, MyProtocol.POSITIVE_ACK.Length);
 
-                    byte[] length = Functions.ReceiveData(ref tcpChannel, sizeof(Int32));
+                    byte[] length = Functions.ReceiveData(tcpChannel, sizeof(Int32));
 
                     Int32 length_int32 = BitConverter.ToInt32(length, 0);
 
-                    Functions.SendData(ref tcpChannel, Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), 0, MyProtocol.POSITIVE_ACK.Length);
+                    Functions.SendData(tcpChannel, Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), 0, MyProtocol.POSITIVE_ACK.Length);
 
-                    byte[] imageSource = Functions.ReceiveData(ref tcpChannel, length_int32);
+                    byte[] imageSource = Functions.ReceiveData(tcpChannel, length_int32);
 
                     Image image = Functions.ConvertByteArrayToBitmap(imageSource);
                     Clipboard.SetImage(image);

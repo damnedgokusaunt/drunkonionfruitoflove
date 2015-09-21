@@ -12,30 +12,16 @@ using System.Windows.Forms;
 
 namespace MyProject
 {
-    public class ClientConnectionHandler
+    public class ClientConnectionHandler : ConnectionHandler
     {
-        private IPAddress ipAddress;
-        private Int32 port;
-        private string password;
-        private Socket handler;
-
-        private UdpClient udp_channel;
-        public Socket clipbd_channel { get; set; }
-
-        public ClientConnectionHandler(IPAddress ipAddress, Int32 port, string password)
-        {
-            this.ipAddress = ipAddress;
-            this.port = port;
-            this.password = password;
-        }
+        public ClientConnectionHandler(Form mainForm, IPAddress ipAddress, Int32 port, string password) : base(mainForm, ipAddress, port, password) { }
 
         // Questo metodo viene invocato per connettere l'oggetto con un server
-        public bool Open()
+        public override bool Open()
         {
- 
             int len;
             string msg;
-            
+
             // Data buffer for incoming data.
             byte[] bytes = new byte[1024];
 
@@ -50,26 +36,28 @@ namespace MyProject
 
                 // Connect the socket to the remote endpoint. Catch any errors.
                 handler.Connect(remoteEP);
-
                 
                 msg = MyProtocol.message(MyProtocol.CONNECTION + this.password);
                 bytes = Encoding.ASCII.GetBytes(msg);
 
                 //MessageBox.Show("Devo inviare: " + msg);
                 // Send connection request
-                Functions.SendData(ref handler, bytes, 0, bytes.Length);
-                
-                Console.WriteLine("Client sent connection request + encrypted password.");
-                
+                Functions.SendData(handler, bytes, 0, bytes.Length);
+
+                ((MainForm)form).UpdateProgress(0.0, "Richiesta di connessione inviata.");
+
                 // Receive the response from the remote device.
                 len = MyProtocol.message(MyProtocol.POSITIVE_ACK).Length;
-                bytes = Functions.ReceiveData(ref handler, len);
+                bytes = Functions.ReceiveData(handler, len);
                 msg = Encoding.ASCII.GetString(bytes, 0, len);
 
                 if (msg == MyProtocol.message(MyProtocol.POSITIVE_ACK))
                 {
                     Int32 width = Screen.PrimaryScreen.Bounds.Width;
                     Int32 height = Screen.PrimaryScreen.Bounds.Height;
+
+                    Console.WriteLine("Thread secondario: " + Thread.CurrentThread.ManagedThreadId);
+                    ((MainForm)form).UpdateProgress(0.5, "Connessione accettata dal sistema remoto.");
 
                     //MessageBox.Show("Coordinate: " + width + "," + height);
                     byte[] resolution = new byte[sizeof(Int32) * 2];
@@ -78,10 +66,10 @@ namespace MyProject
                     System.Buffer.BlockCopy(BitConverter.GetBytes(width), 0, resolution, 0, sizeof(Int32));
                     System.Buffer.BlockCopy(BitConverter.GetBytes(height), 0, resolution, sizeof(Int32), sizeof(Int32));
 
-                    Functions.SendData(ref handler, resolution, 0, sizeof(Int32) * 2);
+                    Functions.SendData(handler, resolution, 0, sizeof(Int32) * 2);
 
                     // Receive the UDP port of the server
-                    bytes = Functions.ReceiveData(ref handler, sizeof(Int32));
+                    bytes = Functions.ReceiveData(handler, sizeof(Int32));
                     Int32 udpRemotePort = BitConverter.ToInt32(bytes, 0);
                     Int32 udpLocalPort = Functions.FindFreePort();
                     IPAddress localIP = (handler.LocalEndPoint as IPEndPoint).Address;
@@ -91,15 +79,17 @@ namespace MyProject
 
                     // Send the UDP port to the server
                     bytes = BitConverter.GetBytes(udpLocalPort);
-                    Functions.SendData(ref handler, bytes, 0, sizeof(Int32));
+                    Functions.SendData(handler, bytes, 0, sizeof(Int32));
 
                     // Receive the TCP port of the server 
-                    bytes = Functions.ReceiveData(ref handler, sizeof(Int32));
+                    bytes = Functions.ReceiveData(handler, sizeof(Int32));
                     Int32 tcpRemotePort = BitConverter.ToInt32(bytes, 0);
                     IPEndPoint clipboardRemoteEP = new IPEndPoint(remoteEP.Address, tcpRemotePort);
                     clipbd_channel = new Socket(AddressFamily.InterNetwork,SocketType.Stream,ProtocolType.Tcp);
                     clipbd_channel.Connect(clipboardRemoteEP);
-
+                    
+                    ((MainForm)form).UpdateProgress(1.0, "Connessione instaurata con successo.");
+                    
                     return true;
                 }          
             }
@@ -111,7 +101,7 @@ namespace MyProject
             return false;
         }
 
-        public bool Close()
+        public override bool Close()
         {
             int len;
             byte[] bytes;
@@ -119,11 +109,11 @@ namespace MyProject
 
             bytes = Encoding.ASCII.GetBytes(MyProtocol.message(MyProtocol.QUIT));
             // Client sends to server a quit request
-            Functions.SendData(ref handler, bytes, 0, bytes.Length);
+            Functions.SendData(handler, bytes, 0, bytes.Length);
 
             len = MyProtocol.message(MyProtocol.POSITIVE_ACK).Length;
             // Client receive a response from server
-            bytes = Functions.ReceiveData(ref handler, len);
+            bytes = Functions.ReceiveData(handler, len);
             msg = Encoding.ASCII.GetString(bytes);
 
             if (msg == MyProtocol.message(MyProtocol.POSITIVE_ACK))
@@ -141,18 +131,17 @@ namespace MyProject
 
         public void Send(byte[] bytes)
         {
-            Functions.SendData(ref handler, bytes, 0, bytes.Length);
+            Functions.SendData(handler, bytes, 0, bytes.Length);
         }
 
         public byte[] Receive(int size)
         {
-            return Functions.ReceiveData(ref handler, size);
+            return Functions.ReceiveData(handler, size);
         }
 
         public void SendUDP(byte[] bytes)
         {
             udp_channel.Send(bytes, bytes.Length);
         }
-
     }
 }

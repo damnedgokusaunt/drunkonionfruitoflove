@@ -18,31 +18,34 @@ using System.IO;
 
 namespace MyProject
 {
-    public class ServerConnectionHandler
+    public class ServerConnectionHandler : ConnectionHandler
     {
-        private Socket tcp_channel, clipboard_channel;
-        private IPAddress ipAddress;
-        private Int32 port;
-        private string password;
-        private bool connected;
-        private UdpClient udp_channel;
         private IPEndPoint udp_remote_endpoint;
         private Int32 widthRatio, heightRatio;
+        private byte[] endpoint_resolution;
 
-
-
-        public ServerConnectionHandler(IPAddress ipAddress, int port, string password)
+        private bool connected;
+        public bool Connected
         {
-            this.ipAddress = ipAddress;
-            this.port = port;
-            this.password = password;
+            get 
+            {
+                return connected; 
+            }
+            set
+            { 
+                connected = value; 
+            }
+        }
+
+        public ServerConnectionHandler(Form form, IPAddress ipAddress, int port, string password) : base(form, ipAddress, port, password)
+        {
             this.connected = false;
         }
 
-        public byte[] Open()
+        public override bool Open()
         {
             string msg;
-            byte[] bytes, endpoint_resolution;
+            byte[] bytes;
 
             // Set local endpoint and create a TCP/IP socket.
             IPEndPoint localEndPoint = new IPEndPoint(ipAddress, port);
@@ -51,7 +54,7 @@ namespace MyProject
             listener.Bind(localEndPoint);
             listener.Listen(10);
 
-            tcp_channel = listener.Accept();
+            handler = listener.Accept();
             listener.Close();
 
             msg = MyProtocol.message(MyProtocol.CONNECTION + this.password);
@@ -59,7 +62,7 @@ namespace MyProject
             //MessageBox.Show("Mi aspetto di ricevere: " + msg);
 
             // Receive connection request
-            bytes = Functions.ReceiveData(ref tcp_channel, msg.Length);
+            bytes = Functions.ReceiveData(handler, msg.Length);
 
             string received_request = Encoding.ASCII.GetString(bytes);
 
@@ -69,10 +72,10 @@ namespace MyProject
 
                 msg = MyProtocol.message(MyProtocol.POSITIVE_ACK);
                 bytes = Encoding.ASCII.GetBytes(msg);
-                Functions.SendData(ref tcp_channel, bytes, 0, bytes.Length);
+                Functions.SendData(handler, bytes, 0, bytes.Length);
 
                 // Receive display resolution
-                endpoint_resolution = Functions.ReceiveData(ref tcp_channel, sizeof(Int32) * 2);
+                endpoint_resolution = Functions.ReceiveData(handler, sizeof(Int32) * 2);
                 widthRatio = Screen.PrimaryScreen.Bounds.Width / BitConverter.ToInt32(endpoint_resolution, 0);
                 heightRatio = Screen.PrimaryScreen.Bounds.Height / BitConverter.ToInt32(endpoint_resolution, sizeof(Int32));
                 MessageBox.Show("Connesso.");
@@ -90,24 +93,24 @@ namespace MyProject
 
                 //Notify the UDP port to the client
                 bytes = BitConverter.GetBytes(udpPort);
-                Functions.SendData(ref tcp_channel, bytes, 0, bytes.Length);
+                Functions.SendData(handler, bytes, 0, bytes.Length);
 
                 // Receive the UDP port from the server
-                bytes = Functions.ReceiveData(ref tcp_channel, sizeof(Int32));
-                udp_remote_endpoint = tcp_channel.RemoteEndPoint as IPEndPoint;
+                bytes = Functions.ReceiveData(handler, sizeof(Int32));
+                udp_remote_endpoint = handler.RemoteEndPoint as IPEndPoint;
 
                 //Notify the TCP port for clipboard to the client
                 bytes = BitConverter.GetBytes(clipboardPort);
-                Functions.SendData(ref tcp_channel, bytes, 0, bytes.Length);
+                Functions.SendData(handler, bytes, 0, bytes.Length);
 
                 clipboard_listener.Listen(10);
 
-                clipboard_channel = clipboard_listener.Accept();
+                this.clipbd_channel = clipboard_listener.Accept();
                 clipboard_listener.Close();
 
                 this.connected = true;
 
-                return endpoint_resolution;
+                return true;
             }
             else
             {
@@ -115,32 +118,28 @@ namespace MyProject
 
                 msg = MyProtocol.message(MyProtocol.NEGATIVE_ACK);
                 bytes = Encoding.ASCII.GetBytes(msg);
-                Functions.SendData(ref tcp_channel, bytes, 0, bytes.Length);
+                Functions.SendData(handler, bytes, 0, bytes.Length);
 
-                return null;
+                return false;
             }
         }
 
-        public void Close()
+        public override bool Close()
         {
             byte[] bytes = Encoding.ASCII.GetBytes(MyProtocol.message(MyProtocol.POSITIVE_ACK));
 
             // Send ack
-            Functions.SendData(ref tcp_channel, bytes, 0, bytes.Length);
+            Functions.SendData(handler, bytes, 0, bytes.Length);
 
             connected = false;
 
-            tcp_channel.Close();
+            handler.Close();
             udp_channel.Close();
 
             MessageBox.Show("Il server ha chiuso la connessione.");
-        }
 
-        public void setConnected()
-        {
-            this.connected = true;
+            return true;
         }
-
 
         public void ListenUDPChannel()
         {
@@ -187,7 +186,7 @@ namespace MyProject
             {
                 Console.WriteLine(this.GetType().Name + " - in attesa di comandi dal client...");
 
-                string recvbuf = Functions.ReceiveTillTerminator(ref clipboard_channel);
+                string recvbuf = Functions.ReceiveTillTerminator(clipbd_channel);
                 string command = recvbuf.Substring(0, 4);
                 Console.WriteLine(this.GetType().Name + " - ricevuto comando: " + recvbuf);
 
@@ -220,7 +219,7 @@ namespace MyProject
                         // Now send ack
                         try
                         {
-                            clipboard_channel.Send(Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK));
+                            clipbd_channel.Send(Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK));
                         }
                         catch (Exception e)
                         {
@@ -228,7 +227,7 @@ namespace MyProject
                             return;
                         }
 
-                        Functions.handleFileDrop(ref clipboard_channel, null);
+                        Functions.handleFileDrop(clipbd_channel, null);
                         Functions.StartClipoardUpdaterThread();
 
                         MessageBox.Show("Ricevuto un File dalla clipboard del client.");
@@ -238,14 +237,14 @@ namespace MyProject
                         // Simulo un po' di ritardo di rete
                         Thread.Sleep(1000);
 
-                        Functions.ReceiveDirectory(ref clipboard_channel);
+                        Functions.ReceiveDirectory(clipbd_channel);
                         Functions.StartClipoardUpdaterThread();
                         break;
 
                     case MyProtocol.IMG:
-                        Functions.SendData(ref clipboard_channel, Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), 0, MyProtocol.POSITIVE_ACK.Length);
+                        Functions.SendData(clipbd_channel, Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), 0, MyProtocol.POSITIVE_ACK.Length);
 
-                        byte[] length = Functions.ReceiveData(ref clipboard_channel, sizeof(Int32));
+                        byte[] length = Functions.ReceiveData(clipbd_channel, sizeof(Int32));
 
                         /*
                         if (BitConverter.IsLittleEndian)
@@ -253,9 +252,9 @@ namespace MyProject
 
                         Int32 length_int32 = BitConverter.ToInt32(length, 0);
 
-                        Functions.SendData(ref clipboard_channel, Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), 0, MyProtocol.POSITIVE_ACK.Length);
+                        Functions.SendData(clipbd_channel, Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), 0, MyProtocol.POSITIVE_ACK.Length);
 
-                        byte[] imageSource = Functions.ReceiveData(ref clipboard_channel, length_int32);
+                        byte[] imageSource = Functions.ReceiveData(clipbd_channel, length_int32);
 
                         Image image = Functions.ConvertByteArrayToBitmap(imageSource);
                         Clipboard.SetImage(image);
@@ -271,7 +270,6 @@ namespace MyProject
             }
         }
     
-
         public void ListenTCPChannel()
         {
             byte[] bytes;
@@ -280,7 +278,7 @@ namespace MyProject
 
             while (connected)
             {
-                bytes = Functions.ReceiveData(ref tcp_channel, commands_length);
+                bytes = Functions.ReceiveData(handler, commands_length);
                 msg = Encoding.ASCII.GetString(bytes).Substring(0, MyProtocol.STD_COMMAND_LENGTH);
 
                 switch (msg)
@@ -292,24 +290,23 @@ namespace MyProject
                     case MyProtocol.TARGET:
 
                         byte[] mess = System.Text.Encoding.Default.GetBytes(MyProtocol.POSITIVE_ACK);
-                        Functions.SendData(ref tcp_channel, mess, 0, mess.Length);
+                        Functions.SendData(handler, mess, 0, mess.Length);
                         MessageBox.Show("Sono il target numero: " + Process.GetCurrentProcess().Id);
                         break;
 
                     case MyProtocol.PAUSE:
-                        
                         byte[] mess1 = System.Text.Encoding.Default.GetBytes(MyProtocol.POSITIVE_ACK);
-                        Functions.SendData(ref tcp_channel, mess1, 0, mess1.Length);
+                        Functions.SendData(handler, mess1, 0, mess1.Length);
                         MessageBox.Show("Sono il server messo in pausa numero: " + Process.GetCurrentProcess().Id);
                         break;
 
                     case MyProtocol.KEYDOWN:
-                        bytes = Functions.ReceiveData(ref tcp_channel, 1);
+                        bytes = Functions.ReceiveData(handler, 1);
                         Functions.KeyDown(bytes[0]);
                        break;
 
                     case MyProtocol.KEYUP:
-                        bytes = Functions.ReceiveData(ref tcp_channel, 1);
+                        bytes = Functions.ReceiveData(handler, 1);
                         Functions.KeyUp(bytes[0]);
                         break;
                 }

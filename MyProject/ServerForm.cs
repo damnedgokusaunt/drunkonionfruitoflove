@@ -104,15 +104,16 @@ namespace MyProject
 
             try
             {
-                listener = new ServerConnectionHandler(this.addr, Convert.ToInt32(portBox.Text), Functions.Encrypt(passwordBox.Text));
+                listener = new ServerConnectionHandler(this, this.addr, Convert.ToInt32(portBox.Text), Functions.Encrypt(passwordBox.Text));
 
-                Task<byte[]> t = Task.Factory.StartNew(() => listener.Open());
+                Task<bool> t = Task.Factory.StartNew(() => listener.Open());
 
                 t.Wait();
 
-                if (t.Result != null)
+                if (t.Result)
                 {
-                    listener.setConnected();
+                    listener.Connected = true;
+
                     //MessageBox.Show("Connesso.");
 
                     consumer_tcp = new Thread(listener.ListenTCPChannel);
