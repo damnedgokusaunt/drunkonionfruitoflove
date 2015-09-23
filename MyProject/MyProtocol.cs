@@ -23,6 +23,7 @@ namespace MyProject
         public const string KEYUP = "KEYU";
         public const string TARGET = "TARG";
         public const string PAUSE = "PAUS";
+        public const string CLIPBOARD_IMPORT = "CIMP";
         
         public const string MOUSE_DOWN_RIGHT = "DR_MOUSE";
         public const string MOUSE_DOWN_LEFT = "DL_MOUSE";

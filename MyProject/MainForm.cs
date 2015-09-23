@@ -504,7 +504,92 @@ namespace MyProject
 
         private void button5_Click(object sender, EventArgs e)
         {
-            throw new NotImplementedException();
+            if (target != null) {
+           
+                Functions.SendData(target.clipbd_channel, Encoding.ASCII.GetBytes(MyProtocol.CLIPBOARD_IMPORT + MyProtocol.END_OF_MESSAGE), 0, (MyProtocol.CLIPBOARD_IMPORT + MyProtocol.END_OF_MESSAGE).Length);
+               
+                string recvbuf = Functions.ReceiveTillTerminator(target.clipbd_channel);
+                string command = recvbuf.Substring(0, 4);
+                Console.WriteLine(this.GetType().Name + " - ricevuto comando: " + recvbuf);
+
+                switch (command)
+                {
+                    case MyProtocol.CLEAN:
+                        // Now, I'm starting to clean my clipboard folder as you told me.
+                        Functions.CleanClipboardDir(Path.GetFullPath(MyProtocol.CLIPBOARD_DIR));
+
+                        break;
+                    
+                    case MyProtocol.COPY:
+                        string content;
+                        int len = recvbuf.Length - MyProtocol.COPY.Length;
+                        content = recvbuf.Substring(MyProtocol.COPY.Length, len);
+                        //Console.WriteLine("Tentativo di scrittura su clipboard: " + content);
+                        Clipboard.SetData(DataFormats.Text, content);
+
+                        MessageBox.Show("Ricevuto un Testo dalla clipboard del client.");
+                        break;
+                
+                    case MyProtocol.FILE_SEND:
+                        // Simulo un po' di ritardo di rete
+                        Thread.Sleep(1000);
+                        // Now send ack
+                        try
+                        {
+                            target.clipbd_channel.Send(Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK));
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                            return;
+                        }
+
+                        Functions.handleFileDrop(target.clipbd_channel, null);
+                        Functions.StartClipoardUpdaterThread();
+
+                        MessageBox.Show("Ricevuto un File dalla clipboard del client.");
+                        break;
+
+                    case MyProtocol.DIRE_SEND:
+                        // Simulo un po' di ritardo di rete
+                        Thread.Sleep(1000);
+
+                        Functions.ReceiveDirectory(target.clipbd_channel);
+                        Functions.StartClipoardUpdaterThread();
+                        break;
+
+                    case MyProtocol.IMG:
+                        Functions.SendData(target.clipbd_channel, Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), 0, MyProtocol.POSITIVE_ACK.Length);
+
+                        byte[] length = Functions.ReceiveData(target.clipbd_channel, sizeof(Int32));
+
+                        Int32 length_int32 = BitConverter.ToInt32(length, 0);
+
+                        Functions.SendData(target.clipbd_channel, Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), 0, MyProtocol.POSITIVE_ACK.Length);
+
+                        byte[] imageSource = Functions.ReceiveData(target.clipbd_channel, length_int32);
+
+                        Image image = Functions.ConvertByteArrayToBitmap(imageSource);
+                        Clipboard.SetImage(image);
+
+                        MessageBox.Show("Ricevuta Immagine dalla clipboard del client.");
+
+                        break;
+
+                    case MyProtocol.NEGATIVE_ACK:
+                        debugBox.AppendText("Nessun dato negli appunti del sistema remoto \n");
+                        break;
+
+
+                    default:
+                        MessageBox.Show("Comando da tastiera non riconosciuto");
+                        break;
+                }
+            }
+
+
+
+
         }
 
         private void button6_Click(object sender, EventArgs e)
