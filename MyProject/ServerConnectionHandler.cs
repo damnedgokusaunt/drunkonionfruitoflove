@@ -146,6 +146,7 @@ namespace MyProject
             int del = 0;
             string msg = string.Empty, cmd = string.Empty;
             byte[] bytes = new byte[sizeof(Int32) * 2];
+            
 
             while (connected)
             {
@@ -181,7 +182,8 @@ namespace MyProject
 
         public void ListenClipboardChannel()
         {
-            //parte operativa
+            byte[] data;
+
             while (connected)
             {
                 Console.WriteLine(this.GetType().Name + " - in attesa di comandi dal client...");
@@ -261,6 +263,17 @@ namespace MyProject
 
                         MessageBox.Show("Ricevuta Immagine dalla clipboard del client.");
 
+                        break;
+                    
+                    case MyProtocol.CLIPBOARD_IMPORT:
+                        bool data_available = Functions.handleClipboardData(this);
+                        
+                        if(!data_available)
+                        {
+                            data = Encoding.ASCII.GetBytes(MyProtocol.message(MyProtocol.NEGATIVE_ACK));
+
+                            Functions.SendData(clipbd_channel, data, 0, data.Length);
+                        }
                         break;
 
                     default:
