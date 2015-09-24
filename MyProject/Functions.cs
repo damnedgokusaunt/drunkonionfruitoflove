@@ -158,6 +158,7 @@ namespace MyProject
         {
             Socket clipbdChannel = conn.clipbd_channel;
             
+
             try
             {
                 string clipbdMsg;
@@ -177,7 +178,8 @@ namespace MyProject
 
                     return true;
                 }
-                else if (Clipboard.ContainsData(DataFormats.Bitmap))
+               
+                if (Clipboard.ContainsData(DataFormats.Bitmap))
                 {
                     Console.WriteLine("Bitmap");
                     //invio comando bitmap + terminatore
@@ -198,7 +200,8 @@ namespace MyProject
 
                     return true;
                 }
-                else if (Clipboard.ContainsData(DataFormats.FileDrop))
+                
+                if (Clipboard.ContainsData(DataFormats.FileDrop))
                 {
                     try
                     {
@@ -251,16 +254,16 @@ namespace MyProject
                     }
 
                     Console.WriteLine("done.");
-
                     return true;
                 }
+
 
             }
             catch (Exception e)
             {
                 MessageBox.Show(e.ToString());
                 SendData(clipbdChannel, Encoding.ASCII.GetBytes(MyProtocol.NEGATIVE_ACK + MyProtocol.END_OF_MESSAGE), 0, (MyProtocol.NEGATIVE_ACK + MyProtocol.END_OF_MESSAGE).Length);
-
+                
                 return false;
             }
 

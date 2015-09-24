@@ -27,8 +27,11 @@ namespace MyProject
         private HotkeysHandler hotkeys_handler;
         private GlobalHook hook;
 
+        private SetupHotkeysForm hotkeys_form;
+
         #region Hotkey
-        enum KeyModifier
+
+        private enum KeyModifier
         {
             None = 0,
             Alt = 1,
@@ -38,7 +41,7 @@ namespace MyProject
         }
 
         protected override void WndProc(ref Message m)
-        {
+        {         
             base.WndProc(ref m);
 
             if (m.Msg == 0x0312)
@@ -50,17 +53,26 @@ namespace MyProject
                 KeyModifier modifier = (KeyModifier)((int)m.LParam & 0xFFFF);       // The modifier of the hotkey that was pressed.
                 int id = m.WParam.ToInt32();                                        // The id of the hotkey that was pressed.
 
-                if (id == 0)
+                switch (id)
                 {
-                    Seleziona_Server();
+                    case 0:
+                        SelectServer();
+                        break;
+                    case 2:
+                        SuspendServer();
+                        break;
+                    case 4:
+                        ImportClipboard();
+                        break;
+                    case 6:
+                        ExportClipboard();
+                        break;
+                    default:
+                        throw new Exception("Hotkey non riconosciuta");
                 }
-                else
-                {
-                    Sospendi_Server();
-                }
-
             }
         }
+        
         #endregion
 
         #region Keyboard methods
@@ -154,6 +166,48 @@ namespace MyProject
         }
         #endregion
 
+        public void NewConnection(string ip_address, string port, string password)
+        {
+            try
+            {
+                // Istanzia oggetto client
+                ClientConnectionHandler new_connection = new ClientConnectionHandler(this, IPAddress.Parse(ip_address), Convert.ToInt32(port), Functions.Encrypt(password));
+
+                //connection.setForm(this);
+                Task<bool> t = Task.Factory.StartNew(() => new_connection.Open());
+
+                // Wait only for 3 minutes
+                bool isCompletedInTime = t.Wait(3000 * 60);
+                if (!isCompletedInTime)
+                {
+                    throw new NotImplementedException();
+                }
+
+                if (t.Result)
+                {
+                    Int32 key = connections.Count();
+                    // Create three items and three sets of subitems for each item.
+                    ListViewItem item = new ListViewItem(key.ToString(), key);
+
+                    // Place a check mark next to the item.
+                    item.Checked = true;
+                    item.SubItems.Add(ip_address);
+                    item.SubItems.Add(port);
+                    item.SubItems.Add("Pausa.");
+
+                    //Add the items to the ListView.
+                    listView.Items.AddRange(new ListViewItem[] { item });
+
+                    // Add connection
+                    connections.Add(key, new_connection);
+                }
+            }
+            catch (FormatException ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+ 
         public void Update(double v, string message)
         {
             if (this.InvokeRequired)
@@ -161,23 +215,22 @@ namespace MyProject
                 this.BeginInvoke(new Action(() =>
                     {
                         // v from 0 to 1
-                        this.progressBar.Value = (int) v * 100;
-                        Console.WriteLine("Thread id: " + Thread.CurrentThread.ManagedThreadId);
-                        this.debugBox.AppendText(message + "\n");
+                        //this.progress_bar.Value = (int) v * 100;
+                        //Console.WriteLine("Thread id: " + Thread.CurrentThread.ManagedThreadId);
+                        //this.debugBox.AppendText(message + "\n");
                     }));
             }
         }
+        
         public MainForm()
         {
             InitializeComponent();
 
-            this.UpdateProgress += Update;
+            //this.tableLayoutPanel1.Width = this.Width;
+            //this.tableLayoutPanel1.Height = this.Height / 2;
+            this.hotkeys_form = new SetupHotkeysForm(this.Handle);
 
-            // Codice che non posso mettere nella InitializeComponent perché è generata automaticamente
-            this.listView.Columns.Add("ID");
-            this.listView.Columns.Add("Indirizzo di rete");
-            this.listView.Columns.Add("Porta");
-            this.listView.Columns.Add("Stato");
+            this.UpdateProgress += Update;
 
             this.connections = new Dictionary<Int32, ClientConnectionHandler>();
             this.current = null;
@@ -201,64 +254,21 @@ namespace MyProject
 
         }
 
-
         private void chiudiToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Application.Exit();
         }
 
- 
-        private void startClientButton_Click(object sender, EventArgs e)
-        {
-            Console.WriteLine("Thread principale: " + Thread.CurrentThread.ManagedThreadId);
-            
-            try
-            {
-                // Istanzia oggetto client
-                ClientConnectionHandler new_connection = new ClientConnectionHandler(this, IPAddress.Parse(serverAddrBox.Text), Convert.ToInt32(serverPortBox.Text), Functions.Encrypt(pwd1.Text));
-
-                //connection.setForm(this);
-                Task<bool> t = Task.Factory.StartNew(() => new_connection.Open());        
-
-                t.Wait();
-
-                if (t.Result)
-                {
-                    Int32 key = connections.Count();
-                    // Create three items and three sets of subitems for each item.
-                    ListViewItem item = new ListViewItem(key.ToString(), key);
-
-                    // Place a check mark next to the item.
-                    item.Checked = true;
-                    item.SubItems.Add(serverAddrBox.Text);
-                    item.SubItems.Add(serverPortBox.Text);
-                    item.SubItems.Add("Pausa.");
-
-                    //Add the items to the ListView.
-                    listView.Items.AddRange(new ListViewItem[] { item });
-
-                    // Add the ListView to the control collection.
-                    this.Controls.Add(listView);
-
-                    // Add connection
-                    connections.Add(key, new_connection);
-                }
-            }
-            catch (FormatException ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-
-        }
-
         private void button1_Click(object sender, EventArgs e)
         {
+            /*
             serverAddrBox.Text = string.Empty;
-            serverPortBox.Text = string.Empty;
+            port.Text = string.Empty;
             pwd1.Text = string.Empty;
+             * */
         }
 
-        private void Seleziona_Server()
+        private void SelectServer()
         {
             byte[] bytes;
             Int32 lookup_key = -1;
@@ -316,7 +326,7 @@ namespace MyProject
         }
 
 
-        private void Sospendi_Server()
+        private void SuspendServer()
         {
             if (target == null)
             {
@@ -475,34 +485,36 @@ namespace MyProject
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            comboBox1.Items.Add(Keys.F7);
-            comboBox1.Items.Add(Keys.F8);
-            comboBox1.Items.Add(Keys.F9);
-
-            comboBox2.Items.Add(Keys.F10);
-            comboBox2.Items.Add(Keys.F11);
-            comboBox2.Items.Add(Keys.F12);
+            /*
+            this.progress_bar.Width = (int)(this.Width * 0.7);
+            this.progress_bar.Height = (int)(this.Height * 0.02);
+            
+            this.progress_bar.Dock = DockStyle.Bottom;*/
         }
 
         private void button2_Click(object sender, EventArgs e)
         {
+            /*
             int id = 0;     // The id of the hotkey. 
             Keys key = (Keys)this.comboBox1.SelectedItem;
 
             if(hotkeys_handler.Register(id, (int)KeyModifier.Control, key.GetHashCode()))
                 MessageBox.Show("Hotkey impostata!");
+             * */
         }
 
         private void button4_Click(object sender, EventArgs e)
         {
+            /*
             int id = 1;     // The id of the hotkey. 
             Keys key = (Keys)this.comboBox2.SelectedItem;
 
             if (hotkeys_handler.Register(id, (int)KeyModifier.Control, key.GetHashCode()))
                 MessageBox.Show("Hotkey impostata!");
+             * */
         }
 
-        private void button5_Click(object sender, EventArgs e)
+        private void ImportClipboard()
         {
             if (target != null) {
            
@@ -577,7 +589,7 @@ namespace MyProject
                         break;
 
                     case MyProtocol.NEGATIVE_ACK:
-                        debugBox.AppendText("Nessun dato negli appunti del sistema remoto \n");
+                        //debugBox.AppendText("Nessun dato negli appunti del sistema remoto \n");
                         break;
 
 
@@ -592,7 +604,7 @@ namespace MyProject
 
         }
 
-        private void button6_Click(object sender, EventArgs e)
+        private void ExportClipboard()
         {
             if (target != null)
             {
@@ -640,7 +652,28 @@ namespace MyProject
         {
 
         }
-        
+
+        private void hotkeyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            hotkeys_form.ShowDialog();
+        }
+
+        private void nuovaConnessioneToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            CreateConnectionForm f = new CreateConnectionForm();
+            f.new_connection += this.NewConnection;
+            f.ShowDialog();
+        }
+
+        private void esciToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            Application.Exit();
+        }
+
+        private void maskedTextBox1_MaskInputRejected(object sender, MaskInputRejectedEventArgs e)
+        {
+
+        }
 
 
     }

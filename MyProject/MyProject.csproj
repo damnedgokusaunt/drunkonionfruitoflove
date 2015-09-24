@@ -52,6 +52,7 @@
     <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="Microsoft.VisualBasic.Compatibility" />
     <Reference Include="Microsoft.VisualBasic.Compatibility.Data" />
+    <Reference Include="Microsoft.VisualBasic.PowerPacks.Vs, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -72,6 +73,12 @@
     </Compile>
     <Compile Include="ClientConnectionHandler.cs" />
     <Compile Include="ConnectionHandler.cs" />
+    <Compile Include="CreateConnectionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CreateConnectionForm.Designer.cs">
+      <DependentUpon>CreateConnectionForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Functions.cs" />
     <Compile Include="GlobalHook.cs" />
     <Compile Include="HotkeysHandler.cs" />
@@ -91,9 +98,18 @@
     <Compile Include="ServerForm.Designer.cs">
       <DependentUpon>ServerForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="SetupHotkeysForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SetupHotkeysForm.Designer.cs">
+      <DependentUpon>SetupHotkeysForm.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="AboutBox.resx">
       <DependentUpon>AboutBox.cs</DependentUpon>
       <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CreateConnectionForm.resx">
+      <DependentUpon>CreateConnectionForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
@@ -110,6 +126,9 @@
     </Compile>
     <EmbeddedResource Include="ServerForm.resx">
       <DependentUpon>ServerForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SetupHotkeysForm.resx">
+      <DependentUpon>SetupHotkeysForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

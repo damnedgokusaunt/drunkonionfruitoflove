@@ -31,289 +31,201 @@ namespace MyProject
         /// </summary>
         private void InitializeComponent()
         {
-            this.portBox = new System.Windows.Forms.TextBox();
-            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
-            this.listView = new System.Windows.Forms.ListView();
-            this.label4 = new System.Windows.Forms.Label();
-            this.pwd1 = new System.Windows.Forms.TextBox();
-            this.label2 = new System.Windows.Forms.Label();
-            this.serverPortBox = new System.Windows.Forms.TextBox();
-            this.serverAddrBox = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.startClientButton = new System.Windows.Forms.Button();
+            this.menuStrip2 = new System.Windows.Forms.MenuStrip();
+            this.azioniToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.nuovaConnessioneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.esciToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.impostazioniToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.hotkeyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.visualizzaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.guidaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.manualeUtenteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.infoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.DisconnectButton = new System.Windows.Forms.Button();
-            this.label3 = new System.Windows.Forms.Label();
-            this.comboBox1 = new System.Windows.Forms.ComboBox();
-            this.label5 = new System.Windows.Forms.Label();
-            this.label6 = new System.Windows.Forms.Label();
-            this.comboBox2 = new System.Windows.Forms.ComboBox();
-            this.label7 = new System.Windows.Forms.Label();
-            this.label8 = new System.Windows.Forms.Label();
-            this.button2 = new System.Windows.Forms.Button();
-            this.button4 = new System.Windows.Forms.Button();
-            this.button5 = new System.Windows.Forms.Button();
-            this.button6 = new System.Windows.Forms.Button();
-            this.progressBar = new System.Windows.Forms.ProgressBar();
-            this.debugBox = new System.Windows.Forms.RichTextBox();
+            this.progress_bar = new System.Windows.Forms.ProgressBar();
+            this.listView = new System.Windows.Forms.ListView();
+            this.ID = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.Indirizzo = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.Porta = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.Stato = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.menuStrip2.SuspendLayout();
+            this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
-            // portBox
+            // menuStrip2
             // 
-            this.portBox.Location = new System.Drawing.Point(452, 188);
-            this.portBox.Name = "portBox";
-            this.portBox.Size = new System.Drawing.Size(110, 20);
-            this.portBox.TabIndex = 10;
+            this.menuStrip2.BackColor = System.Drawing.Color.DodgerBlue;
+            this.menuStrip2.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.menuStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.azioniToolStripMenuItem,
+            this.impostazioniToolStripMenuItem,
+            this.visualizzaToolStripMenuItem,
+            this.guidaToolStripMenuItem});
+            this.menuStrip2.Location = new System.Drawing.Point(0, 0);
+            this.menuStrip2.Name = "menuStrip2";
+            this.menuStrip2.Size = new System.Drawing.Size(480, 24);
+            this.menuStrip2.TabIndex = 48;
+            this.menuStrip2.Text = "menuStrip2";
             // 
-            // menuStrip1
+            // azioniToolStripMenuItem
             // 
-            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
-            this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(644, 24);
-            this.menuStrip1.TabIndex = 17;
-            this.menuStrip1.Text = "menuStrip1";
+            this.azioniToolStripMenuItem.AccessibleRole = System.Windows.Forms.AccessibleRole.None;
+            this.azioniToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.nuovaConnessioneToolStripMenuItem,
+            this.esciToolStripMenuItem});
+            this.azioniToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.azioniToolStripMenuItem.ForeColor = System.Drawing.Color.MidnightBlue;
+            this.azioniToolStripMenuItem.Name = "azioniToolStripMenuItem";
+            this.azioniToolStripMenuItem.Size = new System.Drawing.Size(52, 20);
+            this.azioniToolStripMenuItem.Text = "Azioni";
             // 
-            // listView
+            // nuovaConnessioneToolStripMenuItem
             // 
-            this.listView.AllowColumnReorder = true;
-            this.listView.FullRowSelect = true;
-            this.listView.GridLines = true;
-            this.listView.LabelEdit = true;
-            this.listView.Location = new System.Drawing.Point(12, 27);
-            this.listView.Name = "listView";
-            this.listView.Size = new System.Drawing.Size(312, 139);
-            this.listView.Sorting = System.Windows.Forms.SortOrder.Ascending;
-            this.listView.TabIndex = 18;
-            this.listView.UseCompatibleStateImageBehavior = false;
-            this.listView.View = System.Windows.Forms.View.Details;
+            this.nuovaConnessioneToolStripMenuItem.BackColor = System.Drawing.SystemColors.Control;
+            this.nuovaConnessioneToolStripMenuItem.Name = "nuovaConnessioneToolStripMenuItem";
+            this.nuovaConnessioneToolStripMenuItem.Size = new System.Drawing.Size(178, 22);
+            this.nuovaConnessioneToolStripMenuItem.Text = "Nuova connessione";
+            this.nuovaConnessioneToolStripMenuItem.TextImageRelation = System.Windows.Forms.TextImageRelation.TextBeforeImage;
+            this.nuovaConnessioneToolStripMenuItem.Click += new System.EventHandler(this.nuovaConnessioneToolStripMenuItem_Click);
             // 
-            // label4
+            // esciToolStripMenuItem
             // 
-            this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(330, 108);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(53, 13);
-            this.label4.TabIndex = 28;
-            this.label4.Text = "Password";
+            this.esciToolStripMenuItem.Name = "esciToolStripMenuItem";
+            this.esciToolStripMenuItem.Size = new System.Drawing.Size(178, 22);
+            this.esciToolStripMenuItem.Text = "Esci";
+            this.esciToolStripMenuItem.Click += new System.EventHandler(this.esciToolStripMenuItem_Click);
             // 
-            // pwd1
+            // impostazioniToolStripMenuItem
             // 
-            this.pwd1.Location = new System.Drawing.Point(462, 105);
-            this.pwd1.Name = "pwd1";
-            this.pwd1.Size = new System.Drawing.Size(100, 20);
-            this.pwd1.TabIndex = 27;
-            this.pwd1.Text = "pass";
+            this.impostazioniToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.hotkeyToolStripMenuItem});
+            this.impostazioniToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.impostazioniToolStripMenuItem.ForeColor = System.Drawing.Color.MidnightBlue;
+            this.impostazioniToolStripMenuItem.Name = "impostazioniToolStripMenuItem";
+            this.impostazioniToolStripMenuItem.Size = new System.Drawing.Size(87, 20);
+            this.impostazioniToolStripMenuItem.Text = "Impostazioni";
             // 
-            // label2
+            // hotkeyToolStripMenuItem
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(330, 78);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(32, 13);
-            this.label2.TabIndex = 26;
-            this.label2.Text = "Porta";
+            this.hotkeyToolStripMenuItem.Name = "hotkeyToolStripMenuItem";
+            this.hotkeyToolStripMenuItem.Size = new System.Drawing.Size(112, 22);
+            this.hotkeyToolStripMenuItem.Text = "Hotkey";
+            this.hotkeyToolStripMenuItem.Click += new System.EventHandler(this.hotkeyToolStripMenuItem_Click);
             // 
-            // serverPortBox
+            // visualizzaToolStripMenuItem
             // 
-            this.serverPortBox.Location = new System.Drawing.Point(462, 75);
-            this.serverPortBox.Name = "serverPortBox";
-            this.serverPortBox.Size = new System.Drawing.Size(100, 20);
-            this.serverPortBox.TabIndex = 25;
-            this.serverPortBox.Text = "3000";
+            this.visualizzaToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.visualizzaToolStripMenuItem.ForeColor = System.Drawing.Color.MidnightBlue;
+            this.visualizzaToolStripMenuItem.Name = "visualizzaToolStripMenuItem";
+            this.visualizzaToolStripMenuItem.Size = new System.Drawing.Size(69, 20);
+            this.visualizzaToolStripMenuItem.Text = "Visualizza";
             // 
-            // serverAddrBox
+            // guidaToolStripMenuItem
             // 
-            this.serverAddrBox.Location = new System.Drawing.Point(462, 45);
-            this.serverAddrBox.Name = "serverAddrBox";
-            this.serverAddrBox.Size = new System.Drawing.Size(100, 20);
-            this.serverAddrBox.TabIndex = 24;
-            this.serverAddrBox.Text = "169.254.18.100";
+            this.guidaToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.manualeUtenteToolStripMenuItem,
+            this.infoToolStripMenuItem});
+            this.guidaToolStripMenuItem.ForeColor = System.Drawing.Color.MidnightBlue;
+            this.guidaToolStripMenuItem.Name = "guidaToolStripMenuItem";
+            this.guidaToolStripMenuItem.Size = new System.Drawing.Size(50, 20);
+            this.guidaToolStripMenuItem.Text = "Guida";
             // 
-            // label1
+            // manualeUtenteToolStripMenuItem
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(330, 48);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(70, 13);
-            this.label1.TabIndex = 23;
-            this.label1.Text = "Indirizzo IPv4";
+            this.manualeUtenteToolStripMenuItem.Name = "manualeUtenteToolStripMenuItem";
+            this.manualeUtenteToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
+            this.manualeUtenteToolStripMenuItem.Text = "Manuale utente";
             // 
-            // startClientButton
+            // infoToolStripMenuItem
             // 
-            this.startClientButton.Location = new System.Drawing.Point(462, 143);
-            this.startClientButton.Name = "startClientButton";
-            this.startClientButton.Size = new System.Drawing.Size(100, 23);
-            this.startClientButton.TabIndex = 22;
-            this.startClientButton.Text = "Connetti";
-            this.startClientButton.UseVisualStyleBackColor = true;
-            this.startClientButton.Click += new System.EventHandler(this.startClientButton_Click);
+            this.infoToolStripMenuItem.Name = "infoToolStripMenuItem";
+            this.infoToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
+            this.infoToolStripMenuItem.Text = "Info";
             // 
             // DisconnectButton
             // 
-            this.DisconnectButton.Location = new System.Drawing.Point(13, 185);
+            this.DisconnectButton.Location = new System.Drawing.Point(3, 214);
             this.DisconnectButton.Name = "DisconnectButton";
-            this.DisconnectButton.Size = new System.Drawing.Size(123, 23);
+            this.DisconnectButton.Size = new System.Drawing.Size(104, 23);
             this.DisconnectButton.TabIndex = 31;
             this.DisconnectButton.Text = "Chiudi server";
             this.DisconnectButton.UseVisualStyleBackColor = true;
             this.DisconnectButton.Click += new System.EventHandler(this.DisconnectButton_Click);
             // 
-            // label3
+            // progress_bar
             // 
-            this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(12, 259);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(86, 13);
-            this.label3.TabIndex = 35;
-            this.label3.Text = "Choose CTRL + ";
-            this.label3.Click += new System.EventHandler(this.label3_Click);
+            this.progress_bar.Location = new System.Drawing.Point(113, 214);
+            this.progress_bar.Name = "progress_bar";
+            this.progress_bar.Size = new System.Drawing.Size(236, 23);
+            this.progress_bar.TabIndex = 46;
             // 
-            // comboBox1
+            // listView
             // 
-            this.comboBox1.AllowDrop = true;
-            this.comboBox1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Location = new System.Drawing.Point(102, 256);
-            this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(121, 21);
-            this.comboBox1.TabIndex = 36;
-            this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
+            this.listView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.ID,
+            this.Indirizzo,
+            this.Porta,
+            this.Stato});
+            this.listView.Location = new System.Drawing.Point(113, 3);
+            this.listView.Name = "listView";
+            this.listView.Size = new System.Drawing.Size(248, 205);
+            this.listView.TabIndex = 0;
+            this.listView.UseCompatibleStateImageBehavior = false;
+            this.listView.View = System.Windows.Forms.View.Details;
             // 
-            // label5
+            // ID
             // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(229, 259);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(88, 13);
-            this.label5.TabIndex = 37;
-            this.label5.Text = "to select a server";
+            this.ID.Text = "ID";
             // 
-            // label6
+            // Indirizzo
             // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(12, 301);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(86, 13);
-            this.label6.TabIndex = 38;
-            this.label6.Text = "Choose CTRL + ";
+            this.Indirizzo.Text = "Indirizzo di rete";
             // 
-            // comboBox2
+            // Porta
             // 
-            this.comboBox2.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBox2.FormattingEnabled = true;
-            this.comboBox2.Location = new System.Drawing.Point(102, 298);
-            this.comboBox2.Name = "comboBox2";
-            this.comboBox2.Size = new System.Drawing.Size(121, 21);
-            this.comboBox2.TabIndex = 39;
-            this.comboBox2.SelectedIndexChanged += new System.EventHandler(this.comboBox2_SelectedIndexChanged);
+            this.Porta.Text = "Porta";
             // 
-            // label7
+            // Stato
             // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(231, 301);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(124, 13);
-            this.label7.TabIndex = 40;
-            this.label7.Text = "to suspend a connection";
-            this.label7.Click += new System.EventHandler(this.label7_Click);
+            this.Stato.Text = "Stato";
             // 
-            // label8
+            // tableLayoutPanel1
             // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(134, 240);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(51, 13);
-            this.label8.TabIndex = 41;
-            this.label8.Text = "HOTKEY";
-            this.label8.Click += new System.EventHandler(this.label8_Click);
-            // 
-            // button2
-            // 
-            this.button2.Location = new System.Drawing.Point(333, 254);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(35, 23);
-            this.button2.TabIndex = 42;
-            this.button2.Text = "Ok";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
-            // 
-            // button4
-            // 
-            this.button4.Location = new System.Drawing.Point(361, 296);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(35, 23);
-            this.button4.TabIndex = 43;
-            this.button4.Text = "Ok";
-            this.button4.UseVisualStyleBackColor = true;
-            this.button4.Click += new System.EventHandler(this.button4_Click);
-            // 
-            // button5
-            // 
-            this.button5.Location = new System.Drawing.Point(420, 263);
-            this.button5.Name = "button5";
-            this.button5.Size = new System.Drawing.Size(105, 68);
-            this.button5.TabIndex = 44;
-            this.button5.Text = "Importa appunti (server->client)";
-            this.button5.UseVisualStyleBackColor = true;
-            this.button5.Click += new System.EventHandler(this.button5_Click);
-            // 
-            // button6
-            // 
-            this.button6.Location = new System.Drawing.Point(531, 262);
-            this.button6.Name = "button6";
-            this.button6.Size = new System.Drawing.Size(102, 71);
-            this.button6.TabIndex = 45;
-            this.button6.Text = "Esporta appunti (client->server)";
-            this.button6.UseVisualStyleBackColor = true;
-            this.button6.Click += new System.EventHandler(this.button6_Click);
-            // 
-            // progressBar
-            // 
-            this.progressBar.Location = new System.Drawing.Point(12, 453);
-            this.progressBar.Name = "progressBar";
-            this.progressBar.Size = new System.Drawing.Size(620, 23);
-            this.progressBar.TabIndex = 46;
-            // 
-            // debugBox
-            // 
-            this.debugBox.Location = new System.Drawing.Point(12, 351);
-            this.debugBox.Name = "debugBox";
-            this.debugBox.Size = new System.Drawing.Size(620, 96);
-            this.debugBox.TabIndex = 47;
-            this.debugBox.Text = "";
+            this.tableLayoutPanel1.ColumnCount = 3;
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 22.96451F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 53.02714F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 24.00835F));
+            this.tableLayoutPanel1.Controls.Add(this.listView, 1, 0);
+            this.tableLayoutPanel1.Controls.Add(this.progress_bar, 1, 1);
+            this.tableLayoutPanel1.Controls.Add(this.DisconnectButton, 0, 1);
+            this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 24);
+            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
+            this.tableLayoutPanel1.RowCount = 3;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel1.Size = new System.Drawing.Size(480, 271);
+            this.tableLayoutPanel1.TabIndex = 51;
             // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(644, 488);
-            this.Controls.Add(this.debugBox);
-            this.Controls.Add(this.progressBar);
-            this.Controls.Add(this.button6);
-            this.Controls.Add(this.button5);
-            this.Controls.Add(this.button4);
-            this.Controls.Add(this.button2);
-            this.Controls.Add(this.label8);
-            this.Controls.Add(this.label7);
-            this.Controls.Add(this.comboBox2);
-            this.Controls.Add(this.label6);
-            this.Controls.Add(this.label5);
-            this.Controls.Add(this.comboBox1);
-            this.Controls.Add(this.label3);
-            this.Controls.Add(this.DisconnectButton);
-            this.Controls.Add(this.label4);
-            this.Controls.Add(this.pwd1);
-            this.Controls.Add(this.label2);
-            this.Controls.Add(this.serverPortBox);
-            this.Controls.Add(this.serverAddrBox);
-            this.Controls.Add(this.label1);
-            this.Controls.Add(this.startClientButton);
-            this.Controls.Add(this.listView);
-            this.Controls.Add(this.portBox);
-            this.Controls.Add(this.menuStrip1);
-            this.MainMenuStrip = this.menuStrip1;
+            this.ClientSize = new System.Drawing.Size(480, 295);
+            this.Controls.Add(this.tableLayoutPanel1);
+            this.Controls.Add(this.menuStrip2);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.MaximizeBox = false;
             this.Name = "MainForm";
-            this.Text = "MyProject";
+            this.Text = "Remote Control Client";
+            this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.Load += new System.EventHandler(this.MainForm_Load);
+            this.menuStrip2.ResumeLayout(false);
+            this.menuStrip2.PerformLayout();
+            this.tableLayoutPanel1.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -321,31 +233,24 @@ namespace MyProject
 
         #endregion
 
-        private System.Windows.Forms.TextBox portBox;
-        private System.Windows.Forms.MenuStrip menuStrip1;
-        private System.Windows.Forms.ListView listView;
-        private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.TextBox pwd1;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.TextBox serverPortBox;
-        private System.Windows.Forms.TextBox serverAddrBox;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Button startClientButton;
+        private MenuStrip menuStrip2;
+        private ToolStripMenuItem azioniToolStripMenuItem;
+        private ToolStripMenuItem impostazioniToolStripMenuItem;
+        private ToolStripMenuItem hotkeyToolStripMenuItem;
+        private ToolStripMenuItem visualizzaToolStripMenuItem;
+        private ToolStripMenuItem nuovaConnessioneToolStripMenuItem;
+        private ToolStripMenuItem esciToolStripMenuItem;
+        private ToolStripMenuItem guidaToolStripMenuItem;
+        private ToolStripMenuItem manualeUtenteToolStripMenuItem;
+        private ToolStripMenuItem infoToolStripMenuItem;
         private Button DisconnectButton;
-        private Label label3;
-        private ComboBox comboBox1;
-        private Label label5;
-        private Label label6;
-        private ComboBox comboBox2;
-        private Label label7;
-        private Label label8;
-        private Button button2;
-        private Button button4;
-        private Button button5;
-        private Button button6;
-        
-        public ProgressBar progressBar;
-        public RichTextBox debugBox;
+        public ProgressBar progress_bar;
+        private ListView listView;
+        private ColumnHeader ID;
+        private ColumnHeader Indirizzo;
+        private ColumnHeader Porta;
+        private ColumnHeader Stato;
+        private TableLayoutPanel tableLayoutPanel1;
     }
 }
 
