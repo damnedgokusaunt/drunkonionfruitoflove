@@ -154,11 +154,10 @@ namespace MyProject
         #endregion
 
         #region Clipboard methods
-        public static void handleClipboardData(ConnectionHandler conn)
+        public static bool handleClipboardData(ConnectionHandler conn)
         {
             Socket clipbdChannel = conn.clipbd_channel;
             
-
             try
             {
                 string clipbdMsg;
@@ -175,6 +174,8 @@ namespace MyProject
                     clipbdMsg = MyProtocol.COPY + (string)iData.GetData(DataFormats.Text) + MyProtocol.END_OF_MESSAGE;
                     buffer = Encoding.ASCII.GetBytes(clipbdMsg);
                     Functions.SendData(clipbdChannel, buffer, 0, buffer.Length);
+
+                    return true;
                 }
                 else if (Clipboard.ContainsData(DataFormats.Bitmap))
                 {
@@ -194,6 +195,8 @@ namespace MyProject
                     ReceiveData(clipbdChannel, MyProtocol.POSITIVE_ACK.Length);
                     //invio dati
                     clipbdChannel.Send(res);
+
+                    return true;
                 }
                 else if (Clipboard.ContainsData(DataFormats.FileDrop))
                 {
@@ -249,6 +252,7 @@ namespace MyProject
 
                     Console.WriteLine("done.");
 
+                    return true;
                 }
 
             }
@@ -257,7 +261,10 @@ namespace MyProject
                 MessageBox.Show(e.ToString());
                 SendData(clipbdChannel, Encoding.ASCII.GetBytes(MyProtocol.NEGATIVE_ACK + MyProtocol.END_OF_MESSAGE), 0, (MyProtocol.NEGATIVE_ACK + MyProtocol.END_OF_MESSAGE).Length);
 
+                return false;
             }
+
+            return false;
         }
 
 
