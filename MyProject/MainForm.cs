@@ -19,15 +19,13 @@ namespace MyProject
 {
     public partial class MainForm : Form
     {
-        public delegate void ProgressHandler(double v, string message);
-        public ProgressHandler UpdateProgress;
-
         private Dictionary<Int32, ClientConnectionHandler> connections;
         private ClientConnectionHandler current, target;
         private HotkeysHandler hotkeys_handler;
         private GlobalHook hook;
 
         private SetupHotkeysForm hotkeys_form;
+
 
         #region Hotkey
 
@@ -166,6 +164,55 @@ namespace MyProject
         }
         #endregion
 
+        #region Progress handling methods
+        public void UpdateProgressBar(UInt32 v)
+        {
+            if (this.progressBar1.InvokeRequired)
+            {
+                this.progressBar1.BeginInvoke(new Action(() => this.progressBar1.Value = (int)v));
+            }
+        }
+
+        public void UpdateLabel(string m)
+        {
+            if (this.info_label.InvokeRequired)
+            {
+                Console.WriteLine("Ciao! " + Thread.CurrentThread.ManagedThreadId);
+                this.info_label.BeginInvoke(new Action(() => this.info_label.Text = m));
+            }
+        }
+        #endregion
+
+        public MainForm()
+        {
+            InitializeComponent();
+
+            //this.tableLayoutPanel1.Width = this.Width;
+            //this.tableLayoutPanel1.Height = this.Height / 2;
+            this.hotkeys_form = new SetupHotkeysForm(this.Handle);
+
+            this.connections = new Dictionary<Int32, ClientConnectionHandler>();
+            this.current = null;
+            this.target = null;
+
+            this.hotkeys_handler = new HotkeysHandler(this.Handle);
+
+            this.hook = new GlobalHook();
+            this.hook.Stop();
+
+            // keyboard events
+            this.hook.KeyDown += this.OnKeyDown;
+            this.hook.KeyUp += this.OnKeyUp;
+            this.hook.KeyPress += this.OnKeyPress;
+
+            // mouse events
+            this.hook.MouseDown += this.OnMouseDown;
+            this.hook.MouseUp += this.OnMouseUp;
+            this.hook.MouseWheel += this.OnMouseWheel;
+            this.hook.MouseMove += this.OnMouseMove;
+
+        }
+
         public void NewConnection(string ip_address, string port, string password)
         {
             try
@@ -207,53 +254,7 @@ namespace MyProject
                 MessageBox.Show(ex.Message);
             }
         }
- 
-        public void Update(double v, string message)
-        {
-            if (this.InvokeRequired)
-            {
-                this.BeginInvoke(new Action(() =>
-                    {
-                        // v from 0 to 1
-                        //this.progress_bar.Value = (int) v * 100;
-                        //Console.WriteLine("Thread id: " + Thread.CurrentThread.ManagedThreadId);
-                        //this.debugBox.AppendText(message + "\n");
-                    }));
-            }
-        }
         
-        public MainForm()
-        {
-            InitializeComponent();
-
-            //this.tableLayoutPanel1.Width = this.Width;
-            //this.tableLayoutPanel1.Height = this.Height / 2;
-            this.hotkeys_form = new SetupHotkeysForm(this.Handle);
-
-            this.UpdateProgress += Update;
-
-            this.connections = new Dictionary<Int32, ClientConnectionHandler>();
-            this.current = null;
-            this.target = null;
-
-            this.hotkeys_handler = new HotkeysHandler(this.Handle);
-            
-            this.hook = new GlobalHook();
-            this.hook.Stop();
-            
-            // keyboard events
-            this.hook.KeyDown += this.OnKeyDown;
-            this.hook.KeyUp += this.OnKeyUp;
-            this.hook.KeyPress += this.OnKeyPress;
-
-            // mouse events
-            this.hook.MouseDown += this.OnMouseDown;
-            this.hook.MouseUp += this.OnMouseUp;
-            this.hook.MouseWheel += this.OnMouseWheel;
-            this.hook.MouseMove += this.OnMouseMove;
-
-        }
-
         private void chiudiToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Application.Exit();
@@ -608,6 +609,9 @@ namespace MyProject
         {
             if (target != null)
             {
+                Functions.update_label = this.UpdateLabel;
+                Functions.update_progressbar = this.UpdateProgressBar;
+
                 Thread trd = new Thread(() => Functions.handleClipboardData(target));
                 trd.SetApartmentState(ApartmentState.STA);
                 trd.Start();
@@ -671,6 +675,21 @@ namespace MyProject
         }
 
         private void maskedTextBox1_MaskInputRejected(object sender, MaskInputRejectedEventArgs e)
+        {
+
+        }
+
+        private void importaAppuntiToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void tableLayoutPanel1_Paint(object sender, PaintEventArgs e)
+        {
+        
+        }
+
+        private void comandiToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
         }

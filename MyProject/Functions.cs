@@ -23,6 +23,12 @@ namespace MyProject
 {
     static class Functions
     {
+        public delegate void ProgressBarUpdater(UInt32 v);
+        public delegate void LabelUpdater(string m);
+        
+        public static ProgressBarUpdater update_progressbar;
+        public static LabelUpdater update_label;
+
         [DllImport("user32.dll")]
         static extern void keybd_event(byte key, byte scan, int flags, int extraInfo);
         [DllImport("user32.dll")]
@@ -128,18 +134,21 @@ namespace MyProject
 
             Cursor.Position = new Point(x, y);
         }
+       
         public static void doMouseRightClick()
         {
             // Send click to system
             mouse_event((int)MouseEventFlagsAPI.RIGHTDOWN, 0, 0, 0, 0);
             mouse_event((int)MouseEventFlagsAPI.RIGHTUP, 0, 0, 0, 0);
         }
+        
         public static void doMouseLeftClick()
         {
             // Send click to system
             // mouse_event((int)MouseEventFlagsAPI.LEFTDOWN, 0, 0, 0, 0);
             mouse_event((int)MouseEventFlagsAPI.LEFTUP, 0, 0, 0, 0);
         }
+        
         public static void doMouseWheel(int delta)
         {
             //Console.WriteLine("Server esegue wheel");
@@ -157,7 +166,6 @@ namespace MyProject
         public static bool handleClipboardData(ConnectionHandler conn)
         {
             Socket clipbdChannel = conn.clipbd_channel;
-            
 
             try
             {
@@ -172,7 +180,9 @@ namespace MyProject
 
                 if (Clipboard.ContainsData(DataFormats.Text))
                 {
-                    clipbdMsg = MyProtocol.COPY + (string)iData.GetData(DataFormats.Text) + MyProtocol.END_OF_MESSAGE;
+                    string text = (string)iData.GetData(DataFormats.Text);
+
+                    clipbdMsg = MyProtocol.COPY + text + MyProtocol.END_OF_MESSAGE;
                     buffer = Encoding.ASCII.GetBytes(clipbdMsg);
                     Functions.SendData(clipbdChannel, buffer, 0, buffer.Length);
 
@@ -205,23 +215,20 @@ namespace MyProject
                 {
                     try
                     {
-
                         SendData(clipbdChannel, Encoding.ASCII.GetBytes(MyProtocol.CLEAN + MyProtocol.END_OF_MESSAGE), 0, Encoding.ASCII.GetBytes(MyProtocol.CLEAN + MyProtocol.END_OF_MESSAGE).Length);
                         Console.WriteLine("Clean!");
                         Console.WriteLine("preparazione invio file...");
-
                     }
                     catch (Exception e)
                     {
                         MessageBox.Show(e.ToString());
                     }
 
-                    Console.WriteLine("Il client è pronto a ricevere il file.");
-
                     IDataObject data = Clipboard.GetDataObject();
                     clipContent = data.GetData(DataFormats.FileDrop);
                     path = (string[])clipContent;
                     n = path.Length;
+
 
                     for (int i = 0; i < n; i++)
                     {
@@ -250,10 +257,11 @@ namespace MyProject
                         else
                         {
                             Console.WriteLine("Isn't a File or a Directory!!!");
-                        }
+                        }                  
                     }
 
                     Console.WriteLine("done.");
+                    
                     return true;
                 }
 
@@ -487,11 +495,15 @@ namespace MyProject
 
         public static void SendFile(FileStream fs, Int64 fileSize, Socket clipbdChannel)
         {
+            UInt32 perc = 0;
             Int32 chunks, chunkSize;
-            BinaryReader reader = new BinaryReader(fs);
+            Int64 bytes_sent = 0;
 
+            BinaryReader reader = new BinaryReader(fs);
+         
             chunks = Convert.ToInt32(fileSize / MyProtocol.CHUNK_SIZE);
             chunkSize = 0;
+            perc = 0;
             byte[] bufferFile = new byte[MyProtocol.CHUNK_SIZE];
 
             do
@@ -504,7 +516,6 @@ namespace MyProject
                 else
                 {
                     chunkSize = Convert.ToInt32(fileSize % MyProtocol.CHUNK_SIZE);
-
                 }
 
                 chunks--;
@@ -513,6 +524,11 @@ namespace MyProject
                 try
                 {
                     SendData(clipbdChannel, bufferFile, 0, chunkSize);
+                    bytes_sent += chunkSize;
+                    perc = (UInt32)(bytes_sent * 100 / fileSize);
+
+                    update_label("Inviati " + bytes_sent + " byte su " + fileSize + " byte (" + perc + "%).");
+                    update_progressbar(perc);
                 }
                 catch
                 {
@@ -522,17 +538,18 @@ namespace MyProject
             } while (chunks >= 0);
 
             Console.WriteLine("The end!");
+
+            update_label("File inviato con successo.");
+            update_progressbar(0);
         }
 
         public static void ClipboardSendFile(string name, Socket clipbdChannel)
         {
+            string fileName;
+            string mess = MyProtocol.FILE_SEND;
             FileInfo f;
             FileStream fs;
             Int64 fileSize;
-
-            string fileName;
-            string mess = MyProtocol.FILE_SEND;
-
 
             if (!File.Exists(name)) throw new Exception("File doesn't exist!");
 
@@ -540,11 +557,13 @@ namespace MyProject
             fileSize = f.Length;
             fileName = f.Name;
 
+            
+            MessageBox.Show("Invio file '" + fileName + "' di lunghezza " + fileSize + " byte.");
+
             fs = File.Open(name, FileMode.Open);
 
             SendData(clipbdChannel, Encoding.ASCII.GetBytes(mess + MyProtocol.END_OF_MESSAGE), 0, Encoding.ASCII.GetBytes(mess + MyProtocol.END_OF_MESSAGE).Length);
             Console.WriteLine("Comando invio_file inviato!");
-
 
             SendData(clipbdChannel, BitConverter.GetBytes(fileSize), 0, BitConverter.GetBytes(fileSize).Length);
             Console.WriteLine("FileSize inviata!");
@@ -671,7 +690,6 @@ namespace MyProject
             try
             {
                 clientStream.Write(buffer, offset, length);
-
             }
             catch (Exception e)
             {

@@ -44,7 +44,6 @@ namespace MyProject
                 // Send connection request
                 Functions.SendData(handler, bytes, 0, bytes.Length);
 
-                ((MainForm)form).UpdateProgress(0.0, "Richiesta di connessione inviata.");
 
                 // Receive the response from the remote device.
                 len = MyProtocol.message(MyProtocol.POSITIVE_ACK).Length;
@@ -57,7 +56,6 @@ namespace MyProject
                     Int32 height = Screen.PrimaryScreen.Bounds.Height;
 
                     Console.WriteLine("Thread secondario: " + Thread.CurrentThread.ManagedThreadId);
-                    ((MainForm)form).UpdateProgress(0.5, "Connessione accettata dal sistema remoto.");
 
                     //MessageBox.Show("Coordinate: " + width + "," + height);
                     byte[] resolution = new byte[sizeof(Int32) * 2];
@@ -87,8 +85,6 @@ namespace MyProject
                     IPEndPoint clipboardRemoteEP = new IPEndPoint(remoteEP.Address, tcpRemotePort);
                     clipbd_channel = new Socket(AddressFamily.InterNetwork,SocketType.Stream,ProtocolType.Tcp);
                     clipbd_channel.Connect(clipboardRemoteEP);
-                    
-                    ((MainForm)form).UpdateProgress(1.0, "Connessione instaurata con successo.");
                     
                     return true;
                 }          

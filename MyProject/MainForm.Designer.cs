@@ -35,6 +35,13 @@ namespace MyProject
             this.azioniToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.nuovaConnessioneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.esciToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.comandiToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.importaAppuntiToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.esportaAppuntiToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.importaAppuntiToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.esportaAppuntiVersoIlServerRemotoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.chiudiConnessioneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripComboBox1 = new System.Windows.Forms.ToolStripComboBox();
             this.impostazioniToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.hotkeyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.visualizzaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -42,13 +49,14 @@ namespace MyProject
             this.manualeUtenteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.infoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.DisconnectButton = new System.Windows.Forms.Button();
-            this.progress_bar = new System.Windows.Forms.ProgressBar();
             this.listView = new System.Windows.Forms.ListView();
             this.ID = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.Indirizzo = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.Porta = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.Stato = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.progressBar1 = new System.Windows.Forms.ProgressBar();
+            this.info_label = new System.Windows.Forms.Label();
             this.menuStrip2.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
@@ -59,6 +67,7 @@ namespace MyProject
             this.menuStrip2.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.menuStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.azioniToolStripMenuItem,
+            this.comandiToolStripMenuItem,
             this.impostazioniToolStripMenuItem,
             this.visualizzaToolStripMenuItem,
             this.guidaToolStripMenuItem});
@@ -95,6 +104,57 @@ namespace MyProject
             this.esciToolStripMenuItem.Size = new System.Drawing.Size(178, 22);
             this.esciToolStripMenuItem.Text = "Esci";
             this.esciToolStripMenuItem.Click += new System.EventHandler(this.esciToolStripMenuItem_Click);
+            // 
+            // comandiToolStripMenuItem
+            // 
+            this.comandiToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.importaAppuntiToolStripMenuItem,
+            this.esportaAppuntiToolStripMenuItem,
+            this.importaAppuntiToolStripMenuItem1,
+            this.esportaAppuntiVersoIlServerRemotoToolStripMenuItem,
+            this.chiudiConnessioneToolStripMenuItem});
+            this.comandiToolStripMenuItem.Name = "comandiToolStripMenuItem";
+            this.comandiToolStripMenuItem.Size = new System.Drawing.Size(68, 20);
+            this.comandiToolStripMenuItem.Text = "Comandi";
+            this.comandiToolStripMenuItem.Click += new System.EventHandler(this.comandiToolStripMenuItem_Click);
+            // 
+            // importaAppuntiToolStripMenuItem
+            // 
+            this.importaAppuntiToolStripMenuItem.Name = "importaAppuntiToolStripMenuItem";
+            this.importaAppuntiToolStripMenuItem.Size = new System.Drawing.Size(275, 22);
+            this.importaAppuntiToolStripMenuItem.Text = "Avvia/riprendi controllo";
+            this.importaAppuntiToolStripMenuItem.Click += new System.EventHandler(this.importaAppuntiToolStripMenuItem_Click);
+            // 
+            // esportaAppuntiToolStripMenuItem
+            // 
+            this.esportaAppuntiToolStripMenuItem.Name = "esportaAppuntiToolStripMenuItem";
+            this.esportaAppuntiToolStripMenuItem.Size = new System.Drawing.Size(275, 22);
+            this.esportaAppuntiToolStripMenuItem.Text = "Sospendi controllo";
+            // 
+            // importaAppuntiToolStripMenuItem1
+            // 
+            this.importaAppuntiToolStripMenuItem1.Name = "importaAppuntiToolStripMenuItem1";
+            this.importaAppuntiToolStripMenuItem1.Size = new System.Drawing.Size(275, 22);
+            this.importaAppuntiToolStripMenuItem1.Text = "Importa Appunti dal server remoto";
+            // 
+            // esportaAppuntiVersoIlServerRemotoToolStripMenuItem
+            // 
+            this.esportaAppuntiVersoIlServerRemotoToolStripMenuItem.Name = "esportaAppuntiVersoIlServerRemotoToolStripMenuItem";
+            this.esportaAppuntiVersoIlServerRemotoToolStripMenuItem.Size = new System.Drawing.Size(275, 22);
+            this.esportaAppuntiVersoIlServerRemotoToolStripMenuItem.Text = "Esporta Appunti verso il server remoto";
+            // 
+            // chiudiConnessioneToolStripMenuItem
+            // 
+            this.chiudiConnessioneToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolStripComboBox1});
+            this.chiudiConnessioneToolStripMenuItem.Name = "chiudiConnessioneToolStripMenuItem";
+            this.chiudiConnessioneToolStripMenuItem.Size = new System.Drawing.Size(275, 22);
+            this.chiudiConnessioneToolStripMenuItem.Text = "Chiudi connessione";
+            // 
+            // toolStripComboBox1
+            // 
+            this.toolStripComboBox1.Name = "toolStripComboBox1";
+            this.toolStripComboBox1.Size = new System.Drawing.Size(121, 23);
             // 
             // impostazioniToolStripMenuItem
             // 
@@ -145,20 +205,13 @@ namespace MyProject
             // 
             // DisconnectButton
             // 
-            this.DisconnectButton.Location = new System.Drawing.Point(3, 214);
+            this.DisconnectButton.Location = new System.Drawing.Point(3, 3);
             this.DisconnectButton.Name = "DisconnectButton";
-            this.DisconnectButton.Size = new System.Drawing.Size(104, 23);
+            this.DisconnectButton.Size = new System.Drawing.Size(53, 23);
             this.DisconnectButton.TabIndex = 31;
             this.DisconnectButton.Text = "Chiudi server";
             this.DisconnectButton.UseVisualStyleBackColor = true;
             this.DisconnectButton.Click += new System.EventHandler(this.DisconnectButton_Click);
-            // 
-            // progress_bar
-            // 
-            this.progress_bar.Location = new System.Drawing.Point(113, 214);
-            this.progress_bar.Name = "progress_bar";
-            this.progress_bar.Size = new System.Drawing.Size(236, 23);
-            this.progress_bar.TabIndex = 46;
             // 
             // listView
             // 
@@ -167,9 +220,10 @@ namespace MyProject
             this.Indirizzo,
             this.Porta,
             this.Stato});
-            this.listView.Location = new System.Drawing.Point(113, 3);
+            this.listView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.listView.Location = new System.Drawing.Point(62, 3);
             this.listView.Name = "listView";
-            this.listView.Size = new System.Drawing.Size(248, 205);
+            this.listView.Size = new System.Drawing.Size(357, 180);
             this.listView.TabIndex = 0;
             this.listView.UseCompatibleStateImageBehavior = false;
             this.listView.View = System.Windows.Forms.View.Details;
@@ -193,22 +247,41 @@ namespace MyProject
             // tableLayoutPanel1
             // 
             this.tableLayoutPanel1.ColumnCount = 3;
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 22.96451F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 53.02714F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 24.00835F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12.29167F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 75.83334F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 11.875F));
             this.tableLayoutPanel1.Controls.Add(this.listView, 1, 0);
-            this.tableLayoutPanel1.Controls.Add(this.progress_bar, 1, 1);
-            this.tableLayoutPanel1.Controls.Add(this.DisconnectButton, 0, 1);
+            this.tableLayoutPanel1.Controls.Add(this.DisconnectButton, 0, 0);
+            this.tableLayoutPanel1.Controls.Add(this.progressBar1, 1, 2);
+            this.tableLayoutPanel1.Controls.Add(this.info_label, 1, 1);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 24);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 3;
+            this.tableLayoutPanel1.RowCount = 4;
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 40F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 21F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 44F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(480, 271);
             this.tableLayoutPanel1.TabIndex = 51;
+            this.tableLayoutPanel1.Paint += new System.Windows.Forms.PaintEventHandler(this.tableLayoutPanel1_Paint);
+            // 
+            // progressBar1
+            // 
+            this.progressBar1.Location = new System.Drawing.Point(62, 210);
+            this.progressBar1.Name = "progressBar1";
+            this.progressBar1.Size = new System.Drawing.Size(357, 29);
+            this.progressBar1.TabIndex = 32;
+            // 
+            // info_label
+            // 
+            this.info_label.AutoSize = true;
+            this.info_label.Location = new System.Drawing.Point(62, 186);
+            this.info_label.Name = "info_label";
+            this.info_label.Size = new System.Drawing.Size(35, 13);
+            this.info_label.TabIndex = 33;
+            this.info_label.Text = "label1";
             // 
             // MainForm
             // 
@@ -226,6 +299,7 @@ namespace MyProject
             this.menuStrip2.ResumeLayout(false);
             this.menuStrip2.PerformLayout();
             this.tableLayoutPanel1.ResumeLayout(false);
+            this.tableLayoutPanel1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -244,13 +318,21 @@ namespace MyProject
         private ToolStripMenuItem manualeUtenteToolStripMenuItem;
         private ToolStripMenuItem infoToolStripMenuItem;
         private Button DisconnectButton;
-        public ProgressBar progress_bar;
         private ListView listView;
         private ColumnHeader ID;
         private ColumnHeader Indirizzo;
         private ColumnHeader Porta;
         private ColumnHeader Stato;
         private TableLayoutPanel tableLayoutPanel1;
+        private ToolStripMenuItem comandiToolStripMenuItem;
+        private ToolStripMenuItem importaAppuntiToolStripMenuItem;
+        private ToolStripMenuItem esportaAppuntiToolStripMenuItem;
+        private ToolStripMenuItem importaAppuntiToolStripMenuItem1;
+        private ToolStripMenuItem esportaAppuntiVersoIlServerRemotoToolStripMenuItem;
+        private ToolStripMenuItem chiudiConnessioneToolStripMenuItem;
+        private ToolStripComboBox toolStripComboBox1;
+        private ProgressBar progressBar1;
+        private Label info_label;
     }
 }
 
