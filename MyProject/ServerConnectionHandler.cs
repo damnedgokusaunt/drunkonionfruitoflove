@@ -343,13 +343,13 @@ namespace MyProject
                         break;
 
                     case MyProtocol.KEYDOWN:
-                        bytes = Functions.ReceiveData(handler, 1);
-                        Functions.KeyDown(bytes[0]);
+                        bytes = Functions.ReceiveData(handler, 2);
+                        Functions.KeyDown(bytes[0], bytes[1]);
                        break;
 
                     case MyProtocol.KEYUP:
-                        bytes = Functions.ReceiveData(handler, 1);
-                        Functions.KeyUp(bytes[0]);
+                        bytes = Functions.ReceiveData(handler, 2);
+                        Functions.KeyUp(bytes[0], bytes[1]);
                         break;
                 }
             }
