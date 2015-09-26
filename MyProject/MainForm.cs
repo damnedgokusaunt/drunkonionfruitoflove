@@ -74,26 +74,23 @@ namespace MyProject
         #endregion
 
         #region Keyboard methods
-        private void OnKeyDown(object sender, KeyEventArgs e)
+        private void OnKeyDown(object sender, byte vkCode, byte scanCode)
         {
             if (target != null)
             {
                target.Send(Encoding.ASCII.GetBytes(MyProtocol.KEYDOWN));
-               target.Send(new byte[]{(byte)e.KeyData});
+               target.Send(new byte[]{ vkCode, scanCode });
             }
         }
-        private void OnKeyUp(object sender, KeyEventArgs e)
+        private void OnKeyUp(object sender, byte vkCode, byte scanCode)
         {
             if (target != null)
             {
                target.Send(Encoding.ASCII.GetBytes(MyProtocol.KEYUP));
-               target.Send(new byte[]{(byte)e.KeyData});
+               target.Send(new byte[] { vkCode, scanCode });
             }
         }
-        private void OnKeyPress(object sender, KeyPressEventArgs e)
-        {
-                  
-        }
+
         #endregion
 
         #region Mouse methods
@@ -203,7 +200,6 @@ namespace MyProject
             // keyboard events
             this.hook.KeyDown += this.OnKeyDown;
             this.hook.KeyUp += this.OnKeyUp;
-            this.hook.KeyPress += this.OnKeyPress;
 
             // mouse events
             this.hook.MouseDown += this.OnMouseDown;
