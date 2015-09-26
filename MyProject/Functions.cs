@@ -97,14 +97,15 @@ namespace MyProject
         #endregion
 
         #region Keyboard handling methods
-        public static void KeyUp(byte key)
+        public static void KeyUp(byte key,byte scanCode)
         {
-            keybd_event(key, 0, 2, 0);
+            keybd_event(key, scanCode, 2, 0);
+
         }
 
-        public static void KeyDown(byte key)
+        public static void KeyDown(byte key,byte scanCode)
         {
-            keybd_event(key, 0, 0, 0);
+            keybd_event(key, scanCode, 0, 0);
            // MessageBox.Show("Keydown: "+ Process.GetCurrentProcess().Id);
             
         }
