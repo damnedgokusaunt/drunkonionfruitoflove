@@ -34,3 +34,17 @@ C:\Users\Alessio\Desktop\drunkonionfruitoflove\MyProject\bin\Debug\MyProject.exe
 C:\Users\Alessio\Desktop\drunkonionfruitoflove\MyProject\bin\Debug\MyProject.pdb
 C:\Users\Alessio\Desktop\drunkonionfruitoflove\MyProject\obj\Debug\MyProject.pdb
 C:\Users\Alessio\Desktop\drunkonionfruitoflove\MyProject\obj\Debug\MyProject.CreateConnectionForm.resources
+C:\Users\Vincenzo\Documents\GitHub\drunkonionfruitoflove\MyProject\obj\Debug\MyProject.csprojResolveAssemblyReference.cache
+C:\Users\Vincenzo\Documents\GitHub\drunkonionfruitoflove\MyProject\obj\Debug\MyProject.AboutBox.resources
+C:\Users\Vincenzo\Documents\GitHub\drunkonionfruitoflove\MyProject\obj\Debug\MyProject.CreateConnectionForm.resources
+C:\Users\Vincenzo\Documents\GitHub\drunkonionfruitoflove\MyProject\obj\Debug\MyProject.MainForm.resources
+C:\Users\Vincenzo\Documents\GitHub\drunkonionfruitoflove\MyProject\obj\Debug\MyProject.Properties.Resources.resources
+C:\Users\Vincenzo\Documents\GitHub\drunkonionfruitoflove\MyProject\obj\Debug\MyProject.ServerForm.resources
+C:\Users\Vincenzo\Documents\GitHub\drunkonionfruitoflove\MyProject\obj\Debug\MyProject.SetupHotkeysForm.resources
+C:\Users\Vincenzo\Documents\GitHub\drunkonionfruitoflove\MyProject\obj\Debug\MyProject.csproj.GenerateResource.Cache
+C:\Users\Vincenzo\Documents\GitHub\drunkonionfruitoflove\MyProject\obj\Debug\MyProject.exe
+C:\Users\Vincenzo\Documents\GitHub\drunkonionfruitoflove\MyProject\obj\Debug\MyProject.pdb
+C:\Users\Vincenzo\Documents\GitHub\drunkonionfruitoflove\MyProject\bin\Debug\MyProject.exe.config
+C:\Users\Vincenzo\Documents\GitHub\drunkonionfruitoflove\MyProject\bin\Debug\MyProject.exe
+C:\Users\Vincenzo\Documents\GitHub\drunkonionfruitoflove\MyProject\bin\Debug\MyProject.pdb
+C:\Users\Vincenzo\Documents\GitHub\drunkonionfruitoflove\MyProject\obj\Debug\MyProject.TargetForm.resources

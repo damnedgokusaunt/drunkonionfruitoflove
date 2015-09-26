@@ -39,6 +39,7 @@ namespace MyProject
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ServerForm));
             this.label5 = new System.Windows.Forms.Label();
             this.passwordBox = new System.Windows.Forms.TextBox();
             this.startButton = new System.Windows.Forms.Button();
@@ -49,6 +50,7 @@ namespace MyProject
             this.menu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.sep = new System.Windows.Forms.ToolStripSeparator();
             this.item = new System.Windows.Forms.ToolStripMenuItem();
+            this.mostraFinestraPrincipaleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.comboBox = new System.Windows.Forms.ComboBox();
             this.quitButton = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
@@ -113,30 +115,40 @@ namespace MyProject
             // 
             this.notifyIcon1.BalloonTipIcon = System.Windows.Forms.ToolTipIcon.Info;
             this.notifyIcon1.ContextMenuStrip = this.menu;
-            this.notifyIcon1.Icon = global::MyProject.Properties.Resources.SystemTrayApp;
+            this.notifyIcon1.Icon = ((System.Drawing.Icon)(resources.GetObject("notifyIcon1.Icon")));
             this.notifyIcon1.Text = "Project";
             this.notifyIcon1.Visible = true;
+            this.notifyIcon1.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.notifyIcon1_MouseDoubleClick);
             // 
             // menu
             // 
             this.menu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.sep,
-            this.item});
+            this.item,
+            this.mostraFinestraPrincipaleToolStripMenuItem});
             this.menu.Name = "menu";
-            this.menu.Size = new System.Drawing.Size(93, 32);
+            this.menu.Size = new System.Drawing.Size(209, 54);
             // 
             // sep
             // 
             this.sep.Name = "sep";
-            this.sep.Size = new System.Drawing.Size(89, 6);
+            this.sep.Size = new System.Drawing.Size(205, 6);
             // 
             // item
             // 
             this.item.Image = global::MyProject.Properties.Resources.Exit;
             this.item.Name = "item";
-            this.item.Size = new System.Drawing.Size(92, 22);
+            this.item.Size = new System.Drawing.Size(208, 22);
             this.item.Text = "Exit";
             this.item.Click += new System.EventHandler(this.Exit_Click);
+            // 
+            // mostraFinestraPrincipaleToolStripMenuItem
+            // 
+            this.mostraFinestraPrincipaleToolStripMenuItem.Image = global::MyProject.Properties.Resources.Explorer;
+            this.mostraFinestraPrincipaleToolStripMenuItem.Name = "mostraFinestraPrincipaleToolStripMenuItem";
+            this.mostraFinestraPrincipaleToolStripMenuItem.Size = new System.Drawing.Size(208, 22);
+            this.mostraFinestraPrincipaleToolStripMenuItem.Text = "Mostra finestra principale";
+            this.mostraFinestraPrincipaleToolStripMenuItem.Click += new System.EventHandler(this.mostraFinestraPrincipaleToolStripMenuItem_Click);
             // 
             // comboBox
             // 
@@ -220,6 +232,7 @@ namespace MyProject
         private ToolStripSeparator sep;
         private Button button2;
         private Label label1;
+        private ToolStripMenuItem mostraFinestraPrincipaleToolStripMenuItem;
         
     }
 }

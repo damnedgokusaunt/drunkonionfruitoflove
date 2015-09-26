@@ -24,7 +24,8 @@ namespace MyProject
         private ServerConnectionHandler listener;
         private IPAddress addr;
         private Thread consumer_tcp, consumer_udp, clipboard_worker;
-
+        private TargetForm frm;
+  
         /// <summary>
         /// This method get all addresses of the host and insert them in the combobox
         /// </summary>
@@ -57,9 +58,38 @@ namespace MyProject
             PopulateIPAddressList();
 
             portBox.Text = Convert.ToString(Functions.FindFreePort());
+
+            //delegate for notifyicon
+            notifier = this.notifyIcon1;
+            
+            this.frm= new TargetForm();
+            this.frm.TopMost = true;
+           
+
+            
+        }
+        public static NotifyIcon Notifier { get { return notifier; } }
+        private static NotifyIcon notifier;
+
+
+        public void show_target_form() {
+
+            if (this.InvokeRequired)
+            {
+               this.BeginInvoke(new Action(() => this.frm.Show()));
+            }
         }
 
-        
+        public void hide_target_form()
+        {
+
+            if (this.InvokeRequired)
+            {
+                this.BeginInvoke(new Action(() => this.frm.Hide()));
+            }
+        }
+
+
         // To minimaze inside the tray area
         private void TrayMinimizerForm_Resize(object sender, EventArgs e)
         {
@@ -74,7 +104,7 @@ namespace MyProject
             }
             else if (FormWindowState.Normal == this.WindowState)
             {
-                notifyIcon1.Visible = false;
+                notifyIcon1.Visible = true;
                 //this.Show();
             }
 
@@ -87,7 +117,9 @@ namespace MyProject
             // Check that all the fields are valid
             if (this.passwordBox.Text == string.Empty || this.comboBox.Text == string.Empty || this.portBox.Text == string.Empty)
             {
-                MessageBox.Show("Alcuni campi risultano vuoti.");
+                //MessageBox.Show("Alcuni campi risultano vuoti.");
+                ServerForm.Notifier.ShowBalloonTip(20000, "Attenzione", "Alcuni campi risultano vuoti!", ToolTipIcon.Info);
+                
                 return;
             }
 
@@ -104,8 +136,12 @@ namespace MyProject
 
             try
             {
+                //to associate delegates to methods
                 listener = new ServerConnectionHandler(this, this.addr, Convert.ToInt32(portBox.Text), Functions.Encrypt(passwordBox.Text));
-
+                //delegates for target
+                listener.show = this.show_target_form;
+                listener.hide = this.hide_target_form;
+                
                 Task<bool> t = Task.Factory.StartNew(() => listener.Open());
 
                 t.Wait();
@@ -114,7 +150,7 @@ namespace MyProject
                 {
                     listener.Connected = true;
 
-                    //MessageBox.Show("Connesso.");
+                   
 
                     consumer_tcp = new Thread(listener.ListenTCPChannel);
                     consumer_tcp.IsBackground = true;
@@ -186,7 +222,9 @@ namespace MyProject
         private void ServerForm_Load(object sender, EventArgs e)
         {
             if (!NetworkInterface.GetIsNetworkAvailable())
-                MessageBox.Show("Affinchè l'applicazione funzioni correttamente è necessario che il PC sia connesso ad una rete LAN.");
+               // MessageBox.Show("Affinchè l'applicazione funzioni correttamente è necessario che il PC sia connesso ad una rete LAN.");
+            ServerForm.Notifier.ShowBalloonTip(20000, "Attenzione", "Affinchè l'applicazione funzioni correttamente è necessario che il PC sia connesso ad una rete LAN!", ToolTipIcon.Info);
+                
 
         }
 
@@ -194,6 +232,19 @@ namespace MyProject
         {
             portBox.Text = Convert.ToString(Functions.FindFreePort());
         }
+
+        private void notifyIcon1_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+
+        }
+
+        private void mostraFinestraPrincipaleToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.Show();
+            this.WindowState = FormWindowState.Normal;
+        }
+
+       
 
     }
 }

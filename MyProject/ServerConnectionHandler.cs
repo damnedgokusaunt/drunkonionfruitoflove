@@ -18,11 +18,32 @@ using System.IO;
 
 namespace MyProject
 {
+   
+    
     public class ServerConnectionHandler : ConnectionHandler
     {
+        public delegate void TargetHandlerShow();
+        public delegate void TargetHandlerHide();
+        public TargetHandlerShow show;
+        public TargetHandlerHide hide;
+
+        
+        
         private IPEndPoint udp_remote_endpoint;
         private Int32 widthRatio, heightRatio;
         private byte[] endpoint_resolution;
+     //   Thread worker_target;
+      //  Thread sleeper_target;
+
+        //Delegate for TargetForm
+    /*   public delegate void open_target();
+       public delegate void close_target();
+       public open_target open;
+       public close_target close;
+ */
+
+
+
 
         private bool connected;
         public bool Connected
@@ -40,6 +61,10 @@ namespace MyProject
         public ServerConnectionHandler(Form form, IPAddress ipAddress, int port, string password) : base(form, ipAddress, port, password)
         {
             this.connected = false;
+            TargetForm frm = new TargetForm();
+          
+         //   worker_target = new Thread(() => Application.Run(frm));
+          //  sleeper_target = new Thread(() => frm.Close());
         }
 
         public override bool Open()
@@ -78,7 +103,9 @@ namespace MyProject
                 endpoint_resolution = Functions.ReceiveData(handler, sizeof(Int32) * 2);
                 widthRatio = Screen.PrimaryScreen.Bounds.Width / BitConverter.ToInt32(endpoint_resolution, 0);
                 heightRatio = Screen.PrimaryScreen.Bounds.Height / BitConverter.ToInt32(endpoint_resolution, sizeof(Int32));
-                MessageBox.Show("Connesso.");
+                ServerForm.Notifier.ShowBalloonTip(20000, "Info", "Connesso!", ToolTipIcon.Info);
+               
+               // MessageBox.Show("Connesso.");
 
                 // Create UDP channel
                 Int32 udpPort = Functions.FindFreePort();
@@ -114,7 +141,9 @@ namespace MyProject
             }
             else
             {
-                MessageBox.Show("Richiesta non riconosciuta.");
+                ServerForm.Notifier.ShowBalloonTip(20000, "Info", "Richiesta non riconosciuta!", ToolTipIcon.Info);
+               
+              //  MessageBox.Show("Richiesta non riconosciuta.");
 
                 msg = MyProtocol.message(MyProtocol.NEGATIVE_ACK);
                 bytes = Encoding.ASCII.GetBytes(msg);
@@ -135,8 +164,9 @@ namespace MyProject
 
             handler.Close();
             udp_channel.Close();
-
-            MessageBox.Show("Il server ha chiuso la connessione.");
+            ServerForm.Notifier.ShowBalloonTip(20000, "Info", "Il server ha chiuso la connessione!", ToolTipIcon.Info);
+               
+            //MessageBox.Show("Il server ha chiuso la connessione.");
 
             return true;
         }
@@ -205,16 +235,11 @@ namespace MyProject
                         content = recvbuf.Substring(MyProtocol.COPY.Length, len);
                         //Console.WriteLine("Tentativo di scrittura su clipboard: " + content);
                         Clipboard.SetData(DataFormats.Text, content);
-
-                        MessageBox.Show("Ricevuto un Testo dalla clipboard del client.");
+                        ServerForm.Notifier.ShowBalloonTip(20000, "Aggiornamento clipboard", "Ricevuto un testo dalla clipboard del client!", ToolTipIcon.Info);
+               
+                        //MessageBox.Show("Ricevuto un Testo dalla clipboard del client.");
                         break;
-                        /*
-                    case MyProtocol.RTF:
-                        int lun = recvbuf.Length - MyProtocol.END_OF_MESSAGE.Length - MyProtocol.RTF.Length;
-                        content = recvbuf.Substring(MyProtocol.RTF.Length, lun);
-                        //Console.WriteLine("Tentativo di scrittura su clipboard: " + content);
-                        Clipboard.SetData(DataFormats.Rtf, content);
-                        break;*/
+                    
                     case MyProtocol.FILE_SEND:
                         // Simulo un po' di ritardo di rete
                         Thread.Sleep(1000);
@@ -231,8 +256,9 @@ namespace MyProject
 
                         Functions.handleFileDrop(clipbd_channel, null);
                         Functions.StartClipoardUpdaterThread();
-
-                        MessageBox.Show("Ricevuto un File dalla clipboard del client.");
+                        ServerForm.Notifier.ShowBalloonTip(20000, "Aggiornamento clipboard", "Ricevuto un file dalla clipboard del client!", ToolTipIcon.Info);
+               
+                        //MessageBox.Show("Ricevuto un File dalla clipboard del client.");
                         break;
 
                     case MyProtocol.DIRE_SEND:
@@ -260,8 +286,9 @@ namespace MyProject
 
                         Image image = Functions.ConvertByteArrayToBitmap(imageSource);
                         Clipboard.SetImage(image);
-
-                        MessageBox.Show("Ricevuta Immagine dalla clipboard del client.");
+                        ServerForm.Notifier.ShowBalloonTip(20000, "Aggiornamento clipboard", "Ricevuta un'immagine dalla clipboard del client!", ToolTipIcon.Info);
+               
+                       // MessageBox.Show("Ricevuta Immagine dalla clipboard del client.");
 
                         break;
                     
@@ -277,7 +304,9 @@ namespace MyProject
                         break;
 
                     default:
-                        MessageBox.Show("Comando da tastiera non riconosciuto");
+                        ServerForm.Notifier.ShowBalloonTip(20000, "Aggiornamento clipboard", "Comando da tastiera non riconosciuto!", ToolTipIcon.Info);
+               
+                       // MessageBox.Show("Comando da tastiera non riconosciuto");
                         break;
                 }
             }
@@ -301,16 +330,16 @@ namespace MyProject
                         break;
 
                     case MyProtocol.TARGET:
-
                         byte[] mess = System.Text.Encoding.Default.GetBytes(MyProtocol.POSITIVE_ACK);
                         Functions.SendData(handler, mess, 0, mess.Length);
-                        MessageBox.Show("Sono il target numero: " + Process.GetCurrentProcess().Id);
+                        this.show();   
                         break;
+
 
                     case MyProtocol.PAUSE:
                         byte[] mess1 = System.Text.Encoding.Default.GetBytes(MyProtocol.POSITIVE_ACK);
                         Functions.SendData(handler, mess1, 0, mess1.Length);
-                        MessageBox.Show("Sono il server messo in pausa numero: " + Process.GetCurrentProcess().Id);
+                        this.hide();
                         break;
 
                     case MyProtocol.KEYDOWN:
