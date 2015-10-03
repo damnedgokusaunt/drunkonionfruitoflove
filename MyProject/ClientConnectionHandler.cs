@@ -14,9 +14,10 @@ namespace MyProject
 {
     public class ClientConnectionHandler : ConnectionHandler
     {
+        private IPEndPoint clipboardRemoteEP;
+
         public ClientConnectionHandler(Form mainForm, IPAddress ipAddress, Int32 port, string password) : base(mainForm, ipAddress, port, password) { }
 
-        // Questo metodo viene invocato per connettere l'oggetto con un server
         public override bool Open()
         {
             int len;
@@ -28,15 +29,17 @@ namespace MyProject
             // Connect to  remote device.
             try
             {
-                
                 // Create a TCP/IP  socket.
                 IPEndPoint remoteEP = new IPEndPoint(ipAddress, port);
 
                 handler = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
+                // Set keepalive values
+                Functions.SetKeepAlive(handler, MyProtocol.KEEPALIVE_TIME, MyProtocol.KEEPALIVE_INTERVAL);
+
                 // Connect the socket to the remote endpoint. Catch any errors.
                 handler.Connect(remoteEP);
-                
+
                 msg = MyProtocol.message(MyProtocol.CONNECTION + this.password);
                 bytes = Encoding.ASCII.GetBytes(msg);
 
@@ -82,12 +85,16 @@ namespace MyProject
                     // Receive the TCP port of the server 
                     bytes = Functions.ReceiveData(handler, sizeof(Int32));
                     Int32 tcpRemotePort = BitConverter.ToInt32(bytes, 0);
-                    IPEndPoint clipboardRemoteEP = new IPEndPoint(remoteEP.Address, tcpRemotePort);
-                    clipbd_channel = new Socket(AddressFamily.InterNetwork,SocketType.Stream,ProtocolType.Tcp);
+                    clipboardRemoteEP = new IPEndPoint(remoteEP.Address, tcpRemotePort);
+                    clipbd_channel = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
+                    Functions.SendClipboard = this.SendClipboard;
+                    Functions.ReceiveClipboard = this.ReceiveClipboard;
+
                     clipbd_channel.Connect(clipboardRemoteEP);
-                    
+
                     return true;
-                }          
+                }
             }
             catch (Exception e)
             {
@@ -96,6 +103,8 @@ namespace MyProject
 
             return false;
         }
+
+        
 
         public override bool Close()
         {
@@ -125,19 +134,100 @@ namespace MyProject
             return false;
         }
 
-        public void Send(byte[] bytes)
-        {
-            Functions.SendData(handler, bytes, 0, bytes.Length);
-        }
-
-        public byte[] Receive(int size)
-        {
-            return Functions.ReceiveData(handler, size);
-        }
-
         public void SendUDP(byte[] bytes)
         {
-            udp_channel.Send(bytes, bytes.Length);
+            this.udp_channel.Send(bytes, bytes.Length);
+        }
+
+
+
+        public void SendTCP(Socket sock, byte[] bytes)
+        {
+            bool sent = false;
+            string chespacchioe = Encoding.ASCII.GetString(bytes);
+
+            do
+            {
+                try
+                {
+                    Functions.SendData(this.handler, bytes, 0, bytes.Length);
+                    sent = true;
+                }
+                catch (Exception)
+                {
+                    ((MainForm)this.form).hook.Stop();
+
+                    this.RetryPrimaryConnection();
+                    this.RetryClipboardConnection();
+
+                    ((MainForm)this.form).hook.Start();
+                }
+
+            } while (!sent);
+        }
+
+        public byte[] ReceiveTCP(Socket sock, int size)
+        {
+            byte[] bytes = null;
+
+            try
+            {
+                bytes = Functions.ReceiveData(this.handler, size);
+            }
+            catch (Exception)
+            {
+                ((MainForm)this.form).hook.Stop();
+
+                this.RetryPrimaryConnection();
+                this.RetryClipboardConnection();
+
+                ((MainForm)this.form).hook.Start();
+            }
+
+            return bytes;
+        }
+
+        public override void RetryClipboardConnection()
+        {
+            bool network_available = false;
+
+            while (!network_available)
+            {
+                try
+                {
+                    clipbd_channel.Close();
+                    clipbd_channel = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                    clipbd_channel.Connect(this.clipboardRemoteEP);
+
+                    network_available = true;
+                }
+                catch (SocketException)
+                {
+                    MessageBox.Show("Impossibile raggiungere l'host remoto. Ripristinare la connessione e riprovare");
+                }
+            }
+        }
+
+        public override void RetryPrimaryConnection()
+        {
+            while (true)
+            {
+                try
+                {
+                    
+                    handler.Close();
+                    handler = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                    Functions.SetKeepAlive(handler, MyProtocol.KEEPALIVE_TIME, MyProtocol.KEEPALIVE_INTERVAL);
+
+                    handler.Connect(new IPEndPoint(ipAddress, port));
+
+                    break;
+                }
+                catch (SocketException)
+                {
+                    MessageBox.Show("Impossibile raggiungere l'host remoto. Ripristinare la connessione e riprovare");
+                }
+            }
         }
     }
 }
