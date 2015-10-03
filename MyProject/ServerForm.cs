@@ -58,18 +58,15 @@ namespace MyProject
             PopulateIPAddressList();
 
             portBox.Text = Convert.ToString(Functions.FindFreePort());
-
-            //delegate for notifyicon
-            notifier = this.notifyIcon1;
             
             this.frm= new TargetForm();
-            this.frm.TopMost = true;
-           
+            //this.frm.TopMost = true;
 
+                   
             
         }
-        public static NotifyIcon Notifier { get { return notifier; } }
-        private static NotifyIcon notifier;
+
+        private NotifyIcon notifier;
 
 
         public void show_target_form() {
@@ -79,6 +76,16 @@ namespace MyProject
                this.BeginInvoke(new Action(() => this.frm.Show()));
             }
         }
+
+        public void notify_me(int a, string b, string c, ToolTipIcon cletta)
+        {
+
+            if (this.InvokeRequired)
+            {
+                this.BeginInvoke(new Action(() => this.notifyIcon1.ShowBalloonTip(a,b,c,cletta)));
+            }
+        }
+
 
         public void hide_target_form()
         {
@@ -104,7 +111,7 @@ namespace MyProject
             }
             else if (FormWindowState.Normal == this.WindowState)
             {
-                notifyIcon1.Visible = true;
+                notifyIcon1.Visible = false;
                 //this.Show();
             }
 
@@ -118,7 +125,7 @@ namespace MyProject
             if (this.passwordBox.Text == string.Empty || this.comboBox.Text == string.Empty || this.portBox.Text == string.Empty)
             {
                 //MessageBox.Show("Alcuni campi risultano vuoti.");
-                ServerForm.Notifier.ShowBalloonTip(20000, "Attenzione", "Alcuni campi risultano vuoti!", ToolTipIcon.Info);
+               this.notify_me(20000, "Attenzione", "Alcuni campi risultano vuoti!", ToolTipIcon.Info);
                 
                 return;
             }
@@ -141,7 +148,9 @@ namespace MyProject
                 //delegates for target
                 listener.show = this.show_target_form;
                 listener.hide = this.hide_target_form;
-                
+                listener.notify = this.notify_me;
+                listener.wakeup = this.wakeup_threads;
+
                 Task<bool> t = Task.Factory.StartNew(() => listener.Open());
 
                 t.Wait();
@@ -149,8 +158,6 @@ namespace MyProject
                 if (t.Result)
                 {
                     listener.Connected = true;
-
-                   
 
                     consumer_tcp = new Thread(listener.ListenTCPChannel);
                     consumer_tcp.IsBackground = true;
@@ -223,10 +230,9 @@ namespace MyProject
         {
             if (!NetworkInterface.GetIsNetworkAvailable())
                // MessageBox.Show("Affinchè l'applicazione funzioni correttamente è necessario che il PC sia connesso ad una rete LAN.");
-            ServerForm.Notifier.ShowBalloonTip(20000, "Attenzione", "Affinchè l'applicazione funzioni correttamente è necessario che il PC sia connesso ad una rete LAN!", ToolTipIcon.Info);
-                
-
+            this.notifyIcon1.ShowBalloonTip(20000, "Attenzione", "Affinchè l'applicazione funzioni correttamente è necessario che il PC sia connesso ad una rete LAN!", ToolTipIcon.Info);
         }
+
 
         private void button2_Click(object sender, EventArgs e)
         {
@@ -237,6 +243,19 @@ namespace MyProject
         {
 
         }
+
+
+
+        public void wakeup_threads() 
+        {
+            if (this.consumer_udp.ThreadState == ThreadState.Suspended)
+                this.consumer_udp.Resume();
+
+           // if (this.clipboard_worker.ThreadState == ThreadState.Suspended)
+                this.clipboard_worker.Resume();
+        }
+
+
 
         private void mostraFinestraPrincipaleToolStripMenuItem_Click(object sender, EventArgs e)
         {

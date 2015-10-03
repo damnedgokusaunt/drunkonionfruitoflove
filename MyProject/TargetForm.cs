@@ -16,7 +16,7 @@ namespace MyProject
         public TargetForm()
         {
             InitializeComponent();
-            TopMost = true;
+            //TopMost = true;
             ShowInTaskbar = false;
             FormBorderStyle = FormBorderStyle.None;
             BackColor = Color.LightGreen;
