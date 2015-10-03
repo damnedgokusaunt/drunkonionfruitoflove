@@ -73,7 +73,7 @@ namespace MyProject
             handler = listener.Accept();
             listener.Close();
 
-            Functions.SetKeepAlive(handler, MyProtocol.KEEPALIVE_TIMER, MyProtocol.KEEPALIVE_INTERVAL);
+            Functions.SetKeepAlive(handler, MyProtocol.KEEPALIVE_TIME, MyProtocol.KEEPALIVE_INTERVAL);
          
             msg = MyProtocol.message(MyProtocol.CONNECTION + this.password);
 
@@ -258,7 +258,7 @@ namespace MyProject
                             break;
 
                         case MyProtocol.CLIPBOARD_IMPORT:
-                            bool data_available = Functions.handleClipboardData(this);
+                            bool data_available = Functions.handleClipboardData();
 
                             if (!data_available)
                             {
@@ -293,7 +293,7 @@ namespace MyProject
             listener.Listen(10);
             handler = listener.Accept();
             listener.Close();
-            Functions.SetKeepAlive(handler, MyProtocol.KEEPALIVE_TIMER, MyProtocol.KEEPALIVE_INTERVAL);        
+            Functions.SetKeepAlive(handler, MyProtocol.KEEPALIVE_TIME, MyProtocol.KEEPALIVE_INTERVAL);        
         }
 
     
