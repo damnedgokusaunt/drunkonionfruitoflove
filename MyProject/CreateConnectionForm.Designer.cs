@@ -34,9 +34,9 @@
             this.port_textbox = new System.Windows.Forms.TextBox();
             this.password_textbox = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
+            this.ip_textbox = new System.Windows.Forms.MaskedTextBox();
             this.connect_button = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
-            this.ip_textbox = new System.Windows.Forms.MaskedTextBox();
             this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -108,6 +108,16 @@
             this.label3.Text = "Password";
             this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
+            // ip_textbox
+            // 
+            this.ip_textbox.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.ip_textbox.Location = new System.Drawing.Point(99, 8);
+            this.ip_textbox.Name = "ip_textbox";
+            this.ip_textbox.Size = new System.Drawing.Size(90, 20);
+            this.ip_textbox.TabIndex = 6;
+            this.ip_textbox.Text = "169.254.32.225";
+            this.ip_textbox.MaskInputRejected += new System.Windows.Forms.MaskInputRejectedEventHandler(this.maskedTextBox1_MaskInputRejected);
+            // 
             // connect_button
             // 
             this.connect_button.Location = new System.Drawing.Point(12, 127);
@@ -127,15 +137,6 @@
             this.button1.Text = "Annulla";
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
-            // 
-            // ip_textbox
-            // 
-            this.ip_textbox.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.ip_textbox.Location = new System.Drawing.Point(99, 8);
-            this.ip_textbox.Name = "ip_textbox";
-            this.ip_textbox.Size = new System.Drawing.Size(90, 20);
-            this.ip_textbox.TabIndex = 6;
-            this.ip_textbox.MaskInputRejected += new System.Windows.Forms.MaskInputRejectedEventHandler(this.maskedTextBox1_MaskInputRejected);
             // 
             // CreateConnectionForm
             // 

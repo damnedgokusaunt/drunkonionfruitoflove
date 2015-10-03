@@ -52,23 +52,26 @@ namespace MyProject
                 KeyModifier modifier = (KeyModifier)((int)m.LParam & 0xFFFF);       // The modifier of the hotkey that was pressed.
                 int id = m.WParam.ToInt32();                                        // The id of the hotkey that was pressed.
 
-                switch (id)
-                {
-                    case 0:
-                        SelectServer();
-                        break;
-                    case 2:
-                        SuspendServer();
-                        break;
-                    case 4:
-                        ImportClipboard();
-                        break;
-                    case 6:
-                        ExportClipboard();
-                        break;
-                    default:
-                        throw new Exception("Hotkey non riconosciuta");
-                }
+                MessageBox.Show("Thread principale: " + Thread.CurrentThread.ManagedThreadId);
+
+                    switch (id)
+                    {
+                        case 0:
+                            SelectServer();
+                            break;
+                        case 2:
+                            SuspendServer();
+                            break;
+                        case 4:
+                            ImportClipboard();
+                            break;
+                        case 6:
+                            ExportClipboard();
+                            break;
+                        default:
+                            throw new Exception("Hotkey non riconosciuta");
+                    }
+                
             }
         }
         
@@ -616,10 +619,28 @@ namespace MyProject
                 Functions.update_label = this.UpdateLabel;
                 Functions.update_progressbar = this.UpdateProgressBar;
 
-                Thread trd = new Thread(() => Functions.handleClipboardData());
-                trd.SetApartmentState(ApartmentState.STA);
-                trd.Start();
+                Thread trd = new Thread(() =>
+                    {
+                        try
+                        {
+                            Functions.handleClipboardData();
+                        }
+                        catch (SocketException)
+                        {
+                            this.hook.Stop();
 
+                            target.RetryPrimaryConnection();
+                            target.RetryClipboardConnection();
+
+                            this.hook.Start();
+                            
+                            return;
+                        }
+                    });
+                    
+                trd.SetApartmentState(ApartmentState.STA);
+
+                trd.Start();
             }
         }
 

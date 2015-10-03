@@ -56,9 +56,8 @@ namespace MyProject
         public const int DEFAULT_PORT = 5000;
         public const int CHUNK_SIZE = 1024; // 1 KB
 
-
-
-
+        public const int KEEPALIVE_TIME = 1000*2; // ms
+        public const int KEEPALIVE_INTERVAL = 1000; // ms
 
         public static string message(string code, string pwd)
         {

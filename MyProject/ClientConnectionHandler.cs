@@ -88,10 +88,10 @@ namespace MyProject
                     clipboardRemoteEP = new IPEndPoint(remoteEP.Address, tcpRemotePort);
                     clipbd_channel = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
+                    clipbd_channel.Connect(clipboardRemoteEP);
+
                     Functions.SendClipboard = this.SendClipboard;
                     Functions.ReceiveClipboard = this.ReceiveClipboard;
-
-                    clipbd_channel.Connect(clipboardRemoteEP);
 
                     return true;
                 }
