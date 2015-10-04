@@ -36,6 +36,9 @@ namespace MyProject
         public delegate void AwakeThreadsDelegate();
         public AwakeThreadsDelegate wakeup;
 
+        public delegate void SuspendThreadsDelegate();
+        public SuspendThreadsDelegate suspend;
+
         private IPEndPoint clipboardLocalEndPoint;
         public bool Connected
         {
@@ -71,6 +74,8 @@ namespace MyProject
             listener.Listen(10);
 
             handler = listener.Accept();
+
+           
             listener.Close();
 
             Functions.SetKeepAlive(handler, MyProtocol.KEEPALIVE_TIME, MyProtocol.KEEPALIVE_INTERVAL);
@@ -94,7 +99,9 @@ namespace MyProject
                 widthRatio = Screen.PrimaryScreen.Bounds.Width / BitConverter.ToInt32(endpoint_resolution, 0);
                 heightRatio = Screen.PrimaryScreen.Bounds.Height / BitConverter.ToInt32(endpoint_resolution, sizeof(Int32));
                 this.notify(20000, "Info", "Connesso!", ToolTipIcon.Info);
-               
+                
+
+
                 // Create UDP channel
                 Int32 udpPort = Functions.FindFreePort();
                 IPEndPoint udpLocalEndPoint = new IPEndPoint(ipAddress, udpPort);
@@ -122,6 +129,11 @@ namespace MyProject
 
                 this.clipbd_channel = clipboard_listener.Accept();
                 clipboard_listener.Close();
+                Functions.SetKeepAlive(clipbd_channel, MyProtocol.KEEPALIVE_TIME, MyProtocol.KEEPALIVE_INTERVAL);        
+        
+
+                Functions.SendClipboard = this.SendClipboard;
+                Functions.ReceiveClipboard = this.ReceiveClipboard;
 
                 this.connected = true;
 
@@ -213,6 +225,10 @@ namespace MyProject
                     string command = recvbuf.Substring(0, 4);
                     Console.WriteLine(this.GetType().Name + " - ricevuto comando: " + recvbuf);
 
+                    if (clipbd_channel == null) {
+
+                        MessageBox.Show("clipbd channel a NULL!");
+                    }
                     switch (command)
                     {
                         case MyProtocol.CLEAN:
@@ -257,9 +273,11 @@ namespace MyProject
                             this.notify(20000, "Aggiornamento clipboard", "Ricevuta un'immagine dalla clipboard del client!", ToolTipIcon.Info);
                             break;
 
-                        case MyProtocol.CLIPBOARD_IMPORT:
-                            bool data_available = Functions.handleClipboardData();
+                        case MyProtocol.CLIPBOARD_IMPORT:                        
+                            
+                                bool data_available = Functions.handleClipboardData();
 
+                           
                             if (!data_available)
                             {
                                 data = Encoding.ASCII.GetBytes(MyProtocol.message(MyProtocol.NEGATIVE_ACK));
@@ -274,9 +292,6 @@ namespace MyProject
                     }
                 }
                 catch(SocketException) {
-
-                    //Console.WriteLine("Ho sentitio l'eccezione e mi vo cucco!");
-                    //clipboard_worker.Suspend();
 
                     Thread.CurrentThread.Suspend();
                     Console.WriteLine("Weeeeeeeeeeeee!!");
@@ -305,6 +320,8 @@ namespace MyProject
             clipbd_listener.Listen(10);
             clipbd_channel = clipbd_listener.Accept();
             clipbd_listener.Close();
+            Functions.SetKeepAlive(clipbd_channel, MyProtocol.KEEPALIVE_TIME, MyProtocol.KEEPALIVE_INTERVAL);        
+        
         }
 
 
@@ -345,7 +362,7 @@ namespace MyProject
                         case MyProtocol.KEYDOWN:
                             bytes = Functions.ReceiveData(handler, 2);
                             Functions.KeyDown(bytes[0], bytes[1]);
-                            break;
+                           break;
 
                         case MyProtocol.KEYUP:
                             bytes = Functions.ReceiveData(handler, 2);
@@ -359,7 +376,9 @@ namespace MyProject
 
                     int idd = Thread.CurrentThread.ManagedThreadId;
                     Console.WriteLine("Sono il thread principale:" + idd);                    
-                    MessageBox.Show("Assicurati che la connessione venga ristabilita affinchè i servizi riprendano automaticamente");
+                    MessageBox.Show("La connessione è stata interrotta. Assicurati che la connessione venga ristabilita affinchè i servizi riprendano automaticamente");
+
+                    //this.suspend();
                     RetryPrimaryConnection();
                     RetryClipboardConnection();
                     this.wakeup();

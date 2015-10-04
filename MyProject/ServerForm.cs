@@ -10,7 +10,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-
 using System.Runtime.InteropServices;
 using System.Collections;
 using System.Net.NetworkInformation;
@@ -60,13 +59,10 @@ namespace MyProject
             portBox.Text = Convert.ToString(Functions.FindFreePort());
             
             this.frm= new TargetForm();
-            //this.frm.TopMost = true;
-
-                   
             
         }
 
-        private NotifyIcon notifier;
+      //  private NotifyIcon notifier;
 
 
         public void show_target_form() {
@@ -100,31 +96,27 @@ namespace MyProject
         // To minimaze inside the tray area
         private void TrayMinimizerForm_Resize(object sender, EventArgs e)
         {
-            //notifyIcon1.BalloonTipTitle = "Minimize to Tray App";
-            //notifyIcon1.BalloonTipText = "You have successfully minimized your form.";
-
+            
             if (FormWindowState.Minimized == this.WindowState)
             {
-                //notifyIcon1.Visible = true;
-                //notifyIcon1.ShowBalloonTip(1000);
+                notifyIcon1.Visible = true;
                 this.Hide();
+                    
             }
             else if (FormWindowState.Normal == this.WindowState)
             {
-                notifyIcon1.Visible = false;
-                //this.Show();
+                notifyIcon1.Visible = true;
+                this.ShowInTaskbar = false;
+                
             }
 
         }
-
-    
 
         private void startButton_Click(object sender, EventArgs e)
         {
             // Check that all the fields are valid
             if (this.passwordBox.Text == string.Empty || this.comboBox.Text == string.Empty || this.portBox.Text == string.Empty)
             {
-                //MessageBox.Show("Alcuni campi risultano vuoti.");
                this.notify_me(20000, "Attenzione", "Alcuni campi risultano vuoti!", ToolTipIcon.Info);
                 
                 return;
@@ -150,6 +142,7 @@ namespace MyProject
                 listener.hide = this.hide_target_form;
                 listener.notify = this.notify_me;
                 listener.wakeup = this.wakeup_threads;
+                listener.suspend = this.suspend_threads;
 
                 Task<bool> t = Task.Factory.StartNew(() => listener.Open());
 
@@ -158,6 +151,7 @@ namespace MyProject
                 if (t.Result)
                 {
                     listener.Connected = true;
+
 
                     consumer_tcp = new Thread(listener.ListenTCPChannel);
                     consumer_tcp.IsBackground = true;
@@ -229,7 +223,6 @@ namespace MyProject
         private void ServerForm_Load(object sender, EventArgs e)
         {
             if (!NetworkInterface.GetIsNetworkAvailable())
-               // MessageBox.Show("Affinchè l'applicazione funzioni correttamente è necessario che il PC sia connesso ad una rete LAN.");
             this.notifyIcon1.ShowBalloonTip(20000, "Attenzione", "Affinchè l'applicazione funzioni correttamente è necessario che il PC sia connesso ad una rete LAN!", ToolTipIcon.Info);
         }
 
@@ -244,17 +237,35 @@ namespace MyProject
 
         }
 
-
+        public void suspend_threads()
+        {
+            if(this.consumer_udp.ThreadState != ThreadState.Suspended)
+            {
+                this.consumer_udp.Suspend();
+            }
+            if (this.clipboard_worker.ThreadState != ThreadState.Suspended)
+            {
+                this.clipboard_worker.Suspend();
+            }
+        }
 
         public void wakeup_threads() 
         {
-            if (this.consumer_udp.ThreadState == ThreadState.Suspended)
+            try
+            {
                 this.consumer_udp.Resume();
 
-           // if (this.clipboard_worker.ThreadState == ThreadState.Suspended)
-                this.clipboard_worker.Resume();
-        }
+            }
+            catch { }
 
+            try
+            {
+                this.clipboard_worker.Resume();
+
+            }
+            catch { }
+
+        }
 
 
         private void mostraFinestraPrincipaleToolStripMenuItem_Click(object sender, EventArgs e)
@@ -262,8 +273,6 @@ namespace MyProject
             this.Show();
             this.WindowState = FormWindowState.Normal;
         }
-
-       
 
     }
 }
