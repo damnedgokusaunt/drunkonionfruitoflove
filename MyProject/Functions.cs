@@ -223,67 +223,35 @@ namespace MyProject
                 
                 if (Clipboard.ContainsData(DataFormats.FileDrop))
                 {
-                    try
-                    {
-                        SendClipboard(Encoding.ASCII.GetBytes(MyProtocol.CLEAN + MyProtocol.END_OF_MESSAGE));
+                    SendClipboard(Encoding.ASCII.GetBytes(MyProtocol.CLEAN + MyProtocol.END_OF_MESSAGE));
 
-                        Console.WriteLine("Clean!");
-                        Console.WriteLine("preparazione invio file...");
-                    }
-                    catch (Exception e)
-                    {
-                        MessageBox.Show(e.ToString());
-                    }
+                    Console.WriteLine("Clean!");
+                    Console.WriteLine("preparazione invio file...");
 
+                    
                     IDataObject data = Clipboard.GetDataObject();
                     clipContent = data.GetData(DataFormats.FileDrop);
                     path = (string[])clipContent;
                     n = path.Length;
 
-
                     for (int i = 0; i < n; i++)
                     {
                         if (File.Exists(path[i]))
-                        {
-                            try
-                            {
-                                ClipboardSendFile(path[i]);
-                            }
-                            catch (Exception e)
-                            {
-                                MessageBox.Show(e.ToString());
-                            }
-                        }
+                            ClipboardSendFile(path[i]);
                         else if (Directory.Exists(path[i]))
-                        {
-                            try
-                            {
-                                ClipboardRecursiveDirectorySend(path[i]);
-                            }
-                            catch (Exception e)
-                            {
-                                MessageBox.Show(e.ToString());
-                            }
-                        }
+                            ClipboardRecursiveDirectorySend(path[i]);
                         else
-                        {
-                            Console.WriteLine("Isn't a File or a Directory!!!");
-                        }                  
+                            Console.WriteLine("Isn't a File or a Directory!!!");              
                     }
 
                     Console.WriteLine("done.");
                     
                     return true;
                 }
-
-
             }
-            catch (Exception e)
+            catch (SocketException)
             {
-                MessageBox.Show(e.ToString());
-                SendClipboard(Encoding.ASCII.GetBytes(MyProtocol.NEGATIVE_ACK + MyProtocol.END_OF_MESSAGE));
-                
-                return false;
+                throw;
             }
 
             return false;
@@ -292,13 +260,15 @@ namespace MyProject
 
         public static void receiveFile(Socket sock, string fileName, Int64 fileSize)
         {
-            //clipFile cd;
+            Int64 bytes_sent = 0;
+            UInt32 perc;
             Int32 chunks, chunkSize, resto;
 
             string path = fileName;
 
-            //FILE TRANSFER           
+            //FILE TRANSFER
             FileStream output = File.Create(path);
+            
 
             Console.WriteLine("creato file: " + fileName);
 
@@ -313,32 +283,36 @@ namespace MyProject
             do
             {
                 if (chunks > 0)
-                {
                     chunkSize = MyProtocol.CHUNK_SIZE;
-                }
                 else
                 {
                     resto = Convert.ToInt32(fileSize % MyProtocol.CHUNK_SIZE);
                     if (resto > 0)
-                    {
                         chunkSize = resto;
-                    }
                     else
-                    {
                         break;
-                    }
                 }
 
                 chunks--;
 
                 try
                 {
-                    buffer = ReceiveData(sock, chunkSize);
+                    buffer = ReceiveClipboard(chunkSize);
+
+                    bytes_sent += chunkSize;
+                    perc = (UInt32)(bytes_sent * 100 / fileSize);
+                
+                    if (update_label !=null && update_progressbar!=null)
+                    {
+                        update_label("Ricevuti " + bytes_sent + "/" + fileSize + " byte (" + perc + "%).");
+                        update_progressbar(perc);
+                    }
+
                 }
-                catch (Exception e)
+                catch (SocketException)
                 {
                     output.Close();
-                    throw e;
+                    throw;
                 }
 
                 //Console.WriteLine(Encoding.ASCII.GetString(buffer, 0, chunkSize));
@@ -367,60 +341,42 @@ namespace MyProject
             StringCollection FileCollection = new StringCollection();
             byte[] buffer = null;
 
-
-            Console.WriteLine("Inizio ricezione di un file.");
-
-            // Ricezione della dimensione del file
-            Console.WriteLine("Aspetto di ricevere dim del file...");
             try
             {
-                buffer = ReceiveData(sock, sizeof(Int64));
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-                return;
-            }
-            Int64 fileSize = BitConverter.ToInt64(buffer, 0);
+                Console.WriteLine("Inizio ricezione di un file.");
 
-            // Ricezione del nome del file
-            Console.WriteLine("Aspetto di ricevere nome del file...");
-            try
-            {
+                // Ricezione della dimensione del file
+                Console.WriteLine("Aspetto di ricevere dim del file...");
+
+                buffer = ReceiveClipboard(sizeof(Int64));
+
+                Int64 fileSize = BitConverter.ToInt64(buffer, 0);
+
+                // Ricezione del nome del file
+                Console.WriteLine("Aspetto di ricevere nome del file...");
+
                 string recvbuf = null;
                 int bytesRec;
                 byte[] bytes = new byte[1];
 
-                do
-                {
-                    bytesRec = sock.Receive(bytes);
-                    recvbuf += Encoding.ASCII.GetString(bytes, 0, bytesRec);
-                }
-                while (recvbuf.IndexOf(MyProtocol.END_OF_MESSAGE) == -1);
+                fileName = ReceiveTillTerminator(sock);
 
-                Console.WriteLine("(da nome file) ho ricevuto: " + recvbuf);
-                fileName = recvbuf.Substring(0, recvbuf.IndexOf(MyProtocol.END_OF_MESSAGE));
                 Console.WriteLine("Nome del file: " + fileName);
 
                 if (baseDir != null)
-                {
                     fileName = baseDir + Path.DirectorySeparatorChar + fileName;
-                }
                 else
-                {
                     fileName = MyProtocol.CLIPBOARD_DIR + Path.DirectorySeparatorChar + fileName;
-                }
+
+                Console.WriteLine("Inizio trasferimento file: " + fileName);
+
+                receiveFile(sock, fileName, fileSize);
+                Console.WriteLine("Fine trasferimento file: " + fileName);
             }
-            catch (Exception e)
+            catch (SocketException)
             {
-                Console.WriteLine(e.Message);
-                return;
+                throw;
             }
-
-            Console.WriteLine("Inizio trasferimento file: " + fileName);
-
-            receiveFile(sock, fileName, fileSize);
-            Console.WriteLine("Fine trasferimento file: " + fileName);
         }
 
         public static void ReceiveSubDirectory(Socket sock, string basedir)
@@ -430,47 +386,46 @@ namespace MyProject
             //Int32 dirNameSize;
             string dirName, newBaseDir;
 
-            do
+            try
             {
-                cmd = ReceiveTillTerminator(sock);
-
-                switch (cmd)
+                do
                 {
-                    case MyProtocol.FILE_SEND:
-                        try
-                        {
-                            sock.Send(Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK));
-                        }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine(e.Message);
-                            return;
-                        }
-                        handleFileDrop(sock, basedir);
-                        break;
+                    cmd = ReceiveTillTerminator(sock);
 
-                    case MyProtocol.DIRE_SEND:
-                        // nome directory
-                        dirName = ReceiveTillTerminator(sock);
-                        dirName = System.IO.Path.GetInvalidFileNameChars().Aggregate(dirName, (current, c) => current.Replace(c.ToString(), string.Empty));
-                        newBaseDir = System.IO.Path.Combine(basedir, dirName);
+                    switch (cmd)
+                    {
+                        case MyProtocol.FILE_SEND:
+                            SendClipboard(Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK));
+                            handleFileDrop(sock, basedir);
+                            break;
 
-                        Directory.CreateDirectory(newBaseDir);
+                        case MyProtocol.DIRE_SEND:
+                            // nome directory
+                            dirName = ReceiveTillTerminator(sock);
+                            dirName = System.IO.Path.GetInvalidFileNameChars().Aggregate(dirName, (current, c) => current.Replace(c.ToString(), string.Empty));
+                            newBaseDir = System.IO.Path.Combine(basedir, dirName);
 
-                        Console.WriteLine("Nuova cartella: " + newBaseDir);
+                            Directory.CreateDirectory(newBaseDir);
 
-                        ReceiveSubDirectory(sock, newBaseDir);
-                        break;
+                            Console.WriteLine("Nuova cartella: " + newBaseDir);
 
-                    case MyProtocol.END_OF_DIR:
-                        Console.WriteLine("End of directory. up of a level");
-                        break;
+                            ReceiveSubDirectory(sock, newBaseDir);
+                            break;
 
-                    default:
-                        Console.WriteLine("invalid message");
-                        throw new Exception("Invalid message received from server while trying to transfer directory content.");
-                }
-            } while (cmd != MyProtocol.END_OF_DIR);
+                        case MyProtocol.END_OF_DIR:
+                            Console.WriteLine("End of directory. up of a level");
+                            break;
+
+                        default:
+                            Console.WriteLine("invalid message");
+                            throw new Exception("Invalid message received from server while trying to transfer directory content.");
+                    }
+                } while (cmd != MyProtocol.END_OF_DIR);
+            }
+            catch (SocketException)
+            {
+                throw;
+            }
         }
 
         public static string ReceiveDirectory(Socket sock)
@@ -483,25 +438,24 @@ namespace MyProject
             int bytesRec;
             byte[] bytes = new byte[1];
             string recvbuf = null;
-            do
+
+            try
             {
-                bytesRec = sock.Receive(bytes);
-                recvbuf += Encoding.ASCII.GetString(bytes, 0, bytesRec);
-                //Console.WriteLine("recvbuf: " + recvbuf);
+                basedir = ReceiveTillTerminator(sock);
+
+                Console.WriteLine("Ricevuto nome dir: " + basedir);
+
+                myBaseDir = Path.Combine(MyProtocol.CLIPBOARD_DIR, basedir);
+                DirectoryInfo di = Directory.CreateDirectory(myBaseDir);
+
+                ReceiveSubDirectory(sock, myBaseDir);
+
+                return myBaseDir;
             }
-            while (recvbuf.IndexOf(MyProtocol.END_OF_MESSAGE) == -1);
-
-            basedir = recvbuf.Substring(0, recvbuf.IndexOf(MyProtocol.END_OF_MESSAGE));
-
-            Console.WriteLine("Ricevuto nome dir: " + basedir);
-
-            myBaseDir = Path.Combine(MyProtocol.CLIPBOARD_DIR, basedir);
-            DirectoryInfo di = Directory.CreateDirectory(myBaseDir);
-
-
-            ReceiveSubDirectory(sock, myBaseDir);
-
-            return myBaseDir;
+            catch (SocketException)
+            {
+                throw;
+            }
         }
 
         public static void SendFile(FileStream fs, Int64 fileSize)
@@ -535,20 +489,23 @@ namespace MyProject
                 {
                     SendClipboard(bufferFile);
                     bytes_sent += chunkSize;
-                    if (bytes_sent == 196608)
-                    {
-                        Console.WriteLine("Ciaaaaaao");
-                    }
                     perc = (UInt32)(bytes_sent * 100 / fileSize);
 
                     Console.WriteLine("Inviati " + bytes_sent + " byte su " + fileSize + " byte (" + perc + "%).");
-                    update_label("Inviati " + bytes_sent + " byte su " + fileSize + " byte (" + perc + "%).");
-                    update_progressbar(perc);
+
+                    if(update_label != null && update_progressbar != null)
+                    {
+                        update_label("Inviati " + bytes_sent + " byte su " + fileSize + " byte (" + perc + "%).");
+                        update_progressbar(perc);
+                    }
                 }
                 catch
                 {
-                    update_label("Impossibile inviare il file per un errore di rete.");
-                    update_progressbar(0);
+                    if (update_label != null && update_progressbar != null)
+                    {
+                        update_label("Impossibile inviare il file per un errore di rete.");
+                        update_progressbar(0);
+                    }
 
                     fs.Close();
 
@@ -562,8 +519,12 @@ namespace MyProject
 
             Console.WriteLine("The end!");
 
-            update_label("File inviato con successo.");
-            update_progressbar(0);
+            if(update_label!=null && update_progressbar!=null)
+            {
+                update_label("File inviato con successo.");
+                update_progressbar(0);
+            }
+            
         }
 
         public static void ClipboardSendFile(string name)
@@ -582,25 +543,42 @@ namespace MyProject
 
             
             MessageBox.Show("Invio file '" + fileName + "' di lunghezza " + fileSize + " byte.");
-
-            fs = File.Open(name, FileMode.Open);
-
-            SendClipboard(Encoding.ASCII.GetBytes(mess + MyProtocol.END_OF_MESSAGE));
+            try
+            {
+                fs = File.Open(name, FileMode.Open);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                MessageBox.Show("Non hai i permessi per aprire questo file.");
+                return;
+            }
             
-            Console.WriteLine("Comando invio_file inviato!");
 
-            SendClipboard(BitConverter.GetBytes(fileSize));
+            try
+            {
+                SendClipboard(Encoding.ASCII.GetBytes(mess + MyProtocol.END_OF_MESSAGE));
+
+                Console.WriteLine("Comando invio_file inviato!");
+
+                SendClipboard(BitConverter.GetBytes(fileSize));
+
+                Console.WriteLine("FileSize inviata!");
+
+                SendClipboard(Encoding.ASCII.GetBytes(fileName + MyProtocol.END_OF_MESSAGE));
+                Console.WriteLine("Sto inviando il file: " + fileName);
+
+                SendFile(fs, fileSize);
+
+                fs.Close();
+
+                Console.WriteLine("Done.");
+            }
+            catch (SocketException)
+            {
+                fs.Close();
+                throw;
+            }
             
-            Console.WriteLine("FileSize inviata!");
-
-            SendClipboard(Encoding.ASCII.GetBytes(fileName + MyProtocol.END_OF_MESSAGE));
-            Console.WriteLine("Sto inviando il file: " + fileName);
-
-            SendFile(fs, fileSize);
-
-            fs.Close();
-
-            Console.WriteLine("Done.");
         }
 
 
@@ -621,21 +599,23 @@ namespace MyProject
 
             string com = MyProtocol.DIRE_SEND;
 
-            SendClipboard(Encoding.ASCII.GetBytes(com + MyProtocol.END_OF_MESSAGE));
-            SendClipboard(Encoding.ASCII.GetBytes(dirName + MyProtocol.END_OF_MESSAGE));
-            
-            foreach (string f in Directory.GetFiles(sDir))
+            try
             {
-                ClipboardSendFile(f);
-            }
+                SendClipboard(Encoding.ASCII.GetBytes(com + MyProtocol.END_OF_MESSAGE));
+                SendClipboard(Encoding.ASCII.GetBytes(dirName + MyProtocol.END_OF_MESSAGE));
 
-            foreach (string d in Directory.GetDirectories(sDir))
+                foreach (string f in Directory.GetFiles(sDir))
+                    ClipboardSendFile(f);
+
+                foreach (string d in Directory.GetDirectories(sDir))
+                    ClipboardRecursiveDirectorySend(d);
+
+                SendClipboard(Encoding.ASCII.GetBytes(MyProtocol.END_OF_DIR + MyProtocol.END_OF_MESSAGE));
+            }
+            catch (SocketException)
             {
-                ClipboardRecursiveDirectorySend(d);
+                throw;
             }
-
-            SendClipboard(Encoding.ASCII.GetBytes(MyProtocol.END_OF_DIR + MyProtocol.END_OF_MESSAGE));
-            
         }
 
         public static void UpdateClipboard()
@@ -728,13 +708,12 @@ namespace MyProject
         
         public static string ReceiveTillTerminator(Socket sock)
         {
-            int bytesRec;
             byte[] bytes = new byte[1];
             string recvbuf = null, cmd = null;
             do
             {
-                bytesRec = sock.Receive(bytes);
-                recvbuf += Encoding.ASCII.GetString(bytes, 0, bytesRec);
+                bytes = ReceiveClipboard(1);
+                recvbuf += Encoding.ASCII.GetString(bytes);
                 //Console.WriteLine("recvbuf: " + recvbuf);
             }
             while (recvbuf.IndexOf(MyProtocol.END_OF_MESSAGE) == -1);
@@ -768,6 +747,7 @@ namespace MyProject
 
             clientStream.Flush();
         }
+        
         public static byte[] ReceiveData(Socket sock, int size)
         {
             int bytesRead = 0;
