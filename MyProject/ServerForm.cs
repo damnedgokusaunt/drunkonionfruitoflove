@@ -13,7 +13,7 @@ using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using System.Collections;
 using System.Net.NetworkInformation;
-
+using Microsoft.Win32;
 
 namespace MyProject
 {
@@ -52,17 +52,18 @@ namespace MyProject
 
         public ServerForm()
         {
+            Functions.AddApplicatinToCurrentUserStartup();
+
             InitializeComponent();
 
             PopulateIPAddressList();
 
             portBox.Text = Convert.ToString(Functions.FindFreePort());
-            
-            this.frm= new TargetForm();
-            
-        }
 
-      //  private NotifyIcon notifier;
+            this.frm = new TargetForm();
+
+      
+        }
 
 
         public void show_target_form() {

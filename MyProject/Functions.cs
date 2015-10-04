@@ -17,6 +17,7 @@ using System.Data;
 using System.Collections.Specialized;
 using System.Security.Cryptography;
 using System.Diagnostics;
+using Microsoft.Win32;
 
 
 namespace MyProject
@@ -705,7 +706,19 @@ namespace MyProject
             }
             return true;
         }
+
+
+        public static void AddApplicatinToCurrentUserStartup() {
+
+            using (RegistryKey key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true))
+            {
+                key.SetValue("MyProject", "\"" + System.Reflection.Assembly.GetExecutingAssembly().Location + "\"");
+            }
         
+        }
+
+
+
         public static string ReceiveTillTerminator(Socket sock)
         {
             byte[] bytes = new byte[1];
@@ -767,6 +780,7 @@ namespace MyProject
                     throw e;
                 }
 
+                
                 if (bytesRead == 0)
                     throw new IOException();
 
