@@ -25,11 +25,11 @@ namespace MyProject
         public abstract void RetryPrimaryConnection();
         public abstract void RetryClipboardConnection();
 
-        public void SendClipboard(byte[] bytes)
+        public void SendClipboard(byte[] bytes, int length)
         {
             try
             {
-                Functions.SendData(this.clipbd_channel, bytes, 0, bytes.Length);
+                Functions.SendData(this.clipbd_channel, bytes, 0, length);
             }
             catch (SocketException)
             {

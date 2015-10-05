@@ -52,7 +52,6 @@ namespace MyProject
                 KeyModifier modifier = (KeyModifier)((int)m.LParam & 0xFFFF);       // The modifier of the hotkey that was pressed.
                 int id = m.WParam.ToInt32();                                        // The id of the hotkey that was pressed.
 
-                MessageBox.Show("Thread principale: " + Thread.CurrentThread.ManagedThreadId);
 
                     switch (id)
                     {
@@ -64,6 +63,7 @@ namespace MyProject
                             break;
                         case 4:
                             ImportClipboard();
+                            
                             break;
                         case 6:
                             ExportClipboard();
@@ -178,7 +178,6 @@ namespace MyProject
         {
             if (this.info_label.InvokeRequired)
             {
-                Console.WriteLine("Ciao! " + Thread.CurrentThread.ManagedThreadId);
                 this.info_label.BeginInvoke(new Action(() => this.info_label.Text = m));
             }
         }
@@ -274,6 +273,7 @@ namespace MyProject
 
         private void SelectServer()
         {
+            string msg;
             byte[] bytes;
             Int32 lookup_key = -1;
 
@@ -289,69 +289,67 @@ namespace MyProject
                 return;
             }
 
-            connections.TryGetValue(lookup_key, out current);
-            
-                // If I am controlling one server, I MUST pause it.
-                if (target != null)
-                {
-                    MessageBox.Show("Invio richiesta di PAUSE.");
-                    current.SendTCP(current.handler, Encoding.ASCII.GetBytes(MyProtocol.PAUSE));
+            // If I am controlling one server, I MUST pause it.
+            if (target != null)
+            {
+                target.SendTCP(target.handler, Encoding.ASCII.GetBytes(MyProtocol.PAUSE));
 
-                    bytes = current.ReceiveTCP(current.handler, MyProtocol.POSITIVE_ACK.Length);
-                    
-                    if (bytes == null)
-                        return;
-
-                    string msg = Encoding.ASCII.GetString(bytes);
-                    if (msg == MyProtocol.POSITIVE_ACK)
-                    {
-                        hook.Stop();
-
-                        target = null;
-                    }
-                }
-
-                List<int> keys = connections.Keys.ToList();
-                foreach(int key in keys)
-                {
-                    listView.Items[key].SubItems[3].Text = "Pause.";
-                }
-
-                MessageBox.Show("Invio richiesta di target.");
-                // The client sends a TARGET request to the server
-                current.SendTCP(current.handler, Encoding.ASCII.GetBytes(MyProtocol.TARGET));
-
-                bytes = current.ReceiveTCP(current.handler, MyProtocol.POSITIVE_ACK.Length);
-
+                bytes = target.ReceiveTCP(target.handler, MyProtocol.POSITIVE_ACK.Length);   
                 if (bytes == null)
                     return;
 
-                string mess = Encoding.ASCII.GetString(bytes);
-                if(mess == MyProtocol.POSITIVE_ACK)
+                msg = Encoding.ASCII.GetString(bytes);
+                if (msg == MyProtocol.POSITIVE_ACK)
                 {
-                    listView.Items[lookup_key].SubItems[3].Text = "Target";
-                    target = current;
-                    hook.Start();
+                    hook.Stop();
+                    target = null;
                 }
-        
-            
+            }
+
+            List<int> keys = connections.Keys.ToList();
+            foreach(int key in keys)
+            {
+                listView.Items[key].SubItems[3].Text = "Pause.";
+            }
+
+            connections.TryGetValue(lookup_key, out current);
+
+
+            // The client sends a TARGET request to the server
+            current.SendTCP(current.handler, Encoding.ASCII.GetBytes(MyProtocol.TARGET));
+
+            bytes = current.ReceiveTCP(current.handler, MyProtocol.POSITIVE_ACK.Length);
+            if (bytes == null)
+                return;
+
+            msg = Encoding.ASCII.GetString(bytes);
+            if(msg == MyProtocol.POSITIVE_ACK)
+            {
+                listView.Items[lookup_key].SubItems[3].Text = "Target";
+                target = current;
+                Functions.SendClipboard = target.SendClipboard;
+                Functions.ReceiveClipboard = target.ReceiveClipboard;
+                hook.Start();
+            }   
         }
 
 
         private void SuspendServer()
         {
+            byte[] bytes;
+            string msg;
+
             if (target == null)
             {
                 MessageBox.Show("Non hai nessuno da mettere in pausa.");
                 return;
             }
 
-            MessageBox.Show("Invio richiesta di PAUSE.");
             // The client sends a PAUSE request to the server
             target.SendTCP(target.handler, Encoding.ASCII.GetBytes(MyProtocol.PAUSE));
 
-            byte[] bytes = current.ReceiveTCP(current.handler, MyProtocol.POSITIVE_ACK.Length);
-            string msg = Encoding.ASCII.GetString(bytes);
+            bytes = current.ReceiveTCP(current.handler, MyProtocol.POSITIVE_ACK.Length);
+            msg = Encoding.ASCII.GetString(bytes);
             if (msg == MyProtocol.POSITIVE_ACK)
             {
                 foreach (int key in connections.Keys.ToList())
@@ -360,7 +358,6 @@ namespace MyProject
                 }
 
                 hook.Stop();
-
                 target = null;
             }
         }
@@ -523,16 +520,31 @@ namespace MyProject
                 MessageBox.Show("Hotkey impostata!");
              * */
         }
-
-        private bool doImport()
+        private void HandleFileSend()
         {
-            bool WillReceiveFileDrop = false;
+            // Simulo un po' di ritardo di rete
+            Thread.Sleep(1000);
+            // Now send ack
+            /*
+            byte[] data = Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK);
+            Functions.SendClipboard(data);*/
+            Functions.handleFileDrop(target.clipbd_channel, null);
+            Functions.StartClipoardUpdaterThread();
+            MessageBox.Show("Ricevuto un File dalla clipboard del client.");
+
+        }
+        private void doImport()
+        {
+            byte[] bytes = null;
 
             try
             {
-                Functions.SendData(target.clipbd_channel, Encoding.ASCII.GetBytes(MyProtocol.CLIPBOARD_IMPORT + MyProtocol.END_OF_MESSAGE), 0, (MyProtocol.CLIPBOARD_IMPORT + MyProtocol.END_OF_MESSAGE).Length);
+                bytes = Encoding.ASCII.GetBytes(MyProtocol.CLIPBOARD_IMPORT + MyProtocol.END_OF_MESSAGE);
+                Functions.SendClipboard(bytes, bytes.Length);
 
+                
                 string recvbuf = Functions.ReceiveTillTerminator(target.clipbd_channel);
+                
                 string command = recvbuf.Substring(0, 4);
                 Console.WriteLine(this.GetType().Name + " - ricevuto comando: " + recvbuf);
 
@@ -541,7 +553,16 @@ namespace MyProject
                     case MyProtocol.CLEAN:
                         // Now, I'm starting to clean my clipboard folder as you told me.
                         Functions.CleanClipboardDir(Path.GetFullPath(MyProtocol.CLIPBOARD_DIR));
-                        WillReceiveFileDrop = true;
+
+                        recvbuf = Functions.ReceiveTillTerminator(target.clipbd_channel);
+                        
+                        command = recvbuf.Substring(0, 4);
+                        Console.WriteLine(this.GetType().Name + " - ricevuto comando: " + recvbuf);
+
+                        if(command == MyProtocol.FILE_SEND)
+                        {
+                            HandleFileSend();
+                        }
                         break;
 
                     case MyProtocol.COPY:
@@ -554,14 +575,7 @@ namespace MyProject
                         break;
 
                     case MyProtocol.FILE_SEND:
-                        // Simulo un po' di ritardo di rete
-                        Thread.Sleep(1000);
-                        // Now send ack
-                        byte[] data = Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK);
-                        Functions.SendData(target.clipbd_channel, data, 0, data.Length);
-                        Functions.handleFileDrop(target.clipbd_channel, null);
-                        Functions.StartClipoardUpdaterThread();
-                        MessageBox.Show("Ricevuto un File dalla clipboard del client.");
+                        HandleFileSend();
                         break;
 
                     case MyProtocol.DIRE_SEND:
@@ -572,10 +586,14 @@ namespace MyProject
                         break;
 
                     case MyProtocol.IMG:
-                        Functions.SendData(target.clipbd_channel, Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), 0, MyProtocol.POSITIVE_ACK.Length);
-                        byte[] length = Functions.ReceiveData(target.clipbd_channel, sizeof(Int32));
+                        bytes = Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK);
+                        Functions.SendClipboard(bytes, bytes.Length);
+                        byte[] length = Functions.ReceiveClipboard(sizeof(Int32));
                         Int32 length_int32 = BitConverter.ToInt32(length, 0);
-                        Functions.SendData(target.clipbd_channel, Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), 0, MyProtocol.POSITIVE_ACK.Length);
+
+                        bytes = Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK);
+                        Functions.SendClipboard(bytes, bytes.Length);
+
                         byte[] imageSource = Functions.ReceiveData(target.clipbd_channel, length_int32);
                         Image image = Functions.ConvertByteArrayToBitmap(imageSource);
                         Clipboard.SetImage(image);
@@ -587,7 +605,7 @@ namespace MyProject
                         break;
 
                     default:
-                        MessageBox.Show("Comando da tastiera non riconosciuto");
+                        MessageBox.Show("Comando clipboard non riconosciuto");
                         break;
                 }
             }
@@ -595,8 +613,6 @@ namespace MyProject
             {
                 throw;
             }
-
-            return WillReceiveFileDrop;
         }
 
         private void ImportClipboard()
@@ -607,7 +623,7 @@ namespace MyProject
                     {
                         try
                         {
-                            while(doImport());
+                            doImport();
                         }
                         catch (SocketException)
                         {

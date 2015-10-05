@@ -27,7 +27,7 @@ namespace MyProject
         public delegate void ProgressBarUpdater(UInt32 v);
         public delegate void LabelUpdater(string m);
 
-        public delegate void SendClipboardDelegate(byte[] bytes);
+        public delegate void SendClipboardDelegate(byte[] bytes, int length);
         public delegate byte[] ReceiveClipboardDelegate(int size);
         
         public static ProgressBarUpdater update_progressbar;
@@ -190,7 +190,7 @@ namespace MyProject
                     clipbdMsg = MyProtocol.COPY + text + MyProtocol.END_OF_MESSAGE;
                     buffer = Encoding.ASCII.GetBytes(clipbdMsg);
 
-                    SendClipboard(buffer);
+                    SendClipboard(buffer, buffer.Length);
 
                     return true;
                 }
@@ -200,7 +200,8 @@ namespace MyProject
                     Console.WriteLine("Bitmap");
 
                     //invio comando bitmap + terminatore
-                    SendClipboard(Encoding.ASCII.GetBytes(MyProtocol.IMG + MyProtocol.END_OF_MESSAGE));
+                    buffer = Encoding.ASCII.GetBytes(MyProtocol.IMG + MyProtocol.END_OF_MESSAGE);
+                    SendClipboard(buffer, buffer.Length);
                     
                     //attendo ack di ricezione
                     ReceiveClipboard(MyProtocol.POSITIVE_ACK.Length);
@@ -211,20 +212,21 @@ namespace MyProject
                     byte[] res = ConvertBitmapToByteArray(img);
                     //invio la dimensione dei dati
                     Int32 dim = res.Length;
-                    SendClipboard(BitConverter.GetBytes(dim));
+                    SendClipboard(BitConverter.GetBytes(dim), sizeof(Int32));
 
                     //attendo ack di ricezione
                     ReceiveClipboard(MyProtocol.POSITIVE_ACK.Length);
                     
                     //invio dati
-                    SendClipboard(res);
+                    SendClipboard(res, res.Length);
 
                     return true;
                 }
                 
                 if (Clipboard.ContainsData(DataFormats.FileDrop))
                 {
-                    SendClipboard(Encoding.ASCII.GetBytes(MyProtocol.CLEAN + MyProtocol.END_OF_MESSAGE));
+                    buffer = Encoding.ASCII.GetBytes(MyProtocol.CLEAN + MyProtocol.END_OF_MESSAGE);
+                    SendClipboard(buffer, buffer.Length);
 
                     Console.WriteLine("Clean!");
                     Console.WriteLine("preparazione invio file...");
@@ -332,6 +334,13 @@ namespace MyProject
                 Console.WriteLine("written a chunck. remain " + chunks + " to write");
             } while (chunks >= 0);
 
+            if (update_label != null && update_progressbar != null)
+            {
+                update_label("File ricevuto correttamente.");
+                update_progressbar(0);
+            }
+                
+
             Console.WriteLine("Done!");
             output.Close();
         }
@@ -386,6 +395,7 @@ namespace MyProject
             string cmd = String.Empty;
             //Int32 dirNameSize;
             string dirName, newBaseDir;
+            byte[] bytes = null;
 
             try
             {
@@ -396,7 +406,8 @@ namespace MyProject
                     switch (cmd)
                     {
                         case MyProtocol.FILE_SEND:
-                            SendClipboard(Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK));
+                            bytes = Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK);
+                            SendClipboard(bytes, bytes.Length);
                             handleFileDrop(sock, basedir);
                             break;
 
@@ -488,7 +499,7 @@ namespace MyProject
                 reader.Read(bufferFile, 0, chunkSize);
                 try
                 {
-                    SendClipboard(bufferFile);
+                    SendClipboard(bufferFile, chunkSize);
                     bytes_sent += chunkSize;
                     perc = (UInt32)(bytes_sent * 100 / fileSize);
 
@@ -531,10 +542,11 @@ namespace MyProject
         public static void ClipboardSendFile(string name)
         {
             string fileName;
-            string mess = MyProtocol.FILE_SEND;
+            string mess;
             FileInfo f;
             FileStream fs;
             Int64 fileSize;
+            byte[] bytes = null;
 
             if (!File.Exists(name)) throw new Exception("File doesn't exist!");
 
@@ -557,15 +569,19 @@ namespace MyProject
 
             try
             {
-                SendClipboard(Encoding.ASCII.GetBytes(mess + MyProtocol.END_OF_MESSAGE));
+                bytes = Encoding.ASCII.GetBytes(MyProtocol.FILE_SEND + MyProtocol.END_OF_MESSAGE);
+                SendClipboard(bytes, bytes.Length);
 
                 Console.WriteLine("Comando invio_file inviato!");
 
-                SendClipboard(BitConverter.GetBytes(fileSize));
+                
+                SendClipboard(BitConverter.GetBytes(fileSize), sizeof(Int64));
 
                 Console.WriteLine("FileSize inviata!");
 
-                SendClipboard(Encoding.ASCII.GetBytes(fileName + MyProtocol.END_OF_MESSAGE));
+                bytes = Encoding.ASCII.GetBytes(fileName + MyProtocol.END_OF_MESSAGE);
+                SendClipboard(bytes, bytes.Length);
+
                 Console.WriteLine("Sto inviando il file: " + fileName);
 
                 SendFile(fs, fileSize);
@@ -602,8 +618,11 @@ namespace MyProject
 
             try
             {
-                SendClipboard(Encoding.ASCII.GetBytes(com + MyProtocol.END_OF_MESSAGE));
-                SendClipboard(Encoding.ASCII.GetBytes(dirName + MyProtocol.END_OF_MESSAGE));
+                buffer = Encoding.ASCII.GetBytes(com + MyProtocol.END_OF_MESSAGE);
+                SendClipboard(buffer, buffer.Length);
+
+                buffer = Encoding.ASCII.GetBytes(dirName + MyProtocol.END_OF_MESSAGE);
+                SendClipboard(buffer, buffer.Length);
 
                 foreach (string f in Directory.GetFiles(sDir))
                     ClipboardSendFile(f);
@@ -611,7 +630,8 @@ namespace MyProject
                 foreach (string d in Directory.GetDirectories(sDir))
                     ClipboardRecursiveDirectorySend(d);
 
-                SendClipboard(Encoding.ASCII.GetBytes(MyProtocol.END_OF_DIR + MyProtocol.END_OF_MESSAGE));
+                buffer = Encoding.ASCII.GetBytes(MyProtocol.END_OF_DIR + MyProtocol.END_OF_MESSAGE);
+                SendClipboard(buffer, buffer.Length);
             }
             catch (SocketException)
             {
@@ -719,10 +739,10 @@ namespace MyProject
 
 
 
-        public static string ReceiveTillTerminator(Socket sock)
+        public static string ReceiveTillTerminator(Socket s)
         {
             byte[] bytes = new byte[1];
-            string recvbuf = null, cmd = null;
+            string recvbuf = string.Empty, cmd = null;
             do
             {
                 bytes = ReceiveClipboard(1);
