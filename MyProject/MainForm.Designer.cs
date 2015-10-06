@@ -57,6 +57,7 @@ namespace MyProject
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.info_label = new System.Windows.Forms.Label();
+            this.chiudiConnessioneToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip2.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
@@ -82,6 +83,7 @@ namespace MyProject
             this.azioniToolStripMenuItem.AccessibleRole = System.Windows.Forms.AccessibleRole.None;
             this.azioniToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.nuovaConnessioneToolStripMenuItem,
+            this.chiudiConnessioneToolStripMenuItem1,
             this.esciToolStripMenuItem});
             this.azioniToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.azioniToolStripMenuItem.ForeColor = System.Drawing.Color.MidnightBlue;
@@ -283,6 +285,12 @@ namespace MyProject
             this.info_label.TabIndex = 33;
             this.info_label.Text = "label1";
             // 
+            // chiudiConnessioneToolStripMenuItem1
+            // 
+            this.chiudiConnessioneToolStripMenuItem1.Name = "chiudiConnessioneToolStripMenuItem1";
+            this.chiudiConnessioneToolStripMenuItem1.Size = new System.Drawing.Size(178, 22);
+            this.chiudiConnessioneToolStripMenuItem1.Text = "Chiudi connessione";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -333,6 +341,7 @@ namespace MyProject
         private ToolStripComboBox toolStripComboBox1;
         private ProgressBar progressBar1;
         private Label info_label;
+        private ToolStripMenuItem chiudiConnessioneToolStripMenuItem1;
     }
 }
 

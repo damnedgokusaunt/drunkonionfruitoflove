@@ -60,6 +60,8 @@ namespace MyProject
                 comboBoxes[i].Text = comboBoxes[i].GetItemText(comboBoxes[i].Items[0]);
                 comboBoxes[i].TextChanged += delegate { this.button1.Enabled = true;  };
             }
+
+            this.SetHotkeys();
         }
 
         private void SetupHotkeysForm_Load(object sender, EventArgs e)

@@ -59,6 +59,8 @@ namespace MyProject
         public const int KEEPALIVE_TIME = 1000*2; // ms
         public const int KEEPALIVE_INTERVAL = 1000; // ms
 
+        public const int MAX_ATTEMPTS = 1;
+
         public static string message(string code, string pwd)
         {
             return code + pwd + END_OF_MESSAGE;

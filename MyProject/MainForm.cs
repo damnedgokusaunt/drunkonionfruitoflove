@@ -165,6 +165,161 @@ namespace MyProject
         }
         #endregion
 
+        #region Clipboard methods
+        private void HandleFileSend()
+        {
+            // Simulo un po' di ritardo di rete
+            Thread.Sleep(1000);
+            // Now send ack
+            /*
+            byte[] data = Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK);
+            Functions.SendClipboard(data);*/
+            Functions.handleFileDrop(target.clipbd_channel, null);
+            Functions.StartClipoardUpdaterThread();
+            MessageBox.Show("Ricevuto un File dalla clipboard del client.");
+
+        }
+
+        private void doImport()
+        {
+            byte[] bytes = null;
+
+            try
+            {
+                bytes = Encoding.ASCII.GetBytes(MyProtocol.CLIPBOARD_IMPORT + MyProtocol.END_OF_MESSAGE);
+                Functions.SendClipboard(bytes, bytes.Length);
+
+
+                string recvbuf = Functions.ReceiveTillTerminator(target.clipbd_channel);
+
+                string command = recvbuf.Substring(0, 4);
+                Console.WriteLine(this.GetType().Name + " - ricevuto comando: " + recvbuf);
+
+                switch (command)
+                {
+                    case MyProtocol.CLEAN:
+                        // Now, I'm starting to clean my clipboard folder as you told me.
+                        Functions.CleanClipboardDir(Path.GetFullPath(MyProtocol.CLIPBOARD_DIR));
+
+                        recvbuf = Functions.ReceiveTillTerminator(target.clipbd_channel);
+
+                        command = recvbuf.Substring(0, 4);
+                        Console.WriteLine(this.GetType().Name + " - ricevuto comando: " + recvbuf);
+
+                        if (command == MyProtocol.FILE_SEND)
+                        {
+                            HandleFileSend();
+                        }
+                        break;
+
+                    case MyProtocol.COPY:
+                        string content;
+                        int len = recvbuf.Length - MyProtocol.COPY.Length;
+                        content = recvbuf.Substring(MyProtocol.COPY.Length, len);
+                        //Console.WriteLine("Tentativo di scrittura su clipboard: " + content);
+                        Clipboard.SetData(DataFormats.Text, content);
+                        MessageBox.Show("Ricevuto un Testo dalla clipboard del client.");
+                        break;
+
+                    case MyProtocol.FILE_SEND:
+                        HandleFileSend();
+                        break;
+
+                    case MyProtocol.DIRE_SEND:
+                        // Simulo un po' di ritardo di rete
+                        Thread.Sleep(1000);
+                        Functions.ReceiveDirectory(target.clipbd_channel);
+                        Functions.StartClipoardUpdaterThread();
+                        break;
+
+                    case MyProtocol.IMG:
+                        bytes = Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK);
+                        Functions.SendClipboard(bytes, bytes.Length);
+                        byte[] length = Functions.ReceiveClipboard(sizeof(Int32));
+                        Int32 length_int32 = BitConverter.ToInt32(length, 0);
+
+                        bytes = Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK);
+                        Functions.SendClipboard(bytes, bytes.Length);
+
+                        byte[] imageSource = Functions.ReceiveData(target.clipbd_channel, length_int32);
+                        Image image = Functions.ConvertByteArrayToBitmap(imageSource);
+                        Clipboard.SetImage(image);
+                        MessageBox.Show("Ricevuta Immagine dalla clipboard del client.");
+                        break;
+
+                    case MyProtocol.NEGATIVE_ACK:
+                        //debugBox.AppendText("Nessun dato negli appunti del sistema remoto \n");
+                        break;
+
+                    default:
+                        MessageBox.Show("Comando clipboard non riconosciuto");
+                        break;
+                }
+            }
+            catch (SocketException)
+            {
+                throw;
+            }
+        }
+
+        
+        private void ImportClipboard()
+        {
+            if (target != null)
+            {
+                Thread t = new Thread(() =>
+                {
+                    try
+                    {
+                        doImport();
+                    }
+                    catch (SocketException)
+                    {
+                        //this.hook.Stop();
+
+                        target.RetryPrimaryConnection();
+                        target.RetryClipboardConnection();
+
+                        //this.hook.Start();
+
+                        return;
+                    }
+                });
+                t.SetApartmentState(ApartmentState.STA);
+                t.Start();
+            }
+        }
+
+        private void ExportClipboard()
+        {
+            if (target != null)
+            {
+                Thread trd = new Thread(() =>
+                {
+                    try
+                    {
+                        Functions.handleClipboardData();
+                    }
+                    catch (SocketException)
+                    {
+                        //this.hook.Stop();
+
+                        target.RetryPrimaryConnection();
+                        target.RetryClipboardConnection();
+
+                        //this.hook.Start();
+
+                        return;
+                    }
+                });
+
+                trd.SetApartmentState(ApartmentState.STA);
+
+                trd.Start();
+            }
+        }
+        #endregion
+
         #region Progress handling methods
         public void UpdateProgressBar(UInt32 v)
         {
@@ -218,6 +373,8 @@ namespace MyProject
             {
                 // Istanzia oggetto client
                 ClientConnectionHandler new_connection = new ClientConnectionHandler(this, IPAddress.Parse(ip_address), Convert.ToInt32(port), Functions.Encrypt(password));
+
+                new_connection.remove_target = this.removeTarget;
 
                 Functions.update_label = this.UpdateLabel;
                 Functions.update_progressbar = this.UpdateProgressBar;
@@ -332,7 +489,6 @@ namespace MyProject
                 hook.Start();
             }   
         }
-
 
         private void SuspendServer()
         {
@@ -520,156 +676,9 @@ namespace MyProject
                 MessageBox.Show("Hotkey impostata!");
              * */
         }
-        private void HandleFileSend()
-        {
-            // Simulo un po' di ritardo di rete
-            Thread.Sleep(1000);
-            // Now send ack
-            /*
-            byte[] data = Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK);
-            Functions.SendClipboard(data);*/
-            Functions.handleFileDrop(target.clipbd_channel, null);
-            Functions.StartClipoardUpdaterThread();
-            MessageBox.Show("Ricevuto un File dalla clipboard del client.");
-
-        }
-        private void doImport()
-        {
-            byte[] bytes = null;
-
-            try
-            {
-                bytes = Encoding.ASCII.GetBytes(MyProtocol.CLIPBOARD_IMPORT + MyProtocol.END_OF_MESSAGE);
-                Functions.SendClipboard(bytes, bytes.Length);
-
-                
-                string recvbuf = Functions.ReceiveTillTerminator(target.clipbd_channel);
-                
-                string command = recvbuf.Substring(0, 4);
-                Console.WriteLine(this.GetType().Name + " - ricevuto comando: " + recvbuf);
-
-                switch (command)
-                {
-                    case MyProtocol.CLEAN:
-                        // Now, I'm starting to clean my clipboard folder as you told me.
-                        Functions.CleanClipboardDir(Path.GetFullPath(MyProtocol.CLIPBOARD_DIR));
-
-                        recvbuf = Functions.ReceiveTillTerminator(target.clipbd_channel);
-                        
-                        command = recvbuf.Substring(0, 4);
-                        Console.WriteLine(this.GetType().Name + " - ricevuto comando: " + recvbuf);
-
-                        if(command == MyProtocol.FILE_SEND)
-                        {
-                            HandleFileSend();
-                        }
-                        break;
-
-                    case MyProtocol.COPY:
-                        string content;
-                        int len = recvbuf.Length - MyProtocol.COPY.Length;
-                        content = recvbuf.Substring(MyProtocol.COPY.Length, len);
-                        //Console.WriteLine("Tentativo di scrittura su clipboard: " + content);
-                        Clipboard.SetData(DataFormats.Text, content);
-                        MessageBox.Show("Ricevuto un Testo dalla clipboard del client.");
-                        break;
-
-                    case MyProtocol.FILE_SEND:
-                        HandleFileSend();
-                        break;
-
-                    case MyProtocol.DIRE_SEND:
-                        // Simulo un po' di ritardo di rete
-                        Thread.Sleep(1000);
-                        Functions.ReceiveDirectory(target.clipbd_channel);
-                        Functions.StartClipoardUpdaterThread();
-                        break;
-
-                    case MyProtocol.IMG:
-                        bytes = Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK);
-                        Functions.SendClipboard(bytes, bytes.Length);
-                        byte[] length = Functions.ReceiveClipboard(sizeof(Int32));
-                        Int32 length_int32 = BitConverter.ToInt32(length, 0);
-
-                        bytes = Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK);
-                        Functions.SendClipboard(bytes, bytes.Length);
-
-                        byte[] imageSource = Functions.ReceiveData(target.clipbd_channel, length_int32);
-                        Image image = Functions.ConvertByteArrayToBitmap(imageSource);
-                        Clipboard.SetImage(image);
-                        MessageBox.Show("Ricevuta Immagine dalla clipboard del client.");
-                        break;
-
-                    case MyProtocol.NEGATIVE_ACK:
-                        //debugBox.AppendText("Nessun dato negli appunti del sistema remoto \n");
-                        break;
-
-                    default:
-                        MessageBox.Show("Comando clipboard non riconosciuto");
-                        break;
-                }
-            }
-            catch (SocketException)
-            {
-                throw;
-            }
-        }
-
-        private void ImportClipboard()
-        {
-            if (target != null) 
-            {
-                Thread t = new Thread(() =>
-                    {
-                        try
-                        {
-                            doImport();
-                        }
-                        catch (SocketException)
-                        {
-                            //this.hook.Stop();
-
-                            target.RetryPrimaryConnection();
-                            target.RetryClipboardConnection();
-
-                            //this.hook.Start();
-
-                            return;
-                        }
-                    });
-                t.SetApartmentState(ApartmentState.STA);
-                t.Start();          
-            }
-        }
-
-        private void ExportClipboard()
-        {
-            if (target != null)
-            {
-                Thread trd = new Thread(() =>
-                    {
-                        try
-                        {
-                            Functions.handleClipboardData();
-                        }
-                        catch (SocketException)
-                        {
-                            //this.hook.Stop();
-
-                            target.RetryPrimaryConnection();
-                            target.RetryClipboardConnection();
-
-                            //this.hook.Start();
-                            
-                            return;
-                        }
-                    });
-                    
-                trd.SetApartmentState(ApartmentState.STA);
-
-                trd.Start();
-            }
-        }
+        
+        
+        
 
         private void label7_Click(object sender, EventArgs e)
         {
@@ -723,7 +732,7 @@ namespace MyProject
 
         private void esciToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Application.Exit();
+            throw new NotImplementedException();
         }
 
         private void maskedTextBox1_MaskInputRejected(object sender, MaskInputRejectedEventArgs e)
@@ -746,7 +755,29 @@ namespace MyProject
 
         }
 
+        public void removeTarget()
+        {
+            Int32 key = -1;
 
+            if (connections.ContainsValue(target))
+            {
+                foreach (KeyValuePair<Int32, ClientConnectionHandler> pair in connections)
+                {
+                    if (pair.Value.Equals(target))
+                    {
+                        key = pair.Key;
+                        break;
+                    }
+                }
+            }
+
+            if (key != -1)
+            {
+                connections.Remove(key); // Remove from Dictionary
+                listView.Items[key].Remove();    // Remove from ListView
+                target = null;
+            }
+        }
     }
 
 }

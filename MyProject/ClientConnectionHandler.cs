@@ -14,6 +14,9 @@ namespace MyProject
 {
     public class ClientConnectionHandler : ConnectionHandler
     {
+        public delegate void RemoveTargetDelegate();
+        public RemoveTargetDelegate remove_target;
+
         private IPEndPoint clipboardRemoteEP;
 
         public ClientConnectionHandler(Form mainForm, IPAddress ipAddress, Int32 port, string password) : base(mainForm, ipAddress, port, password) { }
@@ -141,31 +144,23 @@ namespace MyProject
             this.udp_channel.Send(bytes, bytes.Length);
         }
 
-
-
+        
         public void SendTCP(Socket sock, byte[] bytes)
         {
-            bool sent = false;
-            string chespacchioe = Encoding.ASCII.GetString(bytes);
-
             do
             {
                 try
                 {
-                    Functions.SendData(this.handler, bytes, 0, bytes.Length);
-                    sent = true;
+                    Functions.SendData(this.handler, bytes, 0, bytes.Length);             
+                    break;
                 }
                 catch (Exception)
                 {
-                    ((MainForm)this.form).hook.Stop();
-
-                    this.RetryPrimaryConnection();
-                    this.RetryClipboardConnection();
-
-                    ((MainForm)this.form).hook.Start();
+                    if (!RetryConnection())
+                        break;
                 }
 
-            } while (!sent);
+            } while (true);
         }
 
         public byte[] ReceiveTCP(Socket sock, int size)
@@ -178,61 +173,76 @@ namespace MyProject
             }
             catch (Exception)
             {
-                ((MainForm)this.form).hook.Stop();
-
-                this.RetryPrimaryConnection();
-                this.RetryClipboardConnection();
-
-                ((MainForm)this.form).hook.Start();
+                this.RetryConnection();
             }
 
             return bytes;
         }
 
-        public override void RetryClipboardConnection()
-        {
-            bool network_available = false;
-
-            while (!network_available)
-            {
-                try
-                {
-                    clipbd_channel.Close();
-                    clipbd_channel = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-
-                    Functions.SetKeepAlive(clipbd_channel, MyProtocol.KEEPALIVE_TIME, MyProtocol.KEEPALIVE_INTERVAL);
-
-                    clipbd_channel.Connect(this.clipboardRemoteEP);
-                    
-                    network_available = true;
-                }
-                catch (SocketException)
-                {
-                    MessageBox.Show("Impossibile raggiungere l'host remoto. Ripristinare la connessione e riprovare");
-                }
-            }
-        }
-
         public override void RetryPrimaryConnection()
         {
-            while (true)
+            try
+            {
+
+                handler.Close();
+                handler = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                Functions.SetKeepAlive(handler, MyProtocol.KEEPALIVE_TIME, MyProtocol.KEEPALIVE_INTERVAL);
+
+                handler.Connect(new IPEndPoint(ipAddress, port));
+            }
+            catch (SocketException)
+            {
+                throw;
+            }
+        }
+
+        public override void RetryClipboardConnection()
+        {
+            try
+            {
+                clipbd_channel.Close();
+                clipbd_channel = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
+                Functions.SetKeepAlive(clipbd_channel, MyProtocol.KEEPALIVE_TIME, MyProtocol.KEEPALIVE_INTERVAL);
+
+                clipbd_channel.Connect(this.clipboardRemoteEP);
+            }
+            catch (SocketException)
+            {
+                throw;
+            }
+        }
+
+        
+        private bool RetryConnection()
+        {
+            bool success = false;
+
+            ((MainForm)this.form).hook.Stop();
+
+            for (int i = 0; i < MyProtocol.MAX_ATTEMPTS && !success; i++)
             {
                 try
                 {
-                    
-                    handler.Close();
-                    handler = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                    Functions.SetKeepAlive(handler, MyProtocol.KEEPALIVE_TIME, MyProtocol.KEEPALIVE_INTERVAL);
+                    this.RetryPrimaryConnection();
+                    this.RetryClipboardConnection();
 
-                    handler.Connect(new IPEndPoint(ipAddress, port));
-
-                    break;
+                    success = true;
                 }
-                catch (SocketException)
+                catch
                 {
-                    MessageBox.Show("Impossibile raggiungere l'host remoto. Ripristinare la connessione e riprovare");
+                    MessageBox.Show("Impossibile comunicare con l'host remoto. Tentativo " + i + "/2");
                 }
+
             }
+
+            ((MainForm)this.form).hook.Start();
+
+            if (!success)
+                remove_target();
+
+            return success;
         }
+
     }
 }
