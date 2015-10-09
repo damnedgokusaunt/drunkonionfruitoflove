@@ -154,9 +154,9 @@ namespace MyProject
             byte[] bytes = Encoding.ASCII.GetBytes(MyProtocol.message(MyProtocol.POSITIVE_ACK));
             // Send ack
             Functions.SendData(handler, bytes, 0, bytes.Length);
+            
             connected = false;
-            handler.Close();
-            udp_channel.Close();
+
             this.notify(20000, "Info", "Il server ha chiuso la connessione!", ToolTipIcon.Info);
           
             return true;
@@ -240,7 +240,7 @@ namespace MyProject
                             int len = recvbuf.Length - MyProtocol.COPY.Length;
                             content = recvbuf.Substring(MyProtocol.COPY.Length, len);
                             //Console.WriteLine("Tentativo di scrittura su clipboard: " + content);
-                            Clipboard.SetData(DataFormats.Text, content);
+                            Functions.clipboardSetData(DataFormats.Text, content);
                             this.notify(20000, "Aggiornamento clipboard", "Ricevuto un testo dalla clipboard del client!", ToolTipIcon.Info);
                             break;
 
@@ -250,7 +250,7 @@ namespace MyProject
                             // Now send ack
                             Functions.SendData(clipbd_channel, Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), 0, MyProtocol.POSITIVE_ACK.Length); 
                             Functions.handleFileDrop(clipbd_channel, null);
-                            Functions.StartClipoardUpdaterThread();
+                            Functions.UpdateClipboard();
                             this.notify(20000, "Aggiornamento clipboard", "Ricevuto un file dalla clipboard del client!", ToolTipIcon.Info);
                             break;
 
@@ -259,7 +259,7 @@ namespace MyProject
                             Thread.Sleep(1000);
 
                             Functions.ReceiveDirectory(clipbd_channel);
-                            Functions.StartClipoardUpdaterThread();
+                            Functions.UpdateClipboard();
                             break;
 
                         case MyProtocol.IMG:
@@ -269,7 +269,7 @@ namespace MyProject
                             Functions.SendData(clipbd_channel, Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), 0, MyProtocol.POSITIVE_ACK.Length);
                             byte[] imageSource = Functions.ReceiveData(clipbd_channel, length_int32);
                             Image image = Functions.ConvertByteArrayToBitmap(imageSource);
-                            Clipboard.SetImage(image);
+                            Functions.clipboardSetImage(image);
                             this.notify(20000, "Aggiornamento clipboard", "Ricevuta un'immagine dalla clipboard del client!", ToolTipIcon.Info);
                             break;
 

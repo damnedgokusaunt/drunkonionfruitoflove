@@ -34,6 +34,7 @@ namespace MyProject
             this.menuStrip2 = new System.Windows.Forms.MenuStrip();
             this.azioniToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.nuovaConnessioneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.chiudiConnessioneToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.esciToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.comandiToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.importaAppuntiToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -48,7 +49,6 @@ namespace MyProject
             this.guidaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.manualeUtenteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.infoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.DisconnectButton = new System.Windows.Forms.Button();
             this.listView = new System.Windows.Forms.ListView();
             this.ID = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.Indirizzo = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -57,7 +57,6 @@ namespace MyProject
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.info_label = new System.Windows.Forms.Label();
-            this.chiudiConnessioneToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip2.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
             this.SuspendLayout();
@@ -99,6 +98,12 @@ namespace MyProject
             this.nuovaConnessioneToolStripMenuItem.Text = "Nuova connessione";
             this.nuovaConnessioneToolStripMenuItem.TextImageRelation = System.Windows.Forms.TextImageRelation.TextBeforeImage;
             this.nuovaConnessioneToolStripMenuItem.Click += new System.EventHandler(this.nuovaConnessioneToolStripMenuItem_Click);
+            // 
+            // chiudiConnessioneToolStripMenuItem1
+            // 
+            this.chiudiConnessioneToolStripMenuItem1.Name = "chiudiConnessioneToolStripMenuItem1";
+            this.chiudiConnessioneToolStripMenuItem1.Size = new System.Drawing.Size(178, 22);
+            this.chiudiConnessioneToolStripMenuItem1.Text = "Chiudi connessione";
             // 
             // esciToolStripMenuItem
             // 
@@ -205,16 +210,6 @@ namespace MyProject
             this.infoToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
             this.infoToolStripMenuItem.Text = "Info";
             // 
-            // DisconnectButton
-            // 
-            this.DisconnectButton.Location = new System.Drawing.Point(3, 3);
-            this.DisconnectButton.Name = "DisconnectButton";
-            this.DisconnectButton.Size = new System.Drawing.Size(53, 23);
-            this.DisconnectButton.TabIndex = 31;
-            this.DisconnectButton.Text = "Chiudi server";
-            this.DisconnectButton.UseVisualStyleBackColor = true;
-            this.DisconnectButton.Click += new System.EventHandler(this.DisconnectButton_Click);
-            // 
             // listView
             // 
             this.listView.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
@@ -253,7 +248,6 @@ namespace MyProject
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 75.83334F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 11.875F));
             this.tableLayoutPanel1.Controls.Add(this.listView, 1, 0);
-            this.tableLayoutPanel1.Controls.Add(this.DisconnectButton, 0, 0);
             this.tableLayoutPanel1.Controls.Add(this.progressBar1, 1, 2);
             this.tableLayoutPanel1.Controls.Add(this.info_label, 1, 1);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -281,15 +275,9 @@ namespace MyProject
             this.info_label.AutoSize = true;
             this.info_label.Location = new System.Drawing.Point(62, 186);
             this.info_label.Name = "info_label";
-            this.info_label.Size = new System.Drawing.Size(35, 13);
+            this.info_label.Size = new System.Drawing.Size(16, 13);
             this.info_label.TabIndex = 33;
-            this.info_label.Text = "label1";
-            // 
-            // chiudiConnessioneToolStripMenuItem1
-            // 
-            this.chiudiConnessioneToolStripMenuItem1.Name = "chiudiConnessioneToolStripMenuItem1";
-            this.chiudiConnessioneToolStripMenuItem1.Size = new System.Drawing.Size(178, 22);
-            this.chiudiConnessioneToolStripMenuItem1.Text = "Chiudi connessione";
+            this.info_label.Text = "...";
             // 
             // MainForm
             // 
@@ -325,7 +313,6 @@ namespace MyProject
         private ToolStripMenuItem guidaToolStripMenuItem;
         private ToolStripMenuItem manualeUtenteToolStripMenuItem;
         private ToolStripMenuItem infoToolStripMenuItem;
-        private Button DisconnectButton;
         private ListView listView;
         private ColumnHeader ID;
         private ColumnHeader Indirizzo;

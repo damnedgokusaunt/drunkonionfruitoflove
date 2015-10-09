@@ -61,8 +61,6 @@ namespace MyProject
                     Int32 width = Screen.PrimaryScreen.Bounds.Width;
                     Int32 height = Screen.PrimaryScreen.Bounds.Height;
 
-                    Console.WriteLine("Thread secondario: " + Thread.CurrentThread.ManagedThreadId);
-
                     //MessageBox.Show("Coordinate: " + width + "," + height);
                     byte[] resolution = new byte[sizeof(Int32) * 2];
 
@@ -109,29 +107,23 @@ namespace MyProject
             return false;
         }
 
-        
-
         public override bool Close()
         {
-            int len;
             byte[] bytes;
             string msg;
-
+     
             bytes = Encoding.ASCII.GetBytes(MyProtocol.message(MyProtocol.QUIT));
-            // Client sends to server a quit request
-            Functions.SendData(handler, bytes, 0, bytes.Length);
+            Functions.SendData(handler, bytes, 0, bytes.Length);    // Client sends to server a quit request
 
-            len = MyProtocol.message(MyProtocol.POSITIVE_ACK).Length;
-            // Client receive a response from server
-            bytes = Functions.ReceiveData(handler, len);
+            bytes = Functions.ReceiveData(handler, MyProtocol.message(MyProtocol.POSITIVE_ACK).Length); // Client receive a response from server
             msg = Encoding.ASCII.GetString(bytes);
 
             if (msg == MyProtocol.message(MyProtocol.POSITIVE_ACK))
             {
-                handler.Close();
-                udp_channel.Close();
-
-                MessageBox.Show("Il client ha chiuso la connessione.");
+      
+                this.handler.Close();
+                this.clipbd_channel.Close();
+                this.udp_channel.Close();
 
                 return true;
             }
@@ -144,7 +136,6 @@ namespace MyProject
             this.udp_channel.Send(bytes, bytes.Length);
         }
 
-        
         public void SendTCP(Socket sock, byte[] bytes)
         {
             do
@@ -183,7 +174,6 @@ namespace MyProject
         {
             try
             {
-
                 handler.Close();
                 handler = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 Functions.SetKeepAlive(handler, MyProtocol.KEEPALIVE_TIME, MyProtocol.KEEPALIVE_INTERVAL);
@@ -212,8 +202,7 @@ namespace MyProject
                 throw;
             }
         }
-
-        
+ 
         private bool RetryConnection()
         {
             bool success = false;
@@ -233,7 +222,6 @@ namespace MyProject
                 {
                     MessageBox.Show("Impossibile comunicare con l'host remoto. Tentativo " + i + "/2");
                 }
-
             }
 
             ((MainForm)this.form).hook.Start();

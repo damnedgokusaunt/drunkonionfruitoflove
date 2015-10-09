@@ -35,6 +35,23 @@ namespace MyProject
         public static SendClipboardDelegate SendClipboard;
         public static ReceiveClipboardDelegate ReceiveClipboard;
 
+        public delegate IDataObject GetDataObjectDelegate();
+        public static GetDataObjectDelegate getDataObject;
+
+        public delegate bool ClipboardContainsDelegate(string format);
+        public static ClipboardContainsDelegate clipboardContains;
+
+        public delegate void ClipboardSetDataDelegate(string format, object data);
+        public static ClipboardSetDataDelegate clipboardSetData;
+
+        public delegate T ClipboardGetData<T>();
+        public static ClipboardGetData<Image> clipboardGetImage;
+
+        public delegate void ClipboardSetImageDelegate(Image i);
+        public static ClipboardSetImageDelegate clipboardSetImage;
+
+
+
         [DllImport("user32.dll")]
         static extern void keybd_event(byte key, byte scan, int flags, int extraInfo);
         [DllImport("user32.dll")]
@@ -181,9 +198,9 @@ namespace MyProject
                 byte[] buffer;
 
                 IDataObject iData = new DataObject();
-                iData = Clipboard.GetDataObject();
+                iData = getDataObject();
 
-                if (Clipboard.ContainsData(DataFormats.Text))
+                if (clipboardContains(DataFormats.Text))
                 {
                     string text = (string)iData.GetData(DataFormats.Text);
 
@@ -194,8 +211,8 @@ namespace MyProject
 
                     return true;
                 }
-               
-                if (Clipboard.ContainsData(DataFormats.Bitmap))
+
+                if (clipboardContains(DataFormats.Bitmap))
                 {
                     Console.WriteLine("Bitmap");
 
@@ -207,7 +224,7 @@ namespace MyProject
                     ReceiveClipboard(MyProtocol.POSITIVE_ACK.Length);
                     
                     //preparazione invio dati bitmap
-                    Image img = Clipboard.GetImage();
+                    Image img = clipboardGetImage();
                     //converto da bitmap obj a byte array
                     byte[] res = ConvertBitmapToByteArray(img);
                     //invio la dimensione dei dati
@@ -222,8 +239,8 @@ namespace MyProject
 
                     return true;
                 }
-                
-                if (Clipboard.ContainsData(DataFormats.FileDrop))
+
+                if (clipboardContains(DataFormats.FileDrop))
                 {
                     buffer = Encoding.ASCII.GetBytes(MyProtocol.CLEAN + MyProtocol.END_OF_MESSAGE);
                     SendClipboard(buffer, buffer.Length);
@@ -231,8 +248,8 @@ namespace MyProject
                     Console.WriteLine("Clean!");
                     Console.WriteLine("preparazione invio file...");
 
-                    
-                    IDataObject data = Clipboard.GetDataObject();
+
+                    IDataObject data = getDataObject();
                     clipContent = data.GetData(DataFormats.FileDrop);
                     path = (string[])clipContent;
                     n = path.Length;
@@ -365,8 +382,6 @@ namespace MyProject
                 // Ricezione del nome del file
                 Console.WriteLine("Aspetto di ricevere nome del file...");
 
-                string recvbuf = null;
-                int bytesRec;
                 byte[] bytes = new byte[1];
 
                 fileName = ReceiveTillTerminator(sock);
@@ -447,9 +462,7 @@ namespace MyProject
             string basedir, myBaseDir;
 
             // Ricevo il nome della directory
-            int bytesRec;
             byte[] bytes = new byte[1];
-            string recvbuf = null;
 
             try
             {
@@ -542,7 +555,6 @@ namespace MyProject
         public static void ClipboardSendFile(string name)
         {
             string fileName;
-            string mess;
             FileInfo f;
             FileStream fs;
             Int64 fileSize;
@@ -598,7 +610,6 @@ namespace MyProject
             
         }
 
-
         public static void ClipboardRecursiveDirectorySend(string sDir)
         {
             DirectoryInfo dInfo;
@@ -653,15 +664,7 @@ namespace MyProject
                 paths.Add(Path.GetFullPath(d));
             }
 
-            Clipboard.SetData(DataFormats.FileDrop, paths.ToArray());
-        }
-
-        public static void StartClipoardUpdaterThread()
-        {
-            Thread t = new Thread(UpdateClipboard);
-            t.SetApartmentState(ApartmentState.STA);
-            t.Start();
-            t.Join();
+            clipboardSetData(DataFormats.FileDrop, paths.ToArray());
         }
 
         public static void CleanClipboardDir(string dir)
@@ -828,5 +831,6 @@ namespace MyProject
             return new Bitmap(image);
         }
         #endregion
+
     }
 }

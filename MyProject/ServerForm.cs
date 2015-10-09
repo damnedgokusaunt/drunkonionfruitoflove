@@ -62,7 +62,37 @@ namespace MyProject
 
             this.frm = new TargetForm();
 
-      
+            Functions.getDataObject = delegate
+            {
+                IDataObject idata = null;
+
+                this.Invoke(new Action(() => idata = Clipboard.GetDataObject()));
+
+                return idata;
+            };
+
+            Functions.clipboardContains = delegate(string format)
+            {
+                bool result = false;
+
+                this.Invoke(new Action(() => result = Clipboard.ContainsData(format)));
+
+                return result;
+            };
+
+            Functions.clipboardSetData = delegate(string format, object data)
+            {
+                this.Invoke(new Action(() => Clipboard.SetData(format, data)));
+            };
+
+            Functions.clipboardGetImage = delegate
+            {
+                Image i = null;
+
+                this.Invoke(new Action(() => i = Clipboard.GetImage()));
+
+                return i;
+            };
         }
 
 
