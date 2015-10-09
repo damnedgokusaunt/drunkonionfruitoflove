@@ -57,7 +57,9 @@ namespace MyProject
             InitializeComponent();
 
             PopulateIPAddressList();
-
+            
+            Application.ApplicationExit += this.HandleServerExit;
+      
             portBox.Text = Convert.ToString(Functions.FindFreePort());
 
             this.frm = new TargetForm();
@@ -93,6 +95,25 @@ namespace MyProject
 
                 return i;
             };
+        }
+
+        private void HandleServerExit(object sender, EventArgs e)
+        {
+            if (listener != null)
+            {
+                listener.Connected = false;
+
+                listener.clipboard_event.Set();
+                clipboard_worker.Join();
+
+                listener.mouse_event.Set();
+                consumer_udp.Join();
+
+                listener.handler_event.Set();
+                consumer_tcp.Join();
+
+                listener.CloseAllSockets();
+            }
         }
 
 
@@ -211,7 +232,7 @@ namespace MyProject
 
         private void quitButton_Click(object sender, EventArgs e)
         {
-            throw new NotImplementedException();
+            Application.Exit();
         }
        
         /// <summary>

@@ -174,7 +174,7 @@ namespace MyProject
             Thread.Sleep(1000); // Debug on Ethernet
             Functions.handleFileDrop(target.clipbd_channel, null);
             this.Invoke(new Action(() => Functions.UpdateClipboard()));
-            MessageBox.Show("Ricevuto un File dalla clipboard del client.");
+          //  MessageBox.Show("Ricevuto un File dalla clipboard del client.");
         }
 
         private void doImport()

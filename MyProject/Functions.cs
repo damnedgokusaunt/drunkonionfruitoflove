@@ -567,7 +567,7 @@ namespace MyProject
             fileName = f.Name;
 
             
-            MessageBox.Show("Invio file '" + fileName + "' di lunghezza " + fileSize + " byte.");
+         //   MessageBox.Show("Invio file '" + fileName + "' di lunghezza " + fileSize + " byte.");
             try
             {
                 fs = File.Open(name, FileMode.Open);
