@@ -54,7 +54,7 @@ namespace MyProject
             {
                 if (i % 2 == 0)
                 {
-                    comboBoxes[i].Items.AddRange(new object[] { KeyModifier.Control, KeyModifier.Shift});
+                    comboBoxes[i].Items.AddRange(new object[] { KeyModifier.Control});
                 }
 
                 comboBoxes[i].Text = comboBoxes[i].GetItemText(comboBoxes[i].Items[0]);

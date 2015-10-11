@@ -23,7 +23,7 @@ namespace MyProject
         private ClientConnectionHandler current, target;
         private HotkeysHandler hotkeys_handler;
         private SetupHotkeysForm hotkeys_form;
-        private Task clipboard_importer, clipboard_exporter;
+        private Task clipboard_importer, clipboard_exporter, server_selecter;
 
         public GlobalHook hook;
 
@@ -54,10 +54,12 @@ namespace MyProject
                 int id = m.WParam.ToInt32();                                        // The id of the hotkey that was pressed.
 
 
+
                     switch (id)
                     {
                         case 0:
-                            SelectServer();
+                            server_selecter = new Task(() => SelectServer());
+                            server_selecter.Start();
                             break;
                         case 2:
                             SuspendServer();
@@ -171,7 +173,7 @@ namespace MyProject
 
         private void HandleFileSend()
         {
-            Thread.Sleep(1000); // Debug on Ethernet
+            //Thread.Sleep(1000); // Debug on Ethernet
             Functions.handleFileDrop(target.clipbd_channel, null);
             this.Invoke(new Action(() => Functions.UpdateClipboard()));
           //  MessageBox.Show("Ricevuto un File dalla clipboard del client.");
@@ -223,7 +225,7 @@ namespace MyProject
                         break;
 
                     case MyProtocol.DIRE_SEND:
-                        Thread.Sleep(1000); // Debug on Ethernet
+                        //Thread.Sleep(1000); // Debug on Ethernet
                         Functions.ReceiveDirectory(target.clipbd_channel);
                         this.Invoke(new Action(() =>Functions.UpdateClipboard()));
                         break;
@@ -479,39 +481,46 @@ namespace MyProject
             byte[] bytes;
             Int32 lookup_key = -1;
 
-            try
-            {
-                // Retrieve the lookup key from listview
-                lookup_key = Convert.ToInt32(listView.FocusedItem.SubItems[0].Text);
-            }
-            catch (NullReferenceException)
-            {
-                MessageBox.Show("Non è stato selezionato alcun server dalla lista.");
-                
+            // Retrieve the lookup key from listview
+            this.Invoke(new Action(() =>
+                {
+                    try
+                    {
+                        lookup_key = Convert.ToInt32(listView.FocusedItem.SubItems[0].Text);
+                    }
+                    catch (NullReferenceException)
+                    {
+                        MessageBox.Show("Non è stato selezionato alcun server dalla lista.");
+                        return;
+                    }
+                }));
+            if (lookup_key == -1)
                 return;
-            }
 
             // If I am controlling one server, I MUST pause it.
             if (target != null)
             {
                 target.SendTCP(target.handler, Encoding.ASCII.GetBytes(MyProtocol.PAUSE));
 
-                bytes = target.ReceiveTCP(target.handler, MyProtocol.POSITIVE_ACK.Length);   
+                bytes = target.ReceiveTCP(target.handler, MyProtocol.POSITIVE_ACK.Length);
                 if (bytes == null)
                     return;
 
                 msg = Encoding.ASCII.GetString(bytes);
                 if (msg == MyProtocol.POSITIVE_ACK)
                 {
-                    hook.Stop();
-                    target = null;
+                    this.Invoke(new Action(() =>
+                        {
+                            hook.Stop();
+                            this.target = null;
+                        }));
                 }
             }
 
             List<int> keys = connections.Keys.ToList();
-            foreach(int key in keys)
+            foreach (int key in keys)
             {
-                listView.Items[key].SubItems[3].Text = "Pause.";
+                this.Invoke(new Action(() => listView.Items[key].SubItems[3].Text = "Pause."));
             }
 
             connections.TryGetValue(lookup_key, out current);
@@ -525,14 +534,14 @@ namespace MyProject
                 return;
 
             msg = Encoding.ASCII.GetString(bytes);
-            if(msg == MyProtocol.POSITIVE_ACK)
+            if (msg == MyProtocol.POSITIVE_ACK)
             {
-                listView.Items[lookup_key].SubItems[3].Text = "Target";
+                this.Invoke(new Action(() => listView.Items[lookup_key].SubItems[3].Text = "Target"));
                 target = current;
                 Functions.SendClipboard = target.SendClipboard;
                 Functions.ReceiveClipboard = target.ReceiveClipboard;
-                hook.Start();
-            }   
+                this.Invoke(new Action(() => hook.Start()));
+            }
         }
 
         private void SuspendServer()
