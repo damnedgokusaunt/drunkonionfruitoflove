@@ -170,7 +170,7 @@ namespace MyProject
         {
             byte[] bytes = Encoding.ASCII.GetBytes(MyProtocol.message(MyProtocol.POSITIVE_ACK));
             // Send ack
-            Thread.Sleep(1000);
+            //Thread.Sleep(1000);
             Functions.SendData(handler, bytes, 0, bytes.Length);
             
             return true;
@@ -333,6 +333,8 @@ namespace MyProject
             {
                 case MyProtocol.CLEAN:
                     // Now, I'm starting to clean my clipboard folder as you told me.
+                    Functions.SendClipboard(Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK),MyProtocol.POSITIVE_ACK.Length);
+                    
                     Functions.CleanClipboardDir(Path.GetFullPath(MyProtocol.CLIPBOARD_DIR));
                     break;
                 case MyProtocol.COPY:
@@ -346,7 +348,7 @@ namespace MyProject
 
                 case MyProtocol.FILE_SEND:
                     // Simulo un po' di ritardo di rete
-                    Thread.Sleep(1000);
+                    //Thread.Sleep(1000);
                     // Now send ack
                     Functions.SendData(clipbd_channel, Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), 0, MyProtocol.POSITIVE_ACK.Length);
                     Functions.handleFileDrop(clipbd_channel, null);
@@ -356,7 +358,7 @@ namespace MyProject
 
                 case MyProtocol.DIRE_SEND:
                     // Simulo un po' di ritardo di rete
-                    Thread.Sleep(1000);
+                    //Thread.Sleep(1000);
 
                     Functions.ReceiveDirectory(clipbd_channel);
                     Functions.UpdateClipboard();
@@ -465,7 +467,8 @@ namespace MyProject
                 case MyProtocol.PAUSE:
                     byte[] mess1 = System.Text.Encoding.Default.GetBytes(MyProtocol.POSITIVE_ACK);
                     Functions.SendData(handler, mess1, 0, mess1.Length);
-                    this.hide();
+                    Functions.KeyUp(0x11,0);
+                    this.hide();                 
                     break;
 
                 case MyProtocol.KEYDOWN:

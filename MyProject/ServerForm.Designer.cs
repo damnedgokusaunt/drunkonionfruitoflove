@@ -53,7 +53,7 @@ namespace MyProject
             this.mostraFinestraPrincipaleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.comboBox = new System.Windows.Forms.ComboBox();
             this.quitButton = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
+            this.changePort = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.menu.SuspendLayout();
             this.SuspendLayout();
@@ -172,15 +172,16 @@ namespace MyProject
             this.quitButton.UseVisualStyleBackColor = true;
             this.quitButton.Click += new System.EventHandler(this.quitButton_Click);
             // 
-            // button2
+            // changePort
             // 
-            this.button2.Location = new System.Drawing.Point(168, 163);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(100, 23);
-            this.button2.TabIndex = 24;
-            this.button2.Text = "Cambia porta";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
+            this.changePort.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
+            this.changePort.Location = new System.Drawing.Point(168, 163);
+            this.changePort.Name = "changePort";
+            this.changePort.Size = new System.Drawing.Size(100, 23);
+            this.changePort.TabIndex = 24;
+            this.changePort.Text = "Cambia porta";
+            this.changePort.UseVisualStyleBackColor = true;
+            this.changePort.Click += new System.EventHandler(this.button2_Click);
             // 
             // label1
             // 
@@ -197,7 +198,7 @@ namespace MyProject
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(315, 261);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.button2);
+            this.Controls.Add(this.changePort);
             this.Controls.Add(this.quitButton);
             this.Controls.Add(this.comboBox);
             this.Controls.Add(this.label5);
@@ -206,6 +207,8 @@ namespace MyProject
             this.Controls.Add(this.label3);
             this.Controls.Add(this.portBox);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MaximizeBox = false;
             this.Name = "ServerForm";
             this.Text = "Remote Control Server";
             this.Load += new System.EventHandler(this.ServerForm_Load);
@@ -230,7 +233,7 @@ namespace MyProject
         private NotifyIcon notifyIcon1;
         private ToolStripMenuItem item;
         private ToolStripSeparator sep;
-        private Button button2;
+        private Button changePort;
         private Label label1;
         private ToolStripMenuItem mostraFinestraPrincipaleToolStripMenuItem;
         

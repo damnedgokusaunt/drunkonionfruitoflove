@@ -104,16 +104,32 @@ namespace MyProject
                 listener.Connected = false;
 
                 listener.clipboard_event.Set();
-                clipboard_worker.Join();
+
+                if (clipboard_worker != null)
+                {
+                    clipboard_worker.Join();
+                }
 
                 listener.mouse_event.Set();
-                consumer_udp.Join();
+
+                if (consumer_udp != null)
+                {
+
+                    consumer_udp.Join();
+
+                }
 
                 listener.handler_event.Set();
-                consumer_tcp.Join();
+
+                if (consumer_tcp != null)
+                {
+
+                    consumer_tcp.Join();
+                }
 
                 listener.CloseAllSockets();
             }
+
         }
 
 
@@ -166,13 +182,15 @@ namespace MyProject
 
         private void startButton_Click(object sender, EventArgs e)
         {
-            // Check that all the fields are valid
             if (this.passwordBox.Text == string.Empty || this.comboBox.Text == string.Empty || this.portBox.Text == string.Empty)
             {
-               this.notify_me(20000, "Attenzione", "Alcuni campi risultano vuoti!", ToolTipIcon.Info);
-                
+                this.notify_me(20000, "Attenzione", "Alcuni campi risultano vuoti!", ToolTipIcon.Info);
+
                 return;
             }
+
+            // Check that all the fields are valid
+
 
             // Invalid all the dangerous fields
             this.comboBox.Enabled = false;
@@ -180,54 +198,64 @@ namespace MyProject
             this.passwordBox.Enabled = false;
             this.startButton.Enabled = false;
             this.quitButton.Enabled = true;
+            this.changePort.Enabled = false;
+
 
             // Create a thread responsible for connection enstablishment
             // Wait for 1 minute
             // If the thread does not terminate, kill it and return
 
-            try
+            Thread ti = new Thread(() =>
             {
-                //to associate delegates to methods
-                listener = new ServerConnectionHandler(this, this.addr, Convert.ToInt32(portBox.Text), Functions.Encrypt(passwordBox.Text));
-                //delegates for target
-                listener.show = this.show_target_form;
-                listener.hide = this.hide_target_form;
-                listener.notify = this.notify_me;
-                listener.wakeup = this.wakeup_threads;
-                listener.suspend = this.suspend_threads;
-
-                Task<bool> t = Task.Factory.StartNew(() => listener.Open());
-
-                t.Wait();
-
-                if (t.Result)
+                try
                 {
-                    listener.Connected = true;
+                    //to associate delegates to methods
+                    listener = new ServerConnectionHandler(this, this.addr, Convert.ToInt32(portBox.Text), Functions.Encrypt(passwordBox.Text));
+                    //delegates for target
+                    listener.show = this.show_target_form;
+                    listener.hide = this.hide_target_form;
+                    listener.notify = this.notify_me;
+                    listener.wakeup = this.wakeup_threads;
+                    listener.suspend = this.suspend_threads;
+
+                    Task<bool> t = Task.Factory.StartNew(() => listener.Open());
+
+                    t.Wait();
+
+                    if (t.Result)
+                    {
+                        listener.Connected = true;
 
 
-                    consumer_tcp = new Thread(listener.ListenTCPChannel);
-                    consumer_tcp.IsBackground = true;
+                        consumer_tcp = new Thread(listener.ListenTCPChannel);
+                        consumer_tcp.IsBackground = true;
 
-                    consumer_udp = new Thread(listener.ListenUDPChannel);
-                    consumer_udp.IsBackground = true;
+                        consumer_udp = new Thread(listener.ListenUDPChannel);
+                        consumer_udp.IsBackground = true;
 
-                    clipboard_worker = new Thread(listener.ListenClipboardChannel);
-                    clipboard_worker.IsBackground = true;
-                    clipboard_worker.SetApartmentState(ApartmentState.STA);
-                    
-                    
-                    consumer_tcp.Start();
-                    consumer_udp.Start();
-                    clipboard_worker.Start();
+                        clipboard_worker = new Thread(listener.ListenClipboardChannel);
+                        clipboard_worker.IsBackground = true;
+                        clipboard_worker.SetApartmentState(ApartmentState.STA);
+
+
+                        consumer_tcp.Start();
+                        consumer_udp.Start();
+                        clipboard_worker.Start();
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+
+                    return;
                 }
 
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
+            });
 
-                return;
-            }
+            ti.IsBackground = true;
+            ti.Start();
+
         }
 
         private void quitButton_Click(object sender, EventArgs e)
