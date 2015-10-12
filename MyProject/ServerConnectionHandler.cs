@@ -339,10 +339,15 @@ namespace MyProject
                     break;
                 case MyProtocol.COPY:
                     string content;
-                    int len = recvbuf.Length - MyProtocol.COPY.Length;
+                    int len = recvbuf.Length - MyProtocol.COPY.Length - MyProtocol.END_OF_MESSAGE.Length;
                     content = recvbuf.Substring(MyProtocol.COPY.Length, len);
                     //Console.WriteLine("Tentativo di scrittura su clipboard: " + content);
-                    Clipboard.SetData(DataFormats.Text, content);
+                    //Clipboard.SetData(DataFormats.Text, content);
+
+                    Functions.clipboardSetData(DataFormats.Text, content);
+
+                    
+                    
                     this.notify(20000, "Aggiornamento clipboard", "Ricevuto un testo dalla clipboard del client!", ToolTipIcon.Info);
                     break;
 
@@ -371,14 +376,18 @@ namespace MyProject
                     Functions.SendData(clipbd_channel, Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), 0, MyProtocol.POSITIVE_ACK.Length);
                     byte[] imageSource = Functions.ReceiveData(clipbd_channel, length_int32);
                     Image image = Functions.ConvertByteArrayToBitmap(imageSource);
-                    Clipboard.SetImage(image);
+                   // Clipboard.SetImage(image);
+
+
+                   Functions.clipboardSetImage(image);
+                    
                     this.notify(20000, "Aggiornamento clipboard", "Ricevuta un'immagine dalla clipboard del client!", ToolTipIcon.Info);
                     break;
 
 
                 case MyProtocol.CLIPBOARD_IMPORT:
 
-                    bool data_available = Functions.handleClipboardData();
+                    bool data_available = Functions.handleClipboardDataForImport();
 
 
                     if (!data_available)
@@ -390,7 +399,7 @@ namespace MyProject
                     break;
 
                 default:
-                    this.notify(20000, "Aggiornamento clipboard", "Comando da tastiera non riconosciuto!", ToolTipIcon.Info);
+                    this.notify(20000, "Comando non riconosciuto", command, ToolTipIcon.Info);
                     break;
             }
 

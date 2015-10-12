@@ -87,7 +87,12 @@ namespace MyProject
                 this.Invoke(new Action(() => Clipboard.SetData(format, data)));
             };
 
-            Functions.clipboardGetImage = delegate
+            Functions.clipboardSetImage = delegate(Image img)
+            {
+                this.Invoke(new Action(() => Clipboard.SetImage(img)));
+            };
+
+              Functions.clipboardGetImage = delegate
             {
                 Image i = null;
 
