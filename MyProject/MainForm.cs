@@ -23,7 +23,7 @@ namespace MyProject
         private ClientConnectionHandler current, target;
         private HotkeysHandler hotkeys_handler;
         private SetupHotkeysForm hotkeys_form;
-        private Task clipboard_importer, clipboard_exporter, server_selecter;
+        private Task clipboard_importer, clipboard_exporter, server_selecter, server_suspender;
 
         public GlobalHook hook;
 
@@ -62,7 +62,8 @@ namespace MyProject
                             server_selecter.Start();
                             break;
                         case 2:
-                            SuspendServer();
+                            server_suspender = new Task(() => SuspendServer());
+                            server_suspender.Start();
                             break;
                         case 4:
                             clipboard_importer = new Task(() => ImportClipboard());
@@ -173,14 +174,14 @@ namespace MyProject
 
         private void HandleFileSend()
         {
-            //Thread.Sleep(1000); // Debug on Ethernet
             Functions.handleFileDrop(target.clipbd_channel, null);
             this.Invoke(new Action(() => Functions.UpdateClipboard()));
-          //  MessageBox.Show("Ricevuto un File dalla clipboard del client.");
         }
 
         private void doImport()
         {
+            bool exit = false;
+
             byte[] bytes = null;
 
             try
@@ -188,70 +189,74 @@ namespace MyProject
                 bytes = Encoding.ASCII.GetBytes(MyProtocol.CLIPBOARD_IMPORT + MyProtocol.END_OF_MESSAGE);
                 Functions.SendClipboard(bytes, bytes.Length);
 
-
-                string recvbuf = Functions.ReceiveTillTerminator(target.clipbd_channel);
-
-                string command = recvbuf.Substring(0, 4);
-                Console.WriteLine(this.GetType().Name + " - ricevuto comando: " + recvbuf);
-
-                switch (command)
+                while (!exit)
                 {
-                    case MyProtocol.CLEAN:
-                        // Now, I'm starting to clean my clipboard folder as you told me.
-                        Functions.CleanClipboardDir(Path.GetFullPath(MyProtocol.CLIPBOARD_DIR));
+                
+                    string recvbuf = Functions.ReceiveTillTerminator(target.clipbd_channel);
 
-                        recvbuf = Functions.ReceiveTillTerminator(target.clipbd_channel);
+                    string command = recvbuf.Substring(0, 4);
+                    Console.WriteLine(this.GetType().Name + " - ricevuto comando: " + recvbuf);
 
-                        command = recvbuf.Substring(0, 4);
-                        Console.WriteLine(this.GetType().Name + " - ricevuto comando: " + recvbuf);
+                    switch (command)
+                    {
+                        case MyProtocol.CLEAN:
+                            // Now, I'm starting to clean my clipboard folder as you told me.
+                            Functions.CleanClipboardDir(Path.GetFullPath(MyProtocol.CLIPBOARD_DIR));
+                            Functions.SendClipboard(Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), MyProtocol.POSITIVE_ACK.Length);
+                            break;
 
-                        if (command == MyProtocol.FILE_SEND)
-                        {
+                        case MyProtocol.COPY:
+                            string content;
+                            int len = recvbuf.Length - MyProtocol.COPY.Length;
+                            content = recvbuf.Substring(MyProtocol.COPY.Length, len);
+                            //Console.WriteLine("Tentativo di scrittura su clipboard: " + content);
+                            this.Invoke(new Action(() => Clipboard.SetData(DataFormats.Text, content)));
+                            MessageBox.Show("Ricevuto un Testo dalla clipboard del client.");
+
+                            Functions.SendClipboard(Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), MyProtocol.POSITIVE_ACK.Length);
+                            break;
+
+                        case MyProtocol.FILE_SEND:
+                            Functions.SendClipboard(Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), MyProtocol.POSITIVE_ACK.Length);
+                            
                             HandleFileSend();
-                        }
-                        break;
+                            
+                            //Functions.SendClipboard(Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), MyProtocol.POSITIVE_ACK.Length);
+                            
+                            break;
 
-                    case MyProtocol.COPY:
-                        string content;
-                        int len = recvbuf.Length - MyProtocol.COPY.Length;
-                        content = recvbuf.Substring(MyProtocol.COPY.Length, len);
-                        //Console.WriteLine("Tentativo di scrittura su clipboard: " + content);
-                        this.Invoke(new Action(() => Clipboard.SetData(DataFormats.Text, content)));                     
-                        MessageBox.Show("Ricevuto un Testo dalla clipboard del client.");
-                        break;
+                        case MyProtocol.DIRE_SEND:
+                            Functions.ReceiveDirectory(target.clipbd_channel);
+                            this.Invoke(new Action(() => Functions.UpdateClipboard()));
+                            //Functions.SendClipboard(Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), MyProtocol.POSITIVE_ACK.Length);
+                            
+                            break;
 
-                    case MyProtocol.FILE_SEND:
-                        HandleFileSend();
-                        break;
+                        case MyProtocol.IMG:
+                            bytes = Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK);
+                            Functions.SendClipboard(bytes, bytes.Length);
+                            byte[] length = Functions.ReceiveClipboard(sizeof(Int32));
+                            Int32 length_int32 = BitConverter.ToInt32(length, 0);
 
-                    case MyProtocol.DIRE_SEND:
-                        //Thread.Sleep(1000); // Debug on Ethernet
-                        Functions.ReceiveDirectory(target.clipbd_channel);
-                        this.Invoke(new Action(() =>Functions.UpdateClipboard()));
-                        break;
+                            bytes = Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK);
+                            Functions.SendClipboard(bytes, bytes.Length);
 
-                    case MyProtocol.IMG:
-                        bytes = Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK);
-                        Functions.SendClipboard(bytes, bytes.Length);
-                        byte[] length = Functions.ReceiveClipboard(sizeof(Int32));
-                        Int32 length_int32 = BitConverter.ToInt32(length, 0);
+                            byte[] imageSource = Functions.ReceiveData(target.clipbd_channel, length_int32);
+                            Image image = Functions.ConvertByteArrayToBitmap(imageSource);
+                            this.Invoke(new Action(() => Clipboard.SetImage(image)));
+                            MessageBox.Show("Ricevuta Immagine dalla clipboard del client.");
+                            Functions.SendClipboard(Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), MyProtocol.POSITIVE_ACK.Length);
+                           
+                            break;
 
-                        bytes = Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK);
-                        Functions.SendClipboard(bytes, bytes.Length);
+                        case MyProtocol.NEGATIVE_ACK:
+                            exit = true;
+                            break;
 
-                        byte[] imageSource = Functions.ReceiveData(target.clipbd_channel, length_int32);
-                        Image image = Functions.ConvertByteArrayToBitmap(imageSource);
-                        this.Invoke(new Action(() => Clipboard.SetImage(image)));
-                        MessageBox.Show("Ricevuta Immagine dalla clipboard del client.");
-                        break;
-
-                    case MyProtocol.NEGATIVE_ACK:
-                        //debugBox.AppendText("Nessun dato negli appunti del sistema remoto \n");
-                        break;
-
-                    default:
-                        MessageBox.Show("Comando clipboard non riconosciuto");
-                        break;
+                        default:
+                            MessageBox.Show("Comando clipboard non riconosciuto");
+                            break;
+                    }
                 }
             }
             catch (SocketException)
@@ -562,13 +567,14 @@ namespace MyProject
             msg = Encoding.ASCII.GetString(bytes);
             if (msg == MyProtocol.POSITIVE_ACK)
             {
-                foreach (int key in connections.Keys.ToList())
-                {
-                    listView.Items[key].SubItems[3].Text = "Pausa.";
-                }
+                this.Invoke(new Action(() =>
+                    {
+                        foreach (int key in connections.Keys.ToList())
+                            listView.Items[key].SubItems[3].Text = "Pausa.";
 
-                hook.Stop();
-                target = null;
+                        hook.Stop();
+                        target = null;
+                    }));
             }
         }
         

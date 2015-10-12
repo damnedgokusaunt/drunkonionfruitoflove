@@ -54,7 +54,7 @@ namespace MyProject
         public const string IMG_S = "IMAV";
         
         public const int DEFAULT_PORT = 5000;
-        public const int CHUNK_SIZE = 1024; // 1 KB
+        public const int CHUNK_SIZE = 8*1024;
 
         public const int KEEPALIVE_TIME = 1000*2; // ms
         public const int KEEPALIVE_INTERVAL = 1000; // ms
