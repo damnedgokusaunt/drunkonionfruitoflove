@@ -84,12 +84,12 @@ namespace MyProject
 
             Functions.clipboardSetData = delegate(string format, object data)
             {
-                this.Invoke(new Action(() => Clipboard.SetData(format, data)));
+                this.BeginInvoke(new Action(() => Clipboard.SetData(format, data)));
             };
 
             Functions.clipboardSetImage = delegate(Image img)
             {
-                this.Invoke(new Action(() => Clipboard.SetImage(img)));
+                this.BeginInvoke(new Action(() => Clipboard.SetImage(img)));
             };
 
               Functions.clipboardGetImage = delegate
@@ -135,6 +135,9 @@ namespace MyProject
                 listener.CloseAllSockets();
             }
 
+            Functions.KeyUp(0x11, 0);//ctrl
+            Functions.KeyUp(0x12, 0);//alt
+
         }
 
 
@@ -149,10 +152,10 @@ namespace MyProject
         public void notify_me(int a, string b, string c, ToolTipIcon cletta)
         {
 
-            if (this.InvokeRequired)
-            {
-                this.BeginInvoke(new Action(() => this.notifyIcon1.ShowBalloonTip(a,b,c,cletta)));
-            }
+            //if (this.InvokeRequired)
+            //{
+                this.Invoke(new Action(() => this.notifyIcon1.ShowBalloonTip(a,b,c,cletta)));
+           // }
         }
 
 
@@ -189,7 +192,8 @@ namespace MyProject
         {
             if (this.passwordBox.Text == string.Empty || this.comboBox.Text == string.Empty || this.portBox.Text == string.Empty)
             {
-                this.notify_me(20000, "Attenzione", "Alcuni campi risultano vuoti!", ToolTipIcon.Info);
+                MessageBox.Show("Attento, alcuni campi risultano vuoti!");
+                // this.notify_me(20000, "Attenzione", "Alcuni campi risultano vuoti!", ToolTipIcon.Info);
 
                 return;
             }
@@ -265,6 +269,8 @@ namespace MyProject
 
         private void quitButton_Click(object sender, EventArgs e)
         {
+
+
             Application.Exit();
         }
        
@@ -308,7 +314,8 @@ namespace MyProject
         private void ServerForm_Load(object sender, EventArgs e)
         {
             if (!NetworkInterface.GetIsNetworkAvailable())
-            this.notifyIcon1.ShowBalloonTip(20000, "Attenzione", "Affinchè l'applicazione funzioni correttamente è necessario che il PC sia connesso ad una rete LAN!", ToolTipIcon.Info);
+                MessageBox.Show("Spiacenti, affinchè l'applicazione funzioni correttamente è necessario che il PC sia connesso ad una rete LAN!");
+            //this.notifyIcon1.ShowBalloonTip(20000, "Attenzione", "Affinchè l'applicazione funzioni correttamente è necessario che il PC sia connesso ad una rete LAN!", ToolTipIcon.Info);
         }
 
 
@@ -357,6 +364,21 @@ namespace MyProject
         {
             this.Show();
             this.WindowState = FormWindowState.Normal;
+        }
+
+        private void menu_Opening(object sender, CancelEventArgs e)
+        {
+
+        }
+
+        private void label5_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void pictureBox1_Click(object sender, EventArgs e)
+        {
+           
         }
 
     }
