@@ -20,7 +20,8 @@ namespace MyProject
     
     public class ServerConnectionHandler : ConnectionHandler
     {
-       
+        private AutoResetEvent zittiTutti = new AutoResetEvent(false);
+
         private IPEndPoint udp_remote_endpoint;
         private Int32 widthRatio, heightRatio;
         private byte[] endpoint_resolution;
@@ -114,7 +115,7 @@ namespace MyProject
                 // Receive display resolution
                 endpoint_resolution = Functions.ReceiveData(handler, sizeof(Int32) * 2);
                 widthRatio = Screen.PrimaryScreen.Bounds.Width / BitConverter.ToInt32(endpoint_resolution, 0);
-                heightRatio = Screen.PrimaryScreen.Bounds.Height / BitConverter.ToInt32(endpoint_resolution, sizeof(Int32));
+                heightRatio = Screen.PrimaryScreen.Bounds.Height / BitConverter.ToInt32(endpoint_resolution, sizeof(Int32)); 
                 this.notify(20000, "Info", "Connesso!", ToolTipIcon.Info);
                 
 
@@ -158,7 +159,8 @@ namespace MyProject
             }
             else
             {
-                this.notify(20000, "Info", "Richiesta non riconosciuta!", ToolTipIcon.Info);          
+                MessageBox.Show("Spiacenti, richiesta non riconosciuta!");
+                //this.notify(20000, "Info", "Richiesta non riconosciuta!", ToolTipIcon.Info);          
                 msg = MyProtocol.message(MyProtocol.NEGATIVE_ACK);
                 bytes = Encoding.ASCII.GetBytes(msg);
                 Functions.SendData(handler, bytes, 0, bytes.Length);
@@ -192,8 +194,6 @@ namespace MyProject
         {
             while (connected)
             {
-                try
-                {
                     mouse_event.Reset();
 
                     StateObject<UdpClient> state = new StateObject<UdpClient>(8);
@@ -201,13 +201,7 @@ namespace MyProject
 
                     udp_channel.BeginReceive(new AsyncCallback(processMouseData), state);
 
-                    mouse_event.WaitOne();
-                }
-                catch (SocketException)
-                {
-                    //addormenta i thread secondari in caso di eccezione sul socket
-                    Thread.CurrentThread.Suspend();
-                }
+                    mouse_event.WaitOne();           
             }
         }
 
@@ -224,6 +218,8 @@ namespace MyProject
             }
             catch
             {
+                //Thread.CurrentThread.Suspend();
+                zittiTutti.WaitOne();
                 return;
             }
 
@@ -275,6 +271,15 @@ namespace MyProject
             }
             catch
             {
+                //Thread.CurrentThread.Suspend();
+                Console.WriteLine("Thread clipboard va a dormire...");  
+                zittiTutti.WaitOne();
+                Console.WriteLine("Thread clipboard risvegliato!");
+                
+                // Ritenta
+                state.workSocket = this.clipbd_channel;
+                handler = state.workSocket;
+                handler.BeginReceive(state.buffer, 0, state.BufferSize, 0, new AsyncCallback(ReadCallback), state);
                 return;
             }
 
@@ -301,20 +306,8 @@ namespace MyProject
 
                 StateObject<Socket> state = new StateObject<Socket>(1);
                 state.workSocket = this.clipbd_channel;
-
-                try
-                {
-                    clipbd_channel.BeginReceive(state.buffer, 0, state.BufferSize, 0, new AsyncCallback(ReadCallback), state);
-                }
-                catch (SocketException)
-                {
-                    Thread.CurrentThread.Suspend();
-                    Console.WriteLine("Weeeeeeeeeeeee!!");
-                }
-                finally
-                {
-                    clipboard_event.WaitOne();
-                }
+                clipbd_channel.BeginReceive(state.buffer, 0, state.BufferSize, 0, new AsyncCallback(ReadCallback), state);     
+                clipboard_event.WaitOne();
             }
         }
 
@@ -326,7 +319,6 @@ namespace MyProject
 
             if (clipbd_channel == null)
             {
-
                 MessageBox.Show("clipbd channel a NULL!");
             }
             switch (command)
@@ -346,9 +338,9 @@ namespace MyProject
 
                     Functions.clipboardSetData(DataFormats.Text, content);
 
-                    
-                    
-                    this.notify(20000, "Aggiornamento clipboard", "Ricevuto un testo dalla clipboard del client!", ToolTipIcon.Info);
+
+                    MessageBox.Show("Aggiornamento clipboard: ricevuto un testo dalla clipboard del client!");
+                   // this.notify(20000, "Aggiornamento clipboard", "Ricevuto un testo dalla clipboard del client!", ToolTipIcon.Info);
                     break;
 
                 case MyProtocol.FILE_SEND:
@@ -358,8 +350,15 @@ namespace MyProject
                     Functions.SendData(clipbd_channel, Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), 0, MyProtocol.POSITIVE_ACK.Length);
                     Functions.handleFileDrop(clipbd_channel, null);
                     Functions.UpdateClipboard();
-                    this.notify(20000, "Aggiornamento clipboard", "Ricevuto un file dalla clipboard del client!", ToolTipIcon.Info);
-                    break;
+
+                    if (notify != null)
+                    {
+                        MessageBox.Show("Aggiornamento clipboard: ricevuto un file dalla clipboard del client!");
+                   
+                       // this.notify(20000, "Aggiornamento clipboard", "Ricevuto un file dalla clipboard del client!", ToolTipIcon.Info);
+                   
+                    }
+                        break;
 
                 case MyProtocol.DIRE_SEND:
                     // Simulo un po' di ritardo di rete
@@ -380,8 +379,9 @@ namespace MyProject
 
 
                    Functions.clipboardSetImage(image);
-                    
-                    this.notify(20000, "Aggiornamento clipboard", "Ricevuta un'immagine dalla clipboard del client!", ToolTipIcon.Info);
+                   MessageBox.Show("Aggiornamento clipboard: ricevuto un'immagine dalla clipboard del client!");
+                   
+                   // this.notify(20000, "Aggiornamento clipboard", "Ricevuta un'immagine dalla clipboard del client!", ToolTipIcon.Info);
                     break;
 
 
@@ -399,7 +399,10 @@ namespace MyProject
                     break;
 
                 default:
-                    this.notify(20000, "Comando non riconosciuto", command, ToolTipIcon.Info);
+
+                    MessageBox.Show("Spiacenti, comando non riconosciuto!");
+                   
+                  //  this.notify(20000, "Comando non riconosciuto", command, ToolTipIcon.Info);
                     break;
             }
 
@@ -410,31 +413,12 @@ namespace MyProject
 
             while (connected)
             {
-
-                try
-                {
-
-                    handler_event.Reset();
-
-                    StateObject<Socket> state = new StateObject<Socket>(4);
-                    state.workSocket = handler;
-                    handler.BeginReceive(state.buffer, 0, state.BufferSize, 0, new AsyncCallback(ReadCallbackTCP), state);
-                    handler_event.WaitOne();
-
-                }
-
-                catch (SocketException)
-                {
-
-                    int idd = Thread.CurrentThread.ManagedThreadId;
-                    Console.WriteLine("Sono il thread principale:" + idd);
-                    MessageBox.Show("La connessione è stata interrotta. Assicurati che la connessione venga ristabilita affinchè i servizi riprendano automaticamente");
-
-                    //this.suspend();
-                    RetryPrimaryConnection();
-                    RetryClipboardConnection();
-                    this.wakeup();
-                }
+                handler_event.Reset();
+                
+                StateObject<Socket> state = new StateObject<Socket>(4);
+                state.workSocket = handler;
+                handler.BeginReceive(state.buffer, 0, state.BufferSize, 0, new AsyncCallback(ReadCallbackTCP), state);
+                handler_event.WaitOne();
             }
         }
 
@@ -451,8 +435,20 @@ namespace MyProject
             {
                 bytesRead = handler.EndReceive(ar);
             }
-            catch
+            catch (SocketException)
             {
+                int idd = Thread.CurrentThread.ManagedThreadId;
+                Console.WriteLine("Sono il thread principale:" + idd);
+                MessageBox.Show("La connessione è stata interrotta. Assicurati che la connessione venga ristabilita affinchè i servizi riprendano automaticamente");
+
+                //this.suspend();
+                RetryPrimaryConnection();
+                RetryClipboardConnection();
+                //this.wakeup();
+
+                zittiTutti.Set();
+
+                handler_event.Set();
                 return;
             }
 
@@ -514,6 +510,9 @@ namespace MyProject
             Socket clipbd_listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             clipbd_listener.Bind(clipboardLocalEndPoint);
             clipbd_listener.Listen(10);
+
+            Functions.SendData(this.handler, Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), 0, MyProtocol.POSITIVE_ACK.Length);
+            
             clipbd_channel = clipbd_listener.Accept();
             clipbd_listener.Close();
             Functions.SetKeepAlive(clipbd_channel, MyProtocol.KEEPALIVE_TIME, MyProtocol.KEEPALIVE_INTERVAL);        
