@@ -19,6 +19,9 @@ namespace MyProject
 {
     public partial class MainForm : Form
     {
+        [DllImport("user32.dll")]
+        static extern void keybd_event(byte key, byte scan, int flags, int extraInfo);
+
         private Dictionary<Int32, ClientConnectionHandler> connections;
         private ClientConnectionHandler current, target;
         private HotkeysHandler hotkeys_handler;
@@ -42,7 +45,12 @@ namespace MyProject
 
         protected override void WndProc(ref Message m)
         {         
-            base.WndProc(ref m);
+            if(m.Msg == 0x0112)
+            {
+                int command = m.WParam.ToInt32() & 0xfff0;
+                if (command == 0xf010)
+                    return;
+            }
 
             if (m.Msg == 0x0312)
             {
@@ -52,32 +60,31 @@ namespace MyProject
                 Keys key = (Keys)(((int)m.LParam >> 16) & 0xFFFF);                  // The key of the hotkey that was pressed.
                 KeyModifier modifier = (KeyModifier)((int)m.LParam & 0xFFFF);       // The modifier of the hotkey that was pressed.
                 int id = m.WParam.ToInt32();                                        // The id of the hotkey that was pressed.
-
-
-
-                    switch (id)
-                    {
-                        case 0:
-                            server_selecter = new Task(() => SelectServer());
-                            server_selecter.Start();
-                            break;
-                        case 2:
-                            server_suspender = new Task(() => SuspendServer());
-                            server_suspender.Start();
-                            break;
-                        case 4:
-                            clipboard_importer = new Task(() => ImportClipboard());
-                            clipboard_importer.Start();
-                            break;
-                        case 6:
-                            clipboard_exporter = new Task(() => ExportClipboard());
-                            clipboard_exporter.Start();
-                            break;
-                        default:
-                            throw new Exception("Hotkey non riconosciuta");
-                    }
                 
+                switch (id)
+                {
+                    case 0:
+                        server_selecter = new Task(() => SelectServer());
+                        server_selecter.Start();
+                        break;
+                    case 2:
+                        server_suspender = new Task(() => SuspendServer());
+                        server_suspender.Start();
+                        break;
+                    case 4:
+                        clipboard_importer = new Task(() => ImportClipboard());
+                        clipboard_importer.Start();
+                        break;
+                    case 6:
+                        clipboard_exporter = new Task(() => ExportClipboard());
+                        clipboard_exporter.Start();
+                        break;
+                    default:
+                        throw new Exception("Hotkey non riconosciuta");
+                }  
             }
+
+            base.WndProc(ref m);
         }
         
         #endregion
@@ -85,18 +92,24 @@ namespace MyProject
         #region Keyboard methods
         private void OnKeyDown(object sender, byte vkCode, byte scanCode)
         {
+            byte[] bytes = new byte[MyProtocol.KEYDOWN.Length + 2];
+            Array.Copy(Encoding.ASCII.GetBytes(MyProtocol.KEYDOWN), bytes, MyProtocol.KEYDOWN.Length);
+            Array.Copy(new byte[] { vkCode, scanCode }, 0, bytes, MyProtocol.KEYDOWN.Length, 2);
+
             if (target != null)
             {
-                target.SendTCP(target.handler, Encoding.ASCII.GetBytes(MyProtocol.KEYDOWN));
-                target.SendTCP(target.handler, new byte[] { vkCode, scanCode });
+                target.SendTCP(target.handler, bytes);
             }
         }
         private void OnKeyUp(object sender, byte vkCode, byte scanCode)
         {
+            byte[] bytes = new byte[MyProtocol.KEYUP.Length + 2];
+            Array.Copy(Encoding.ASCII.GetBytes(MyProtocol.KEYUP), bytes, MyProtocol.KEYUP.Length);
+            Array.Copy(new byte[] { vkCode, scanCode }, 0, bytes, MyProtocol.KEYUP.Length, 2);
+
             if (target != null)
             {
-                target.SendTCP(target.handler, Encoding.ASCII.GetBytes(MyProtocol.KEYUP));
-                target.SendTCP(target.handler, new byte[] { vkCode, scanCode });
+                target.SendTCP(target.handler, bytes);
             }
         }
 
@@ -175,7 +188,7 @@ namespace MyProject
         private void HandleFileSend()
         {
             Functions.handleFileDrop(target.clipbd_channel, null);
-            this.Invoke(new Action(() => Functions.UpdateClipboard()));
+            Functions.UpdateClipboard();
         }
 
         private void doImport()
@@ -210,7 +223,8 @@ namespace MyProject
                             int len = recvbuf.Length - MyProtocol.COPY.Length;
                             content = recvbuf.Substring(MyProtocol.COPY.Length, len);
                             //Console.WriteLine("Tentativo di scrittura su clipboard: " + content);
-                            this.Invoke(new Action(() => Clipboard.SetData(DataFormats.Text, content)));
+                            Functions.clipboardSetData(DataFormats.Text, content);
+
                             MessageBox.Show("Ricevuto un Testo dalla clipboard del client.");
 
                             Functions.SendClipboard(Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), MyProtocol.POSITIVE_ACK.Length);
@@ -227,7 +241,7 @@ namespace MyProject
 
                         case MyProtocol.DIRE_SEND:
                             Functions.ReceiveDirectory(target.clipbd_channel);
-                            this.Invoke(new Action(() => Functions.UpdateClipboard()));
+                            Functions.UpdateClipboard();
                             //Functions.SendClipboard(Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), MyProtocol.POSITIVE_ACK.Length);
                             
                             break;
@@ -243,7 +257,7 @@ namespace MyProject
 
                             byte[] imageSource = Functions.ReceiveData(target.clipbd_channel, length_int32);
                             Image image = Functions.ConvertByteArrayToBitmap(imageSource);
-                            this.Invoke(new Action(() => Clipboard.SetImage(image)));
+                            Functions.clipboardSetImage(image);
                             MessageBox.Show("Ricevuta Immagine dalla clipboard del client.");
                             Functions.SendClipboard(Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), MyProtocol.POSITIVE_ACK.Length);
                            
@@ -267,9 +281,9 @@ namespace MyProject
   
         private void ImportClipboard()
         {
-            if (target != null)
-            {      
-                lock (clipboardLock)
+            lock (this)
+            {
+                if (target != null)
                 {
                     try
                     {
@@ -277,18 +291,19 @@ namespace MyProject
                     }
                     catch (SocketException)
                     {
-                        target.RetryPrimaryConnection();
-                        target.RetryClipboardConnection();
+                        keybd_event(0, 0, 0, 0);
+                        keybd_event(0, 0, 2, 0);
                     }
                 }
-            }
+                //MessageBox.Show("Thread Import terminato");
+            }       
         }
 
         private void ExportClipboard()
         {
-            if (target != null)
+            lock (this)
             {
-                lock (clipboardLock)
+                if (target != null)
                 {
                     try
                     {
@@ -296,10 +311,11 @@ namespace MyProject
                     }
                     catch (SocketException)
                     {
-                        target.RetryPrimaryConnection();
-                        target.RetryClipboardConnection();
+                        keybd_event(0, 0, 0, 0);
+                        keybd_event(0, 0, 2, 0);
                     }
-                } 
+                }
+                //MessageBox.Show("Thread Export terminato");
             }
         }
         
@@ -323,10 +339,14 @@ namespace MyProject
         }
         #endregion
 
-
         public MainForm()
         {
             InitializeComponent();
+
+            //this.progressBar1.Size.Width = (int) (this.Width * 0.7);
+
+            this.Width = Screen.PrimaryScreen.Bounds.Width;
+            this.Height = Screen.PrimaryScreen.Bounds.Height;
 
             Functions.getDataObject = delegate 
             {
@@ -348,7 +368,7 @@ namespace MyProject
 
             Functions.clipboardSetData = delegate(string format, object data)
             {
-                this.Invoke(new Action(() => Clipboard.SetData(format, data)));
+                this.BeginInvoke(new Action(() => Clipboard.SetData(format, data)));
             };
 
             Functions.clipboardGetImage = delegate
@@ -362,7 +382,7 @@ namespace MyProject
 
             Functions.clipboardSetImage = delegate(Image i)
             {
-                this.Invoke(new Action(() => Clipboard.SetImage(i)));
+                this.BeginInvoke(new Action(() => Clipboard.SetImage(i)));
             };
                 
            
@@ -408,6 +428,18 @@ namespace MyProject
             {
                 if (!clipboard_exporter.IsCompleted)
                     clipboard_exporter.Wait();
+            }
+
+            if (server_selecter != null)
+            {
+                if (!server_selecter.IsCompleted)
+                    server_selecter.Wait();
+            }
+
+            if (server_suspender != null)
+            {
+                if (!server_suspender.IsCompleted)
+                    server_suspender.Wait();
             }
 
             if(connections.Count > 0)
@@ -486,8 +518,10 @@ namespace MyProject
             byte[] bytes;
             Int32 lookup_key = -1;
 
-            // Retrieve the lookup key from listview
-            this.Invoke(new Action(() =>
+            lock (this)
+            {
+                // Retrieve the lookup key from listview
+                this.Invoke(new Action(() =>
                 {
                     try
                     {
@@ -499,53 +533,55 @@ namespace MyProject
                         return;
                     }
                 }));
-            if (lookup_key == -1)
-                return;
+                if (lookup_key == -1)
+                    return;
 
-            // If I am controlling one server, I MUST pause it.
-            if (target != null)
-            {
-                target.SendTCP(target.handler, Encoding.ASCII.GetBytes(MyProtocol.PAUSE));
+                // If I am controlling one server, I MUST pause it.
+                if (target != null)
+                {
+                    target.SendTCP(target.handler, Encoding.ASCII.GetBytes(MyProtocol.PAUSE));
 
-                bytes = target.ReceiveTCP(target.handler, MyProtocol.POSITIVE_ACK.Length);
+                    bytes = target.ReceiveTCP(target.handler, MyProtocol.POSITIVE_ACK.Length);
+                    if (bytes == null)
+                        return;
+
+                    msg = Encoding.ASCII.GetString(bytes);
+                    if (msg == MyProtocol.POSITIVE_ACK)
+                    {
+                        this.Invoke(new Action(() =>
+                        {
+                            hook.Stop();
+                            this.target = null;
+                        }));
+                    }
+                }
+
+                List<int> keys = connections.Keys.ToList();
+                foreach (int key in keys)
+                {
+                    this.Invoke(new Action(() => listView.Items[key].SubItems[3].Text = "Pause."));
+                }
+
+                connections.TryGetValue(lookup_key, out current);
+
+
+                // The client sends a TARGET request to the server
+                current.SendTCP(current.handler, Encoding.ASCII.GetBytes(MyProtocol.TARGET));
+
+                bytes = current.ReceiveTCP(current.handler, MyProtocol.POSITIVE_ACK.Length);
                 if (bytes == null)
                     return;
 
                 msg = Encoding.ASCII.GetString(bytes);
                 if (msg == MyProtocol.POSITIVE_ACK)
                 {
-                    this.Invoke(new Action(() =>
-                        {
-                            hook.Stop();
-                            this.target = null;
-                        }));
+                    this.Invoke(new Action(() => listView.Items[lookup_key].SubItems[3].Text = "Target"));
+                    target = current;
+                    Functions.SendClipboard = target.SendClipboard;
+                    Functions.ReceiveClipboard = target.ReceiveClipboard;
+                    this.Invoke(new Action(() => hook.Start()));
                 }
-            }
-
-            List<int> keys = connections.Keys.ToList();
-            foreach (int key in keys)
-            {
-                this.Invoke(new Action(() => listView.Items[key].SubItems[3].Text = "Pause."));
-            }
-
-            connections.TryGetValue(lookup_key, out current);
-
-
-            // The client sends a TARGET request to the server
-            current.SendTCP(current.handler, Encoding.ASCII.GetBytes(MyProtocol.TARGET));
-
-            bytes = current.ReceiveTCP(current.handler, MyProtocol.POSITIVE_ACK.Length);
-            if (bytes == null)
-                return;
-
-            msg = Encoding.ASCII.GetString(bytes);
-            if (msg == MyProtocol.POSITIVE_ACK)
-            {
-                this.Invoke(new Action(() => listView.Items[lookup_key].SubItems[3].Text = "Target"));
-                target = current;
-                Functions.SendClipboard = target.SendClipboard;
-                Functions.ReceiveClipboard = target.ReceiveClipboard;
-                this.Invoke(new Action(() => hook.Start()));
+                //MessageBox.Show("Thread Select terminato");
             }
         }
 
@@ -554,20 +590,22 @@ namespace MyProject
             byte[] bytes;
             string msg;
 
-            if (target == null)
+            lock (this)
             {
-                MessageBox.Show("Non hai nessuno da mettere in pausa.");
-                return;
-            }
+                if (target == null)
+                {
+                    MessageBox.Show("Non hai nessuno da mettere in pausa.");
+                    return;
+                }
 
-            // The client sends a PAUSE request to the server
-            target.SendTCP(target.handler, Encoding.ASCII.GetBytes(MyProtocol.PAUSE));
+                // The client sends a PAUSE request to the server
+                target.SendTCP(target.handler, Encoding.ASCII.GetBytes(MyProtocol.PAUSE));
 
-            bytes = current.ReceiveTCP(current.handler, MyProtocol.POSITIVE_ACK.Length);
-            msg = Encoding.ASCII.GetString(bytes);
-            if (msg == MyProtocol.POSITIVE_ACK)
-            {
-                this.Invoke(new Action(() =>
+                bytes = current.ReceiveTCP(current.handler, MyProtocol.POSITIVE_ACK.Length);
+                msg = Encoding.ASCII.GetString(bytes);
+                if (msg == MyProtocol.POSITIVE_ACK)
+                {
+                    this.Invoke(new Action(() =>
                     {
                         foreach (int key in connections.Keys.ToList())
                             listView.Items[key].SubItems[3].Text = "Pausa.";
@@ -575,10 +613,11 @@ namespace MyProject
                         hook.Stop();
                         target = null;
                     }));
+                }
             }
+            //MessageBox.Show("Thread Suspend terminato");
         }
         
-
         private void DisconnectButton_Click(object sender, EventArgs e)
         {
             Int32 server_id = -1;
@@ -616,93 +655,6 @@ namespace MyProject
             }
         }
 
-        private void button1_Click_1(object sender, EventArgs e)
-        {
-            this.hook.Start();
-        }
-
-        private void button3_Click(object sender, EventArgs e)
-        {
-            this.hook.Stop();
-        }
-
-        private void MainForm_Load(object sender, EventArgs e)
-        {
-            /*
-            this.progress_bar.Width = (int)(this.Width * 0.7);
-            this.progress_bar.Height = (int)(this.Height * 0.02);
-            
-            this.progress_bar.Dock = DockStyle.Bottom;*/
-        }
-
-        private void button2_Click(object sender, EventArgs e)
-        {
-            /*
-            int id = 0;     // The id of the hotkey. 
-            Keys key = (Keys)this.comboBox1.SelectedItem;
-
-            if(hotkeys_handler.Register(id, (int)KeyModifier.Control, key.GetHashCode()))
-                MessageBox.Show("Hotkey impostata!");
-             * */
-        }
-
-        private void button4_Click(object sender, EventArgs e)
-        {
-            /*
-            int id = 1;     // The id of the hotkey. 
-            Keys key = (Keys)this.comboBox2.SelectedItem;
-
-            if (hotkeys_handler.Register(id, (int)KeyModifier.Control, key.GetHashCode()))
-                MessageBox.Show("Hotkey impostata!");
-             * */
-        }
-        
-        
-        
-
-        private void label7_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void toolStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
-        {
-
-        }
-
-        private void label3_Click(object sender, EventArgs e)
-        {
-
-        }
-        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label8_Click(object sender, EventArgs e)
-        {
-
-        }
-        private void comboBox2_SelectedIndexChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void groupBox1_Enter(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label10_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void hotkeyToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            hotkeys_form.ShowDialog();
-        }
-
         private void nuovaConnessioneToolStripMenuItem_Click(object sender, EventArgs e)
         {
             CreateConnectionForm f = new CreateConnectionForm();
@@ -710,24 +662,10 @@ namespace MyProject
             f.ShowDialog();
         }
 
-        private void maskedTextBox1_MaskInputRejected(object sender, MaskInputRejectedEventArgs e)
-        {
-
-        }
-
         private void importaAppuntiToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
-        }
-
-        private void tableLayoutPanel1_Paint(object sender, PaintEventArgs e)
-        {
-        
-        }
-
-        private void comandiToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-
+            server_selecter = new Task(() => SelectServer());
+            server_selecter.Start();
         }
 
         public void removeTarget()
@@ -757,6 +695,34 @@ namespace MyProject
         private void esciToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Application.Exit();
+        }
+
+        private void importaAppuntiToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            clipboard_importer = new Task(() => ImportClipboard());
+            clipboard_importer.Start();
+        }
+
+        private void esportaAppuntiVersoIlServerRemotoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            clipboard_exporter = new Task(() => ExportClipboard());
+            clipboard_exporter.Start();
+        }
+
+        private void esportaAppuntiToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            server_suspender = new Task(() => SuspendServer());
+            server_suspender.Start();
+        }
+
+        private void hotkeyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.hotkeys_form.Show();
+        }
+
+        private void pictureBox1_Click(object sender, EventArgs e)
+        {
+
         }
     }
 

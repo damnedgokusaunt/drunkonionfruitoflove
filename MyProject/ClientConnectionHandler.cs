@@ -194,7 +194,6 @@ namespace MyProject
                 clipbd_channel = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
                 Functions.SetKeepAlive(clipbd_channel, MyProtocol.KEEPALIVE_TIME, MyProtocol.KEEPALIVE_INTERVAL);
-
                 clipbd_channel.Connect(this.clipboardRemoteEP);
             }
             catch (SocketException)
@@ -203,7 +202,7 @@ namespace MyProject
             }
         }
  
-        private bool RetryConnection()
+        public bool RetryConnection()
         {
             bool success = false;
 
@@ -214,6 +213,9 @@ namespace MyProject
                 try
                 {
                     this.RetryPrimaryConnection();
+
+                    Functions.ReceiveData(this.handler, MyProtocol.POSITIVE_ACK.Length);
+
                     this.RetryClipboardConnection();
 
                     success = true;
@@ -224,10 +226,10 @@ namespace MyProject
                 }
             }
 
-            ((MainForm)this.form).hook.Start();
-
             if (!success)
                 remove_target();
+            else
+                ((MainForm)this.form).hook.Start();
 
             return success;
         }

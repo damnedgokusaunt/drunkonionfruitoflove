@@ -31,24 +31,18 @@ namespace MyProject
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             this.menuStrip2 = new System.Windows.Forms.MenuStrip();
             this.azioniToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.nuovaConnessioneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.chiudiConnessioneToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.esciToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.comandiToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.importaAppuntiToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.esportaAppuntiToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.importaAppuntiToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.esportaAppuntiVersoIlServerRemotoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.chiudiConnessioneToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripComboBox1 = new System.Windows.Forms.ToolStripComboBox();
             this.impostazioniToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.hotkeyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.visualizzaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.guidaToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.manualeUtenteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.infoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.listView = new System.Windows.Forms.ListView();
             this.ID = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.Indirizzo = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
@@ -57,20 +51,20 @@ namespace MyProject
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.info_label = new System.Windows.Forms.Label();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.menuStrip2.SuspendLayout();
             this.tableLayoutPanel1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // menuStrip2
             // 
-            this.menuStrip2.BackColor = System.Drawing.Color.DodgerBlue;
+            this.menuStrip2.BackColor = System.Drawing.Color.White;
             this.menuStrip2.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.menuStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.azioniToolStripMenuItem,
             this.comandiToolStripMenuItem,
-            this.impostazioniToolStripMenuItem,
-            this.visualizzaToolStripMenuItem,
-            this.guidaToolStripMenuItem});
+            this.impostazioniToolStripMenuItem});
             this.menuStrip2.Location = new System.Drawing.Point(0, 0);
             this.menuStrip2.Name = "menuStrip2";
             this.menuStrip2.Size = new System.Drawing.Size(480, 24);
@@ -82,7 +76,6 @@ namespace MyProject
             this.azioniToolStripMenuItem.AccessibleRole = System.Windows.Forms.AccessibleRole.None;
             this.azioniToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.nuovaConnessioneToolStripMenuItem,
-            this.chiudiConnessioneToolStripMenuItem1,
             this.esciToolStripMenuItem});
             this.azioniToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 9F);
             this.azioniToolStripMenuItem.ForeColor = System.Drawing.Color.MidnightBlue;
@@ -99,12 +92,6 @@ namespace MyProject
             this.nuovaConnessioneToolStripMenuItem.TextImageRelation = System.Windows.Forms.TextImageRelation.TextBeforeImage;
             this.nuovaConnessioneToolStripMenuItem.Click += new System.EventHandler(this.nuovaConnessioneToolStripMenuItem_Click);
             // 
-            // chiudiConnessioneToolStripMenuItem1
-            // 
-            this.chiudiConnessioneToolStripMenuItem1.Name = "chiudiConnessioneToolStripMenuItem1";
-            this.chiudiConnessioneToolStripMenuItem1.Size = new System.Drawing.Size(178, 22);
-            this.chiudiConnessioneToolStripMenuItem1.Text = "Chiudi connessione";
-            // 
             // esciToolStripMenuItem
             // 
             this.esciToolStripMenuItem.Name = "esciToolStripMenuItem";
@@ -118,12 +105,10 @@ namespace MyProject
             this.importaAppuntiToolStripMenuItem,
             this.esportaAppuntiToolStripMenuItem,
             this.importaAppuntiToolStripMenuItem1,
-            this.esportaAppuntiVersoIlServerRemotoToolStripMenuItem,
-            this.chiudiConnessioneToolStripMenuItem});
+            this.esportaAppuntiVersoIlServerRemotoToolStripMenuItem});
             this.comandiToolStripMenuItem.Name = "comandiToolStripMenuItem";
             this.comandiToolStripMenuItem.Size = new System.Drawing.Size(68, 20);
             this.comandiToolStripMenuItem.Text = "Comandi";
-            this.comandiToolStripMenuItem.Click += new System.EventHandler(this.comandiToolStripMenuItem_Click);
             // 
             // importaAppuntiToolStripMenuItem
             // 
@@ -137,31 +122,21 @@ namespace MyProject
             this.esportaAppuntiToolStripMenuItem.Name = "esportaAppuntiToolStripMenuItem";
             this.esportaAppuntiToolStripMenuItem.Size = new System.Drawing.Size(275, 22);
             this.esportaAppuntiToolStripMenuItem.Text = "Sospendi controllo";
+            this.esportaAppuntiToolStripMenuItem.Click += new System.EventHandler(this.esportaAppuntiToolStripMenuItem_Click);
             // 
             // importaAppuntiToolStripMenuItem1
             // 
             this.importaAppuntiToolStripMenuItem1.Name = "importaAppuntiToolStripMenuItem1";
             this.importaAppuntiToolStripMenuItem1.Size = new System.Drawing.Size(275, 22);
             this.importaAppuntiToolStripMenuItem1.Text = "Importa Appunti dal server remoto";
+            this.importaAppuntiToolStripMenuItem1.Click += new System.EventHandler(this.importaAppuntiToolStripMenuItem1_Click);
             // 
             // esportaAppuntiVersoIlServerRemotoToolStripMenuItem
             // 
             this.esportaAppuntiVersoIlServerRemotoToolStripMenuItem.Name = "esportaAppuntiVersoIlServerRemotoToolStripMenuItem";
             this.esportaAppuntiVersoIlServerRemotoToolStripMenuItem.Size = new System.Drawing.Size(275, 22);
             this.esportaAppuntiVersoIlServerRemotoToolStripMenuItem.Text = "Esporta Appunti verso il server remoto";
-            // 
-            // chiudiConnessioneToolStripMenuItem
-            // 
-            this.chiudiConnessioneToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripComboBox1});
-            this.chiudiConnessioneToolStripMenuItem.Name = "chiudiConnessioneToolStripMenuItem";
-            this.chiudiConnessioneToolStripMenuItem.Size = new System.Drawing.Size(275, 22);
-            this.chiudiConnessioneToolStripMenuItem.Text = "Chiudi connessione";
-            // 
-            // toolStripComboBox1
-            // 
-            this.toolStripComboBox1.Name = "toolStripComboBox1";
-            this.toolStripComboBox1.Size = new System.Drawing.Size(121, 23);
+            this.esportaAppuntiVersoIlServerRemotoToolStripMenuItem.Click += new System.EventHandler(this.esportaAppuntiVersoIlServerRemotoToolStripMenuItem_Click);
             // 
             // impostazioniToolStripMenuItem
             // 
@@ -176,39 +151,9 @@ namespace MyProject
             // hotkeyToolStripMenuItem
             // 
             this.hotkeyToolStripMenuItem.Name = "hotkeyToolStripMenuItem";
-            this.hotkeyToolStripMenuItem.Size = new System.Drawing.Size(112, 22);
-            this.hotkeyToolStripMenuItem.Text = "Hotkey";
+            this.hotkeyToolStripMenuItem.Size = new System.Drawing.Size(160, 22);
+            this.hotkeyToolStripMenuItem.Text = "Modifica hotkey";
             this.hotkeyToolStripMenuItem.Click += new System.EventHandler(this.hotkeyToolStripMenuItem_Click);
-            // 
-            // visualizzaToolStripMenuItem
-            // 
-            this.visualizzaToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 9F);
-            this.visualizzaToolStripMenuItem.ForeColor = System.Drawing.Color.MidnightBlue;
-            this.visualizzaToolStripMenuItem.Name = "visualizzaToolStripMenuItem";
-            this.visualizzaToolStripMenuItem.Size = new System.Drawing.Size(69, 20);
-            this.visualizzaToolStripMenuItem.Text = "Visualizza";
-            // 
-            // guidaToolStripMenuItem
-            // 
-            this.guidaToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.manualeUtenteToolStripMenuItem,
-            this.infoToolStripMenuItem});
-            this.guidaToolStripMenuItem.ForeColor = System.Drawing.Color.MidnightBlue;
-            this.guidaToolStripMenuItem.Name = "guidaToolStripMenuItem";
-            this.guidaToolStripMenuItem.Size = new System.Drawing.Size(50, 20);
-            this.guidaToolStripMenuItem.Text = "Guida";
-            // 
-            // manualeUtenteToolStripMenuItem
-            // 
-            this.manualeUtenteToolStripMenuItem.Name = "manualeUtenteToolStripMenuItem";
-            this.manualeUtenteToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
-            this.manualeUtenteToolStripMenuItem.Text = "Manuale utente";
-            // 
-            // infoToolStripMenuItem
-            // 
-            this.infoToolStripMenuItem.Name = "infoToolStripMenuItem";
-            this.infoToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
-            this.infoToolStripMenuItem.Text = "Info";
             // 
             // listView
             // 
@@ -218,9 +163,9 @@ namespace MyProject
             this.Porta,
             this.Stato});
             this.listView.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.listView.Location = new System.Drawing.Point(62, 3);
+            this.listView.Location = new System.Drawing.Point(62, 74);
             this.listView.Name = "listView";
-            this.listView.Size = new System.Drawing.Size(357, 180);
+            this.listView.Size = new System.Drawing.Size(357, 140);
             this.listView.TabIndex = 0;
             this.listView.UseCompatibleStateImageBehavior = false;
             this.listView.View = System.Windows.Forms.View.Details;
@@ -228,56 +173,76 @@ namespace MyProject
             // ID
             // 
             this.ID.Text = "ID";
+            this.ID.Width = 100;
             // 
             // Indirizzo
             // 
             this.Indirizzo.Text = "Indirizzo di rete";
+            this.Indirizzo.Width = 100;
             // 
             // Porta
             // 
             this.Porta.Text = "Porta";
+            this.Porta.Width = 100;
             // 
             // Stato
             // 
             this.Stato.Text = "Stato";
+            this.Stato.Width = 100;
             // 
             // tableLayoutPanel1
             // 
+            this.tableLayoutPanel1.AutoSize = true;
+            this.tableLayoutPanel1.BackColor = System.Drawing.SystemColors.ControlLightLight;
             this.tableLayoutPanel1.ColumnCount = 3;
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 12.29167F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 75.83334F));
+            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 75.83333F));
             this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 11.875F));
-            this.tableLayoutPanel1.Controls.Add(this.listView, 1, 0);
-            this.tableLayoutPanel1.Controls.Add(this.progressBar1, 1, 2);
-            this.tableLayoutPanel1.Controls.Add(this.info_label, 1, 1);
+            this.tableLayoutPanel1.Controls.Add(this.progressBar1, 1, 3);
+            this.tableLayoutPanel1.Controls.Add(this.listView, 1, 2);
+            this.tableLayoutPanel1.Controls.Add(this.info_label, 1, 4);
+            this.tableLayoutPanel1.Controls.Add(this.pictureBox1, 1, 1);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(0, 24);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 4;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 21F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 44F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+            this.tableLayoutPanel1.RowCount = 6;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 2.880898F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 23.78489F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 53.97828F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 10.39011F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 3.024372F));
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 5.941445F));
             this.tableLayoutPanel1.Size = new System.Drawing.Size(480, 271);
             this.tableLayoutPanel1.TabIndex = 51;
-            this.tableLayoutPanel1.Paint += new System.Windows.Forms.PaintEventHandler(this.tableLayoutPanel1_Paint);
             // 
             // progressBar1
             // 
-            this.progressBar1.Location = new System.Drawing.Point(62, 210);
+            this.progressBar1.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
+            this.progressBar1.Location = new System.Drawing.Point(62, 220);
             this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(357, 29);
+            this.progressBar1.Size = new System.Drawing.Size(357, 22);
             this.progressBar1.TabIndex = 32;
             // 
             // info_label
             // 
+            this.info_label.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.info_label.AutoSize = true;
-            this.info_label.Location = new System.Drawing.Point(62, 186);
+            this.info_label.Location = new System.Drawing.Point(232, 245);
             this.info_label.Name = "info_label";
-            this.info_label.Size = new System.Drawing.Size(16, 13);
+            this.info_label.Size = new System.Drawing.Size(16, 8);
             this.info_label.TabIndex = 33;
             this.info_label.Text = "...";
+            // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
+            this.pictureBox1.Location = new System.Drawing.Point(62, 10);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(357, 58);
+            this.pictureBox1.TabIndex = 34;
+            this.pictureBox1.TabStop = false;
+            this.pictureBox1.Click += new System.EventHandler(this.pictureBox1_Click);
             // 
             // MainForm
             // 
@@ -287,15 +252,16 @@ namespace MyProject
             this.Controls.Add(this.tableLayoutPanel1);
             this.Controls.Add(this.menuStrip2);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
             this.Name = "MainForm";
             this.Text = "Remote Control Client";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
-            this.Load += new System.EventHandler(this.MainForm_Load);
             this.menuStrip2.ResumeLayout(false);
             this.menuStrip2.PerformLayout();
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -307,12 +273,8 @@ namespace MyProject
         private ToolStripMenuItem azioniToolStripMenuItem;
         private ToolStripMenuItem impostazioniToolStripMenuItem;
         private ToolStripMenuItem hotkeyToolStripMenuItem;
-        private ToolStripMenuItem visualizzaToolStripMenuItem;
         private ToolStripMenuItem nuovaConnessioneToolStripMenuItem;
         private ToolStripMenuItem esciToolStripMenuItem;
-        private ToolStripMenuItem guidaToolStripMenuItem;
-        private ToolStripMenuItem manualeUtenteToolStripMenuItem;
-        private ToolStripMenuItem infoToolStripMenuItem;
         private ListView listView;
         private ColumnHeader ID;
         private ColumnHeader Indirizzo;
@@ -324,11 +286,9 @@ namespace MyProject
         private ToolStripMenuItem esportaAppuntiToolStripMenuItem;
         private ToolStripMenuItem importaAppuntiToolStripMenuItem1;
         private ToolStripMenuItem esportaAppuntiVersoIlServerRemotoToolStripMenuItem;
-        private ToolStripMenuItem chiudiConnessioneToolStripMenuItem;
-        private ToolStripComboBox toolStripComboBox1;
         private ProgressBar progressBar1;
         private Label info_label;
-        private ToolStripMenuItem chiudiConnessioneToolStripMenuItem1;
+        private PictureBox pictureBox1;
     }
 }
 
