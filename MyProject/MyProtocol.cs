@@ -59,7 +59,7 @@ namespace MyProject
         public const int KEEPALIVE_TIME = 1000*2; // ms
         public const int KEEPALIVE_INTERVAL = 1000; // ms
 
-        public const int MAX_ATTEMPTS = 1;
+        public const int MAX_ATTEMPTS = 3;
 
         public static string message(string code, string pwd)
         {

@@ -973,26 +973,14 @@ namespace MyProject
         
         public static void SendData(Socket sock, byte[] buffer, int offset, int length)
         {
-            NetworkStream clientStream;
-            clientStream = new NetworkStream(sock);
-
-            if (clientStream == null)
-            {
-                return;
-            }
-
             try
             {
-                clientStream.Write(buffer, offset, length);
+                sock.Send(buffer, offset, length, SocketFlags.None);
             }
             catch (Exception e)
             {
-                Console.WriteLine("write exception " + e.Message);
-                clientStream.Close();
                 throw;
             }
-
-            clientStream.Flush();
         }
         
         public static byte[] ReceiveData(Socket sock, int size)

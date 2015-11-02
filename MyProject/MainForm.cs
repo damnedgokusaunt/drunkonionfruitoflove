@@ -295,7 +295,8 @@ namespace MyProject
                         keybd_event(0, 0, 2, 0);
                     }
                 }
-                //MessageBox.Show("Thread Import terminato");
+                else
+                    MessageBox.Show("Nessun target impostato.");
             }       
         }
 
@@ -314,8 +315,9 @@ namespace MyProject
                         keybd_event(0, 0, 0, 0);
                         keybd_event(0, 0, 2, 0);
                     }
-                }
-                //MessageBox.Show("Thread Export terminato");
+                } 
+                else
+                    MessageBox.Show("Nessun target impostato.");
             }
         }
         
@@ -723,6 +725,12 @@ namespace MyProject
         private void pictureBox1_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+            if (!Directory.Exists(MyProtocol.CLIPBOARD_DIR))
+                Directory.CreateDirectory(MyProtocol.CLIPBOARD_DIR);
         }
     }
 

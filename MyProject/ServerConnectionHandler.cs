@@ -347,6 +347,8 @@ namespace MyProject
                     // Simulo un po' di ritardo di rete
                     //Thread.Sleep(1000);
                     // Now send ack
+                    try { 
+                    
                     Functions.SendData(clipbd_channel, Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), 0, MyProtocol.POSITIVE_ACK.Length);
                     Functions.handleFileDrop(clipbd_channel, null);
                     Functions.UpdateClipboard();
@@ -358,6 +360,14 @@ namespace MyProject
                        // this.notify(20000, "Aggiornamento clipboard", "Ricevuto un file dalla clipboard del client!", ToolTipIcon.Info);
                    
                     }
+
+
+                        }catch(SocketException){
+
+                            zittiTutti.WaitOne();
+
+                        }
+
                         break;
 
                 case MyProtocol.DIRE_SEND:
@@ -387,15 +397,20 @@ namespace MyProject
 
                 case MyProtocol.CLIPBOARD_IMPORT:
 
-                    bool data_available = Functions.handleClipboardDataForImport();
-
-
-                    if (!data_available)
+                    try
                     {
-                        data = Encoding.ASCII.GetBytes(MyProtocol.message(MyProtocol.NEGATIVE_ACK));
-
-                        Functions.SendData(clipbd_channel, data, 0, data.Length);
+                        bool data_available = Functions.handleClipboardDataForImport();
+                        if (!data_available)
+                        {
+                            data = Encoding.ASCII.GetBytes(MyProtocol.message(MyProtocol.NEGATIVE_ACK));
+                            Functions.SendData(clipbd_channel, data, 0, data.Length);
+                        }
                     }
+                    catch (SocketException)
+                    {
+                        zittiTutti.WaitOne();
+                    }
+                    
                     break;
 
                 default:

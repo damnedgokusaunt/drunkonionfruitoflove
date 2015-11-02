@@ -14,6 +14,7 @@ using System.Runtime.InteropServices;
 using System.Collections;
 using System.Net.NetworkInformation;
 using Microsoft.Win32;
+using System.IO;
 
 namespace MyProject
 {
@@ -312,11 +313,18 @@ namespace MyProject
 
         private void ServerForm_Load(object sender, EventArgs e)
         {
+
+            if (!Directory.Exists(MyProtocol.CLIPBOARD_DIR)) {
+
+                Directory.CreateDirectory(MyProtocol.CLIPBOARD_DIR);   
+            }
+            
             if (!NetworkInterface.GetIsNetworkAvailable())
                 MessageBox.Show("Spiacenti, affinchè l'applicazione funzioni correttamente è necessario che il PC sia connesso ad una rete LAN!");
             //this.notifyIcon1.ShowBalloonTip(20000, "Attenzione", "Affinchè l'applicazione funzioni correttamente è necessario che il PC sia connesso ad una rete LAN!", ToolTipIcon.Info);
+      
         }
-
+    
 
         private void button2_Click(object sender, EventArgs e)
         {
