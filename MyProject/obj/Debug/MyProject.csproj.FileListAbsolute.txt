@@ -62,3 +62,4 @@ C:\Users\S210656\Desktop\drunkonionfruitoflove\MyProject\obj\Debug\MyProject.Tar
 C:\Users\S210656\Desktop\drunkonionfruitoflove\MyProject\obj\Debug\MyProject.csproj.GenerateResource.Cache
 C:\Users\S210656\Desktop\drunkonionfruitoflove\MyProject\obj\Debug\MyProject.exe
 C:\Users\S210656\Desktop\drunkonionfruitoflove\MyProject\obj\Debug\MyProject.pdb
+C:\Users\Alessio\Desktop\drunkonionfruitoflove\MyProject\obj\Debug\MyProject.TargetForm.resources

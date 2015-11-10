@@ -325,30 +325,33 @@ namespace MyProject
             {
                 case MyProtocol.CLEAN:
                     // Now, I'm starting to clean my clipboard folder as you told me.
-                    Functions.SendClipboard(Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK),MyProtocol.POSITIVE_ACK.Length);
-                    
+                    Functions.SendClipboard(Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), MyProtocol.POSITIVE_ACK.Length);
+
                     Functions.CleanClipboardDir(Path.GetFullPath(MyProtocol.CLIPBOARD_DIR));
                     break;
                 case MyProtocol.COPY:
                     string content;
                     int len = recvbuf.Length - MyProtocol.COPY.Length - MyProtocol.END_OF_MESSAGE.Length;
                     content = recvbuf.Substring(MyProtocol.COPY.Length, len);
-                    //Console.WriteLine("Tentativo di scrittura su clipboard: " + content);
-                    //Clipboard.SetData(DataFormats.Text, content);
 
+                    // Mando ack
+                    Functions.SendData(clipbd_channel, Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), 0, MyProtocol.POSITIVE_ACK.Length);
+
+                    // Metto in ricezione di unuint32
+                    byte[] arr = Functions.ReceiveData(clipbd_channel, sizeof(Int32));
+                    // converto arr in intero e poi lo metto nella reiceive
+                    Int32 arr_int32 = BitConverter.ToInt32(arr, 0);
+                    // Send ack
+                    Functions.SendData(clipbd_channel, Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), 0, MyProtocol.POSITIVE_ACK.Length);
+                    // Ricezione di un numero di byte pari alla lunghezza in UNICODE
+                    byte[] text_arr = Functions.ReceiveData(clipbd_channel, arr_int32);
+                    content = Encoding.Unicode.GetString(text_arr);
                     Functions.clipboardSetData(DataFormats.Text, content);
-
-
                     MessageBox.Show("Aggiornamento clipboard: ricevuto un testo dalla clipboard del client!");
-                   // this.notify(20000, "Aggiornamento clipboard", "Ricevuto un testo dalla clipboard del client!", ToolTipIcon.Info);
                     break;
 
                 case MyProtocol.FILE_SEND:
-                    // Simulo un po' di ritardo di rete
-                    //Thread.Sleep(1000);
                     // Now send ack
-                    try { 
-                    
                     Functions.SendData(clipbd_channel, Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), 0, MyProtocol.POSITIVE_ACK.Length);
                     Functions.handleFileDrop(clipbd_channel, null);
                     Functions.UpdateClipboard();
@@ -356,24 +359,12 @@ namespace MyProject
                     if (notify != null)
                     {
                         MessageBox.Show("Aggiornamento clipboard: ricevuto un file dalla clipboard del client!");
-                   
-                       // this.notify(20000, "Aggiornamento clipboard", "Ricevuto un file dalla clipboard del client!", ToolTipIcon.Info);
-                   
+                        this.notify(20000, "Aggiornamento clipboard", "Ricevuto un file dalla clipboard del client!", ToolTipIcon.Info);
+
                     }
-
-
-                        }catch(SocketException){
-
-                            zittiTutti.WaitOne();
-
-                        }
-
-                        break;
+                    break;
 
                 case MyProtocol.DIRE_SEND:
-                    // Simulo un po' di ritardo di rete
-                    //Thread.Sleep(1000);
-
                     Functions.ReceiveDirectory(clipbd_channel);
                     Functions.UpdateClipboard();
                     break;
@@ -385,39 +376,27 @@ namespace MyProject
                     Functions.SendData(clipbd_channel, Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), 0, MyProtocol.POSITIVE_ACK.Length);
                     byte[] imageSource = Functions.ReceiveData(clipbd_channel, length_int32);
                     Image image = Functions.ConvertByteArrayToBitmap(imageSource);
-                   // Clipboard.SetImage(image);
-
-
-                   Functions.clipboardSetImage(image);
-                   MessageBox.Show("Aggiornamento clipboard: ricevuto un'immagine dalla clipboard del client!");
-                   
-                   // this.notify(20000, "Aggiornamento clipboard", "Ricevuta un'immagine dalla clipboard del client!", ToolTipIcon.Info);
+                    Functions.clipboardSetImage(image);
+                    MessageBox.Show("Aggiornamento clipboard: ricevuto un'immagine dalla clipboard del client!");
                     break;
 
 
                 case MyProtocol.CLIPBOARD_IMPORT:
 
-                    try
+                    bool data_available = Functions.handleClipboardDataForImport();
+
+
+                    if (!data_available)
                     {
-                        bool data_available = Functions.handleClipboardDataForImport();
-                        if (!data_available)
-                        {
-                            data = Encoding.ASCII.GetBytes(MyProtocol.message(MyProtocol.NEGATIVE_ACK));
-                            Functions.SendData(clipbd_channel, data, 0, data.Length);
-                        }
+                        data = Encoding.ASCII.GetBytes(MyProtocol.message(MyProtocol.NEGATIVE_ACK));
+
+                        Functions.SendData(clipbd_channel, data, 0, data.Length);
                     }
-                    catch (SocketException)
-                    {
-                        zittiTutti.WaitOne();
-                    }
-                    
                     break;
 
                 default:
 
                     MessageBox.Show("Spiacenti, comando non riconosciuto!");
-                   
-                  //  this.notify(20000, "Comando non riconosciuto", command, ToolTipIcon.Info);
                     break;
             }
 
@@ -464,6 +443,10 @@ namespace MyProject
                 zittiTutti.Set();
 
                 handler_event.Set();
+                return;
+            }
+            catch(Exception){
+
                 return;
             }
 
