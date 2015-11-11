@@ -542,8 +542,6 @@ namespace MyProject
                 else
                     fileName = MyProtocol.CLIPBOARD_DIR + Path.DirectorySeparatorChar + fileName;
 
-                SendClipboard(Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), MyProtocol.POSITIVE_ACK.Length);
-
                 Console.WriteLine("Inizio trasferimento file: " + fileName);
 
                 receiveFile(sock, fileName, fileSize);
@@ -590,6 +588,9 @@ namespace MyProject
                             // Ricevo dirname
                             byte[] dirname_array = ReceiveClipboard(dirname_len);
                             dirName = Encoding.Unicode.GetString(dirname_array);
+
+                            // Invio ack
+                            SendClipboard(Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), MyProtocol.POSITIVE_ACK.Length);
                             
                             dirName = System.IO.Path.GetInvalidFileNameChars().Aggregate(dirName, (current, c) => current.Replace(c.ToString(), string.Empty));
                             newBaseDir = System.IO.Path.Combine(basedir, dirName);

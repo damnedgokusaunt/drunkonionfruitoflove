@@ -275,7 +275,7 @@ namespace MyProject
                             break;
 
                         default:
-                            MessageBox.Show("Comando clipboard non riconosciuto");
+                            MessageBox.Show("Comando clipboard non riconosciuto: " + command);
                             break;
                     }
                 }
