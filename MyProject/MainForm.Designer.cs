@@ -109,6 +109,7 @@ namespace MyProject
             this.comandiToolStripMenuItem.Name = "comandiToolStripMenuItem";
             this.comandiToolStripMenuItem.Size = new System.Drawing.Size(68, 20);
             this.comandiToolStripMenuItem.Text = "Comandi";
+            this.comandiToolStripMenuItem.Click += new System.EventHandler(this.comandiToolStripMenuItem_Click);
             // 
             // importaAppuntiToolStripMenuItem
             // 

@@ -219,9 +219,16 @@ namespace MyProject
                             break;
 
                         case MyProtocol.COPY:
-                            string content;
-                            int len = recvbuf.Length - MyProtocol.COPY.Length;
-                            content = recvbuf.Substring(MyProtocol.COPY.Length, len);
+                            Functions.SendClipboard(Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), MyProtocol.POSITIVE_ACK.Length);
+
+                            byte[] text_len_array = Functions.ReceiveClipboard(sizeof(Int32));
+                            Int32 text_len = BitConverter.ToInt32(text_len_array, 0);
+
+                            Functions.SendClipboard(Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), MyProtocol.POSITIVE_ACK.Length);
+
+                            byte[] text_array = Functions.ReceiveClipboard(text_len);
+                            string content = Encoding.Unicode.GetString(text_array);
+
                             //Console.WriteLine("Tentativo di scrittura su clipboard: " + content);
                             Functions.clipboardSetData(DataFormats.Text, content);
 
@@ -731,6 +738,11 @@ namespace MyProject
         {
             if (!Directory.Exists(MyProtocol.CLIPBOARD_DIR))
                 Directory.CreateDirectory(MyProtocol.CLIPBOARD_DIR);
+        }
+
+        private void comandiToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
         }
     }
 

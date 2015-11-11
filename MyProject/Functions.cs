@@ -577,8 +577,20 @@ namespace MyProject
                             break;
 
                         case MyProtocol.DIRE_SEND:
-                            // nome directory
-                            dirName = ReceiveTillTerminator(sock);
+                            // Invio ack
+                            SendClipboard(Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), MyProtocol.POSITIVE_ACK.Length);
+                            
+                            // Ricevo lunghezza nome della directory
+                            byte[] dirname_len_array = ReceiveClipboard(sizeof(Int32));
+                            Int32 dirname_len = BitConverter.ToInt32(dirname_len_array, 0);
+
+                            // Invio ack
+                            SendClipboard(Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), MyProtocol.POSITIVE_ACK.Length);
+
+                            // Ricevo dirname
+                            byte[] dirname_array = ReceiveClipboard(dirname_len);
+                            dirName = Encoding.Unicode.GetString(dirname_array);
+                            
                             dirName = System.IO.Path.GetInvalidFileNameChars().Aggregate(dirName, (current, c) => current.Replace(c.ToString(), string.Empty));
                             newBaseDir = System.IO.Path.Combine(basedir, dirName);
 
@@ -810,7 +822,6 @@ namespace MyProject
                 return;
             }
 
-
             try
             {
                 // Invio comando FILE_SEND
@@ -829,19 +840,22 @@ namespace MyProject
                 Console.WriteLine("FileSize inviata!");
 
                 // Invio lunghezza file name
-                Int32 fileNameLen = fileName.Length;
-                byte[] fileNameLenBytes = BitConverter.GetBytes(fileNameLen);
-                SendClipboard(fileNameLenBytes, fileNameLenBytes.Length);
+                byte[] filename_unicode_array = Encoding.Unicode.GetBytes(fileName);
+                Int32 filename_unicode_len = filename_unicode_array.Length;
+                SendClipboard(BitConverter.GetBytes(filename_unicode_len), sizeof(Int32));
 
                 // Ricezione Ack
                 ReceiveClipboard(MyProtocol.POSITIVE_ACK.Length);
 
                 // Invio file name UNICODE
-                byte[] fileNameBytes = Encoding.Unicode.GetBytes(fileName);
-                SendClipboard(fileNameBytes, fileNameBytes.Length);
+
+                SendClipboard(filename_unicode_array, filename_unicode_len);
 
                 // Ricezione Ack
                 ReceiveClipboard(MyProtocol.POSITIVE_ACK.Length);
+
+                Console.WriteLine("Sto inviando il file: " + fileName);
+                //Functions.ReceiveClipboard(MyProtocol.POSITIVE_ACK.Length);
 
                 SendFile(fs, fileSize);
 
