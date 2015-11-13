@@ -153,10 +153,8 @@ namespace MyProject
         public void notify_me(int a, string b, string c, ToolTipIcon cletta)
         {
 
-            //if (this.InvokeRequired)
-            //{
-                this.Invoke(new Action(() => this.notifyIcon1.ShowBalloonTip(a,b,c,cletta)));
-           // }
+            this.Invoke(new Action(() => this.notifyIcon1.ShowBalloonTip(a,b,c,cletta)));
+        
         }
 
 
@@ -194,14 +192,10 @@ namespace MyProject
             if (this.passwordBox.Text == string.Empty || this.comboBox.Text == string.Empty || this.portBox.Text == string.Empty)
             {
                 MessageBox.Show("Attento, alcuni campi risultano vuoti!");
-                // this.notify_me(20000, "Attenzione", "Alcuni campi risultano vuoti!", ToolTipIcon.Info);
-
                 return;
             }
 
             // Check that all the fields are valid
-
-
             // Invalid all the dangerous fields
             this.comboBox.Enabled = false;
             this.portBox.Enabled = false;
@@ -226,8 +220,7 @@ namespace MyProject
                     listener.hide = this.hide_target_form;
                     listener.notify = this.notify_me;
                     listener.wakeup = this.wakeup_threads;
-                    listener.suspend = this.suspend_threads;
-
+                 
                     Task<bool> t = Task.Factory.StartNew(() => listener.Open());
 
                     t.Wait();
@@ -290,6 +283,7 @@ namespace MyProject
         /// </summary>
         /// <param name="sender">The source of the event.</param>
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+       
         void About_Click(object sender, EventArgs e)
         {
             if (!isAboutLoaded)
@@ -305,6 +299,7 @@ namespace MyProject
         /// </summary>
         /// <param name="sender">The sender.</param>
         /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+        
         void Exit_Click(object sender, EventArgs e)
         {
             // Quit without further ado.
@@ -321,8 +316,6 @@ namespace MyProject
             
             if (!NetworkInterface.GetIsNetworkAvailable())
                 MessageBox.Show("Spiacenti, affinchè l'applicazione funzioni correttamente è necessario che il PC sia connesso ad una rete LAN!");
-            //this.notifyIcon1.ShowBalloonTip(20000, "Attenzione", "Affinchè l'applicazione funzioni correttamente è necessario che il PC sia connesso ad una rete LAN!", ToolTipIcon.Info);
-      
         }
     
 
@@ -334,18 +327,6 @@ namespace MyProject
         private void notifyIcon1_MouseDoubleClick(object sender, MouseEventArgs e)
         {
 
-        }
-
-        public void suspend_threads()
-        {
-            if(this.consumer_udp.ThreadState != ThreadState.Suspended)
-            {
-                this.consumer_udp.Suspend();
-            }
-            if (this.clipboard_worker.ThreadState != ThreadState.Suspended)
-            {
-                this.clipboard_worker.Suspend();
-            }
         }
 
         public void wakeup_threads() 

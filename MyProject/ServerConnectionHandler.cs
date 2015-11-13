@@ -117,9 +117,7 @@ namespace MyProject
                 widthRatio = Screen.PrimaryScreen.Bounds.Width / BitConverter.ToInt32(endpoint_resolution, 0);
                 heightRatio = Screen.PrimaryScreen.Bounds.Height / BitConverter.ToInt32(endpoint_resolution, sizeof(Int32)); 
                 this.notify(20000, "Info", "Connesso!", ToolTipIcon.Info);
-                
-
-
+    
                 // Create UDP channel
                 Int32 udpPort = Functions.FindFreePort();
                 IPEndPoint udpLocalEndPoint = new IPEndPoint(ipAddress, udpPort);
@@ -160,7 +158,6 @@ namespace MyProject
             else
             {
                 MessageBox.Show("Spiacenti, richiesta non riconosciuta!");
-                //this.notify(20000, "Info", "Richiesta non riconosciuta!", ToolTipIcon.Info);          
                 msg = MyProtocol.message(MyProtocol.NEGATIVE_ACK);
                 bytes = Encoding.ASCII.GetBytes(msg);
                 Functions.SendData(handler, bytes, 0, bytes.Length);
@@ -172,9 +169,7 @@ namespace MyProject
         {
             byte[] bytes = Encoding.ASCII.GetBytes(MyProtocol.message(MyProtocol.POSITIVE_ACK));
             // Send ack
-            //Thread.Sleep(1000);
             Functions.SendData(handler, bytes, 0, bytes.Length);
-            
             return true;
         }
 
@@ -218,7 +213,6 @@ namespace MyProject
             }
             catch
             {
-                //Thread.CurrentThread.Suspend();
                 zittiTutti.WaitOne();
                 return;
             }
@@ -271,7 +265,6 @@ namespace MyProject
             }
             catch
             {
-                //Thread.CurrentThread.Suspend();
                 Console.WriteLine("Thread clipboard va a dormire...");  
                 zittiTutti.WaitOne();
                 Console.WriteLine("Thread clipboard risvegliato!");
@@ -321,87 +314,103 @@ namespace MyProject
             {
                 MessageBox.Show("clipbd channel a NULL!");
             }
-            switch (command)
+
+            try
             {
-                case MyProtocol.CLEAN:
-                    // Now, I'm starting to clean my clipboard folder as you told me.
-                    Functions.SendClipboard(Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), MyProtocol.POSITIVE_ACK.Length);
+                switch (command)
+                {
+                    case MyProtocol.CLEAN:
+                        // Now, I'm starting to clean my clipboard folder as you told me.
+                        Functions.SendClipboard(Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), MyProtocol.POSITIVE_ACK.Length);
+                        Functions.CleanClipboardDir(Path.GetFullPath(MyProtocol.CLIPBOARD_DIR));
+                        break;
 
-                    Functions.CleanClipboardDir(Path.GetFullPath(MyProtocol.CLIPBOARD_DIR));
-                    break;
-                case MyProtocol.COPY:
-                    string content;
-                    int len = recvbuf.Length - MyProtocol.COPY.Length - MyProtocol.END_OF_MESSAGE.Length;
-                    content = recvbuf.Substring(MyProtocol.COPY.Length, len);
+                    case MyProtocol.COPY:
+                        string content;
+                        int len = recvbuf.Length - MyProtocol.COPY.Length - MyProtocol.END_OF_MESSAGE.Length;
+                        content = recvbuf.Substring(MyProtocol.COPY.Length, len);
 
-                    // Mando ack
-                    Functions.SendData(clipbd_channel, Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), 0, MyProtocol.POSITIVE_ACK.Length);
+                        // Mando ack
+                        Functions.SendData(clipbd_channel, Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), 0, MyProtocol.POSITIVE_ACK.Length);
 
-                    // Metto in ricezione di unuint32
-                    byte[] arr = Functions.ReceiveData(clipbd_channel, sizeof(Int32));
-                    // converto arr in intero e poi lo metto nella reiceive
-                    Int32 arr_int32 = BitConverter.ToInt32(arr, 0);
-                    // Send ack
-                    Functions.SendData(clipbd_channel, Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), 0, MyProtocol.POSITIVE_ACK.Length);
-                    // Ricezione di un numero di byte pari alla lunghezza in UNICODE
-                    byte[] text_arr = Functions.ReceiveData(clipbd_channel, arr_int32);
-                    content = Encoding.Unicode.GetString(text_arr);
-                    Functions.clipboardSetData(DataFormats.Text, content);
-                    MessageBox.Show("Aggiornamento clipboard: ricevuto un testo dalla clipboard del client!");
-                    break;
+                        // Metto in ricezione di unuint32
+                        byte[] arr = Functions.ReceiveData(clipbd_channel, sizeof(Int32));
+                        // converto arr in intero e poi lo metto nella reiceive
+                        Int32 arr_int32 = BitConverter.ToInt32(arr, 0);
+                        // Send ack
+                        Functions.SendData(clipbd_channel, Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), 0, MyProtocol.POSITIVE_ACK.Length);
+                        // Ricezione di un numero di byte pari alla lunghezza in UNICODE
+                        byte[] text_arr = Functions.ReceiveData(clipbd_channel, arr_int32);
+                        content = Encoding.Unicode.GetString(text_arr);
+                        Functions.clipboardSetData(DataFormats.Text, content);
+                        MessageBox.Show("Aggiornamento clipboard: ricevuto un testo dalla clipboard del client!");
+                        break;
 
-                case MyProtocol.FILE_SEND:
-                    // Now send ack
-                    Functions.SendData(clipbd_channel, Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), 0, MyProtocol.POSITIVE_ACK.Length);
-                    Functions.handleFileDrop(clipbd_channel, null);
-                    Functions.UpdateClipboard();
+                    case MyProtocol.FILE_SEND:
+                        // Now send ack
+                        Functions.SendData(clipbd_channel, Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), 0, MyProtocol.POSITIVE_ACK.Length);
+                        Functions.handleFileDrop(clipbd_channel, null);
+                        Functions.UpdateClipboard();
 
-                    if (notify != null)
-                    {
-                        MessageBox.Show("Aggiornamento clipboard: ricevuto un file dalla clipboard del client!");
-                        this.notify(20000, "Aggiornamento clipboard", "Ricevuto un file dalla clipboard del client!", ToolTipIcon.Info);
+                        if (notify != null)
+                        {
+                            MessageBox.Show("Aggiornamento clipboard: ricevuto un file dalla clipboard del client!");
+                            this.notify(20000, "Aggiornamento clipboard", "Ricevuto un file dalla clipboard del client!", ToolTipIcon.Info);
 
-                    }
-                    break;
+                        }
+                        break;
 
-                case MyProtocol.DIRE_SEND:
-                    Functions.ReceiveDirectory(clipbd_channel);
-                    Functions.UpdateClipboard();
-                    break;
+                    case MyProtocol.DIRE_SEND:
+                        Functions.ReceiveDirectory(clipbd_channel);
+                        Functions.UpdateClipboard();
+                        break;
 
-                case MyProtocol.IMG:
-                    Functions.SendData(clipbd_channel, Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), 0, MyProtocol.POSITIVE_ACK.Length);
-                    byte[] length = Functions.ReceiveData(clipbd_channel, sizeof(Int32));
-                    Int32 length_int32 = BitConverter.ToInt32(length, 0);
-                    Functions.SendData(clipbd_channel, Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), 0, MyProtocol.POSITIVE_ACK.Length);
-                    byte[] imageSource = Functions.ReceiveData(clipbd_channel, length_int32);
-                    Image image = Functions.ConvertByteArrayToBitmap(imageSource);
-                    Functions.clipboardSetImage(image);
-                    MessageBox.Show("Aggiornamento clipboard: ricevuto un'immagine dalla clipboard del client!");
-                    break;
-
-
-                case MyProtocol.CLIPBOARD_IMPORT:
-
-                    bool data_available = Functions.handleClipboardDataForImport();
+                    case MyProtocol.IMG:
+                        Functions.SendData(clipbd_channel, Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), 0, MyProtocol.POSITIVE_ACK.Length);
+                        byte[] length = Functions.ReceiveData(clipbd_channel, sizeof(Int32));
+                        Int32 length_int32 = BitConverter.ToInt32(length, 0);
+                        Functions.SendData(clipbd_channel, Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), 0, MyProtocol.POSITIVE_ACK.Length);
+                        byte[] imageSource = Functions.ReceiveData(clipbd_channel, length_int32);
+                        Image image = Functions.ConvertByteArrayToBitmap(imageSource);
+                        Functions.clipboardSetImage(image);
+                        MessageBox.Show("Aggiornamento clipboard: ricevuto un'immagine dalla clipboard del client!");
+                        break;
 
 
-                    if (!data_available)
-                    {
-                        data = Encoding.ASCII.GetBytes(MyProtocol.message(MyProtocol.NEGATIVE_ACK));
+                    case MyProtocol.CLIPBOARD_IMPORT:
 
-                        Functions.SendData(clipbd_channel, data, 0, data.Length);
-                    }
-                    break;
+                        bool data_available = Functions.handleClipboardDataForImport();
 
-                default:
 
-                    MessageBox.Show("Spiacenti, comando non riconosciuto!");
-                    break;
+                        if (!data_available)
+                        {
+                            data = Encoding.ASCII.GetBytes(MyProtocol.message(MyProtocol.NEGATIVE_ACK));
+
+                            Functions.SendData(clipbd_channel, data, 0, data.Length);
+                        }
+                        break;
+
+                    default:
+
+                        MessageBox.Show("Spiacenti, comando non riconosciuto!");
+                        break;
+                }
+
+            }
+            catch (SocketException)
+            {
+                zittiTutti.WaitOne();
+
+            }
+            catch (Exception)
+            {
+
+                return;
+
             }
 
-        }
 
+        }
         public void ListenTCPChannel()
         {
 
@@ -434,14 +443,9 @@ namespace MyProject
                 int idd = Thread.CurrentThread.ManagedThreadId;
                 Console.WriteLine("Sono il thread principale:" + idd);
                 MessageBox.Show("La connessione è stata interrotta. Assicurati che la connessione venga ristabilita affinchè i servizi riprendano automaticamente");
-
-                //this.suspend();
                 RetryPrimaryConnection();
                 RetryClipboardConnection();
-                //this.wakeup();
-
                 zittiTutti.Set();
-
                 handler_event.Set();
                 return;
             }
@@ -508,9 +512,7 @@ namespace MyProject
             Socket clipbd_listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             clipbd_listener.Bind(clipboardLocalEndPoint);
             clipbd_listener.Listen(10);
-
             Functions.SendData(this.handler, Encoding.ASCII.GetBytes(MyProtocol.POSITIVE_ACK), 0, MyProtocol.POSITIVE_ACK.Length);
-            
             clipbd_channel = clipbd_listener.Accept();
             clipbd_listener.Close();
             Functions.SetKeepAlive(clipbd_channel, MyProtocol.KEEPALIVE_TIME, MyProtocol.KEEPALIVE_INTERVAL);        
